@@ -1,0 +1,13 @@
+<RCC>
+    <qresource prefix="/">
+        <file>main.qml</file>
+        <file>Style.qml</file>
+        <file>controls/MyToolButton.qml</file>
+        <file>controls/MyTextEdit.qml</file>
+        <file>controls/MyTabButton.qml</file>
+        <file>controls/MyLabel.qml</file>
+        <file>controls/MyComboBox.qml</file>
+        <file>controls/MyCheckBox.qml</file>
+        <file>controls/MyButton.qml</file>
+    </qresource>
+</RCC>
