@@ -22,6 +22,8 @@ Button {
     property alias radius: backgroundRect.radius
     property alias sourceDark: darkImage.source
     property alias sourceLight: lightImage.source
+    property int imageMargins: 0
+    property int buttonDownDistance: 3
     property color backgroundColor: Style.darkerGray
     property bool selected: false
 
@@ -35,16 +37,18 @@ Button {
         Image {
             id: darkImage
             anchors.fill: parent
+            anchors.margins: imageMargins
             visible: control.hovered
             opacity: enabled ? 1.0 : 0.3
-            transform: Translate { y: control.down ? 2 : 0 }
+            transform: Translate { y: control.down ? buttonDownDistance : 0 }
         }
         Image {
             id: lightImage
             anchors.fill: parent
+            anchors.margins: imageMargins
             visible: ! control.hovered
             opacity: enabled ? 1.0 : 0.3
-            transform: Translate { y: control.down ? 2 : 0 }
+            transform: Translate { y: control.down ? buttonDownDistance : 0 }
         }
     }
     background: Rectangle {

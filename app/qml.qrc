@@ -9,5 +9,10 @@
         <file>controls/MyComboBox.qml</file>
         <file>controls/MyCheckBox.qml</file>
         <file>controls/MyButton.qml</file>
+        <file>img/gear-white.png</file>
+        <file>img/gear-black.png</file>
+        <file>img/x-white.png</file>
+        <file>img/x-red.png</file>
+        <file>controls/MyDialog.qml</file>
     </qresource>
 </RCC>

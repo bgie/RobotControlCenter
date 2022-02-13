@@ -14,25 +14,26 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-pragma Singleton
-import QtQuick 2.0
+import QtQuick 2.12
+import RobotControlCenter 1.0
 
-Item {
-    readonly property int windowMargins: 20
-    readonly property int smallMargin: 10
-    readonly property int mediumMargin: 20
-    readonly property int largeMargin: 30
-    readonly property int extraLargeMargin: 50
+Rectangle {
+    property alias title: titleLabel.text
 
-    readonly property int smallRadius: 3
-    readonly property int largeRadius: 8
+    radius: 4
+    color: Style.darkGray
 
-    readonly property string fontSize: "14"
+    MyLabel {
+        id: titleLabel
+        anchors.top: parent.top
+        anchors.margins: 6
+        anchors.horizontalCenter: parent.horizontalCenter
+    }
 
-    readonly property color black: "#000000"
-    readonly property color darkerGray: "#101010"
-    readonly property color darkGray: "#303030"
-    readonly property color mediumGray: "#808080"
-    readonly property color lightGray: "#D0D0D0"
-    readonly property color white: "#FFFFFF"
+    Rectangle {
+        anchors.fill: parent
+        anchors.margins: 6
+        anchors.topMargin: 36
+        color: Style.darkerGray
+    }
 }
