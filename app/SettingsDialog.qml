@@ -24,7 +24,7 @@ import RobotControlCenter 1.0
 import './controls/'
 
 MyDialog {
-    width: 800
+    width: 1024
     height: 600
     title: "Settings"
 
@@ -83,16 +83,16 @@ MyDialog {
     }
 
     Item {
+        id: content
         anchors.right: parent.right
         anchors.top: parent.top
         anchors.bottom: parent.bottom
         anchors.left: navigationBar.right
+        anchors.margins: Style.largeMargin
 
-        visible: gamepadButton.selected
-
-        Grid {
+        Grid {  // GamePad panel
             anchors.fill: parent
-            anchors.margins: Style.largeMargin
+            visible: gamepadButton.selected
             columns: 2
 
             Repeater {
@@ -100,9 +100,10 @@ MyDialog {
 
                 delegate:  Column {
                     spacing: Style.mediumMargin
+                    width: 256
 
                     MyLabel {
-                        width: gamePadImage.width
+                        width: parent.width
                         horizontalAlignment: Qt.AlignCenter
                         text: "Player " + (index+1)
                         font.pixelSize: Style.subHeaderFontSize
@@ -110,17 +111,55 @@ MyDialog {
 
                     Image {
                         id: gamePadImage
-                        width: sourceSize.width
-                        height: sourceSize.height
+                        width: parent.width
                         source: "/img/gamepad.png"
                     }
 
                     MyLabel {
-                        width: gamePadImage.width
-                        horizontalAlignment: Qt.AlignCenter
+                        width: parent.width
+                        horizontalAlignment: Qt.AlignHCenter
                         text: modelData.debugString
                     }
                 }
+            }
+        }
+
+        // Camera panel
+        ColumnLayout {
+            anchors.fill: parent
+            visible: cameraButton.selected
+            spacing: Style.smallMargin
+
+            Row {
+                Repeater {
+                    model: cameraManager.availableDevices
+
+                    delegate: MyToolButton {
+                        selected: modelData === cameraManager.currentDevice
+                        width: 160
+                        height: 128
+
+                        sourceLight: "img/camera-white.png"
+                        sourceDark: "img/camera-black.png"
+                        imageMargins: 20
+                        imageBottomMargin: 48
+
+                        MyLabel {
+                            anchors.fill: parent
+                            anchors.margins: Style.smallMargin
+                            verticalAlignment: Qt.AlignBottom
+                            horizontalAlignment: Qt.AlignHCenter
+                            text: modelData
+                            color: parent.foregroundInverted ? Style.black : Style.lightGray
+                        }
+
+                        onClicked: cameraManager.currentDevice = modelData
+                    }
+                }
+            }
+            Item {
+                Layout.fillHeight: true
+                Layout.fillWidth: true
             }
         }
     }

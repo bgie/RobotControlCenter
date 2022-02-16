@@ -23,11 +23,14 @@ add_library(lib
   joystick/Joystick.cpp
   joystick/GamePad.cpp
   joystick/GamePadManager.cpp
+  camera/Camera.cpp
+  camera/CameraReader.cpp
+  camera/CameraManager.cpp
   settings/SettingsController.cpp
   util/FactoryMethod.cpp
 )
 
 target_include_directories(lib PUBLIC .)
 
-target_link_libraries(lib Qt5::Core)
+target_link_libraries(lib Qt5::Core Qt5::Quick)
 target_link_libraries(lib SDL2)

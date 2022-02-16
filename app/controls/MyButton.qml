@@ -23,7 +23,7 @@ Button {
     property color backgroundColor: Style.darkerGray
 
     id: control
-    font.pointSize: Style.fontSize
+    font.pixelSize: Style.fontSize
     hoverEnabled: true
 
     contentItem: Text {

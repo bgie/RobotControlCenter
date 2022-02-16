@@ -40,7 +40,7 @@ Item {
     readonly property color black: "#000000"
     readonly property color darkerGray: "#101010"
     readonly property color darkGray: "#303030"
-    readonly property color mediumGray: "#808080"
-    readonly property color lightGray: "#D0D0D0"
+    readonly property color mediumGray: "#C0C0C0"
+    readonly property color lightGray: "#E0E0E0"
     readonly property color white: "#FFFFFF"
 }

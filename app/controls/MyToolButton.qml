@@ -23,9 +23,11 @@ Button {
     property alias sourceDark: darkImage.source
     property alias sourceLight: lightImage.source
     property int imageMargins: 0
+    property int imageBottomMargin
     property int buttonDownDistance: 3
     property color backgroundColor: Style.darkerGray
     property bool selected: false
+    property bool foregroundInverted: control.down || control.hovered || control.selected
 
     id: control
     hoverEnabled: true
@@ -40,8 +42,9 @@ Button {
             id: darkImage
             anchors.fill: parent
             anchors.margins: imageMargins
+            anchors.bottomMargin: imageBottomMargin
             fillMode: Image.PreserveAspectFit
-            visible: control.hovered
+            visible: foregroundInverted
             opacity: enabled ? 1.0 : 0.3
             transform: Translate { y: control.down ? buttonDownDistance : 0 }
         }
@@ -49,8 +52,9 @@ Button {
             id: lightImage
             anchors.fill: parent
             anchors.margins: imageMargins
+            anchors.bottomMargin: imageBottomMargin
             fillMode: Image.PreserveAspectFit
-            visible: ! control.hovered
+            visible: ! foregroundInverted
             opacity: enabled ? 1.0 : 0.3
             transform: Translate { y: control.down ? buttonDownDistance : 0 }
         }
@@ -60,6 +64,6 @@ Button {
         radius: 0
         color: control.down ? Style.white :
                control.hovered ? Style.lightGray :
-               control.selected ? Style.darkerGray : control.backgroundColor
+               control.selected ? Style.mediumGray : control.backgroundColor
     }
 }

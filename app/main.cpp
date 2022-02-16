@@ -14,6 +14,8 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
+#include "ImageItem.h"
+#include "camera/CameraManager.h"
 #include "joystick/GamePad.h"
 #include "joystick/GamePadManager.h"
 #include "joystick/JoystickManager.h"
@@ -33,6 +35,7 @@ int main(int argc, char *argv[])
     QGuiApplication app(argc, argv);
 
     qmlRegisterSingletonType(QUrl("qrc:/Style.qml"), "RobotControlCenter", 1, 0, "Style");
+    qmlRegisterType<ImageItem>("RobotControlCenter", 1, 0, "ImageItem");
     qmlRegisterType<SettingsController>("RobotControlCenter", 1, 0, "SettingsController");
     qmlRegisterUncreatableType<GamePadManager>("RobotControlCenter", 1, 0, "GamePadManager", "Has constructor args");
 
@@ -45,13 +48,16 @@ int main(int argc, char *argv[])
     QObject::connect(&idleTimer, &QTimer::timeout, &loop, &SDL2EventLoop::processEvents);
     idleTimer.start(0);
 
-    QQmlApplicationEngine engine;
-
     FactoryMethod settingsControllerFactory([&]() -> QObject* {
         return new SettingsController();
     });
+
+    CameraManager cameraManager;
+
+    QQmlApplicationEngine engine;
     engine.rootContext()->setContextProperty(QStringLiteral("settingsControllerFactory"), &settingsControllerFactory);
     engine.rootContext()->setContextProperty(QStringLiteral("gamePadManager"), &gamePadManger);
+    engine.rootContext()->setContextProperty(QStringLiteral("cameraManager"), &cameraManager);
     engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
     if (engine.rootObjects().isEmpty()) {
         return -1;
