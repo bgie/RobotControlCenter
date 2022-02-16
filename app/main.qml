@@ -41,41 +41,52 @@ Window {
             text: "Under construction"
         }
 
-        MyToolButton {
-            id: settingsButton
-            width: 64
-            height: 62
-            anchors.margins: 8
-            anchors.bottom: parent.bottom
+
+        Row {
             anchors.right: parent.right
-            sourceLight: "img/gear-white.png"
-            sourceDark: "img/gear-black.png"
-            backgroundColor: window.color
-            radius: 6
-            onClicked: selected = !selected
-        }
-
-
-        MyToolButton {
-            id: closeButton
-            visible: visibility == Window.FullScreen
-            width: 48
-            height: 48
             anchors.top: parent.top
-            anchors.right: parent.right
-            anchors.margins: 16
-            sourceLight: "img/x-white.png"
-            sourceDark: "img/x-red.png"
-            imageMargins: 4
-            backgroundColor: "#600000"
-            radius: 24
-            onClicked: window.close()
+            anchors.margins: 8
+
+            MyToolButton {
+                id: settingsButton
+                width: 64
+                height: 64
+                anchors.margins: 8
+                sourceLight: "img/gear-white.png"
+                sourceDark: "img/gear-black.png"
+                backgroundColor: window.color
+                radius: Style.largeRadius
+                onClicked: selected = !selected
+            }
+
+            Item {
+                width: 16
+                height: 16
+            }
+
+            Item {
+                width: 64
+                height: 64
+
+                MyToolButton {
+                    id: closeButton
+                    anchors.centerIn: parent
+                    width: 48
+                    height: 48
+                    sourceLight: "img/x-white.png"
+                    sourceDark: "img/x-red.png"
+                    imageMargins: 4
+                    backgroundColor: "#600000"
+                    radius: 32
+                    onClicked: window.close()
+                }
+            }
         }
     }
 
     Rectangle {
         id: dialogShadow
-        visible: dialogLoader.sourceComponent
+        visible: dialogLoader.active
         anchors.fill: parent
         color: "#B0000000"
 
@@ -88,16 +99,13 @@ Window {
         Loader {
             id: dialogLoader
             anchors.centerIn: parent
-            sourceComponent: settingsButton.selected ? settingsDialog : undefined
+            source: "SettingsDialog.qml"
+            active: settingsButton.selected
         }
-    }
 
-    Component {
-        id: settingsDialog
-        MyDialog {
-            width: 640
-            height: 480
-            title: "Settings"
+        Connections {
+            target: dialogLoader.item
+            onExitClicked: settingsButton.selected = false
         }
     }
 }

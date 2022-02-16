@@ -38,6 +38,7 @@ Button {
             id: darkImage
             anchors.fill: parent
             anchors.margins: imageMargins
+            fillMode: Image.PreserveAspectFit
             visible: control.hovered
             opacity: enabled ? 1.0 : 0.3
             transform: Translate { y: control.down ? buttonDownDistance : 0 }
@@ -46,6 +47,7 @@ Button {
             id: lightImage
             anchors.fill: parent
             anchors.margins: imageMargins
+            fillMode: Image.PreserveAspectFit
             visible: ! control.hovered
             opacity: enabled ? 1.0 : 0.3
             transform: Translate { y: control.down ? buttonDownDistance : 0 }
@@ -53,7 +55,7 @@ Button {
     }
     background: Rectangle {
         id: backgroundRect
-        radius: Style.smallRadius
+        radius: 0
         color: control.down ? Style.white :
                control.hovered ? Style.lightGray :
                control.selected ? Style.darkerGray : control.backgroundColor

@@ -14,10 +14,19 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
+import QtQml 2.3
 import QtQuick 2.12
+import QtQuick.Controls 2.12
+import QtQuick.Layouts 1.12
 import RobotControlCenter 1.0
 
-Text {
-    font.pixelSize: Style.fontSize
-    color: Style.lightGray
+MyToolButton {
+    property MyNavigationBar navigationBar
+
+    width: navigationBar.buttonSize
+    height: navigationBar.buttonSize
+    imageMargins: 16
+    backgroundColor: navigationBar.color
+    onClicked: navigationBar.selectedButton = this
+    selected: navigationBar.selectedButton === this
 }

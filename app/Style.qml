@@ -25,9 +25,13 @@ Item {
     readonly property int extraLargeMargin: 50
 
     readonly property int smallRadius: 3
-    readonly property int largeRadius: 8
+    readonly property int largeRadius: 12
 
-    readonly property string fontSize: "14"
+    readonly property int fontSize: 20
+    readonly property int headerFontSize: 28
+
+    readonly property int navigationButtonSize: 96
+    readonly property int navigationButtonIconMargin: 16
 
     readonly property color black: "#000000"
     readonly property color darkerGray: "#101010"

@@ -14,5 +14,18 @@
         <file>img/x-white.png</file>
         <file>img/x-red.png</file>
         <file>controls/MyDialog.qml</file>
+        <file>img/tank-white.png</file>
+        <file>img/tank-black.png</file>
+        <file>img/gamepad-white.png</file>
+        <file>img/gamepad-black.png</file>
+        <file>img/camera-white.png</file>
+        <file>img/camera-black.png</file>
+        <file>img/antenna-white.png</file>
+        <file>img/antenna-black.png</file>
+        <file>SettingsDialog.qml</file>
+        <file>img/exit-white.png</file>
+        <file>img/exit-black.png</file>
+        <file>controls/MyNavigationBar.qml</file>
+        <file>controls/MyNavigationButton.qml</file>
     </qresource>
 </RCC>
