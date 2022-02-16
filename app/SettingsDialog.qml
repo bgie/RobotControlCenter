@@ -81,4 +81,47 @@ MyDialog {
             }
         ]
     }
+
+    Item {
+        anchors.right: parent.right
+        anchors.top: parent.top
+        anchors.bottom: parent.bottom
+        anchors.left: navigationBar.right
+
+        visible: gamepadButton.selected
+
+        Grid {
+            anchors.fill: parent
+            anchors.margins: Style.largeMargin
+            columns: 2
+
+            Repeater {
+                model: gamePadManager.gamePads
+
+                delegate:  Column {
+                    spacing: Style.mediumMargin
+
+                    MyLabel {
+                        width: gamePadImage.width
+                        horizontalAlignment: Qt.AlignCenter
+                        text: "Player " + (index+1)
+                        font.pixelSize: Style.subHeaderFontSize
+                    }
+
+                    Image {
+                        id: gamePadImage
+                        width: sourceSize.width
+                        height: sourceSize.height
+                        source: "/img/gamepad.png"
+                    }
+
+                    MyLabel {
+                        width: gamePadImage.width
+                        horizontalAlignment: Qt.AlignCenter
+                        text: modelData.debugString
+                    }
+                }
+            }
+        }
+    }
 }

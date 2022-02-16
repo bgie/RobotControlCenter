@@ -32,6 +32,7 @@ class GamePad : public QObject {
     Q_PROPERTY(bool rButton READ rButton NOTIFY rButtonChanged)
     Q_PROPERTY(bool selectButton READ selectButton NOTIFY selectButtonChanged)
     Q_PROPERTY(bool startButton READ startButton NOTIFY startButtonChanged)
+    Q_PROPERTY(QString debugString READ debugString NOTIFY debugStringChanged)
 
 public:
     explicit GamePad(IJoystick* joystick = nullptr);
@@ -48,6 +49,7 @@ public:
     bool rButton() const;
     bool selectButton() const;
     bool startButton() const;
+    QString debugString() const;
 
 signals:
     void xAxisChanged(int position);
@@ -60,6 +62,7 @@ signals:
     void rButtonChanged(bool pressed);
     void selectButtonChanged(bool pressed);
     void startButtonChanged(bool pressed);
+    void debugStringChanged();
 
 private:
     void onButtonChanged(uint8_t button, bool pressed);

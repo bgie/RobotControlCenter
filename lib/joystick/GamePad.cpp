@@ -29,6 +29,18 @@
 #define SELECT_BUTTON_INDEX 6
 #define START_BUTTON_INDEX 7
 
+namespace {
+QString axisToString(int position)
+{
+    if (position > 0) {
+        return QStringLiteral("+1");
+    } else if (position < 0) {
+        return QStringLiteral("-1");
+    }
+    return QStringLiteral("0");
+}
+}
+
 GamePad::GamePad(IJoystick* joystick)
     : QObject(joystick)
     , _joystick(joystick)
@@ -54,42 +66,66 @@ int GamePad::yAxis() const
 
 bool GamePad::aButton() const
 {
-    return _joystick ? _joystick->axisPosition(A_BUTTON_INDEX) : 0;
+    return _joystick ? _joystick->isButtonPressed(A_BUTTON_INDEX) : 0;
 }
 
 bool GamePad::bButton() const
 {
-    return _joystick ? _joystick->axisPosition(B_BUTTON_INDEX) : 0;
+    return _joystick ? _joystick->isButtonPressed(B_BUTTON_INDEX) : 0;
 }
 
 bool GamePad::xButton() const
 {
-    return _joystick ? _joystick->axisPosition(X_BUTTON_INDEX) : 0;
+    return _joystick ? _joystick->isButtonPressed(X_BUTTON_INDEX) : 0;
 }
 
 bool GamePad::yButton() const
 {
-    return _joystick ? _joystick->axisPosition(Y_BUTTON_INDEX) : 0;
+    return _joystick ? _joystick->isButtonPressed(Y_BUTTON_INDEX) : 0;
 }
 
 bool GamePad::lButton() const
 {
-    return _joystick ? _joystick->axisPosition(L_BUTTON_INDEX) : 0;
+    return _joystick ? _joystick->isButtonPressed(L_BUTTON_INDEX) : 0;
 }
 
 bool GamePad::rButton() const
 {
-    return _joystick ? _joystick->axisPosition(R_BUTTON_INDEX) : 0;
+    return _joystick ? _joystick->isButtonPressed(R_BUTTON_INDEX) : 0;
 }
 
 bool GamePad::selectButton() const
 {
-    return _joystick ? _joystick->axisPosition(SELECT_BUTTON_INDEX) : 0;
+    return _joystick ? _joystick->isButtonPressed(SELECT_BUTTON_INDEX) : 0;
 }
 
 bool GamePad::startButton() const
 {
-    return _joystick ? _joystick->axisPosition(START_BUTTON_INDEX) : 0;
+    return _joystick ? _joystick->isButtonPressed(START_BUTTON_INDEX) : 0;
+}
+
+QString GamePad::debugString() const
+{
+    QStringList pressedButtons;
+    if (aButton())
+        pressedButtons << QStringLiteral("A");
+    if (bButton())
+        pressedButtons << QStringLiteral("B");
+    if (xButton())
+        pressedButtons << QStringLiteral("X");
+    if (yButton())
+        pressedButtons << QStringLiteral("Y");
+    if (lButton())
+        pressedButtons << QStringLiteral("L");
+    if (rButton())
+        pressedButtons << QStringLiteral("R");
+    if (startButton())
+        pressedButtons << QStringLiteral("START");
+    if (selectButton())
+        pressedButtons << QStringLiteral("SELECT");
+    if (pressedButtons.empty())
+        pressedButtons << QStringLiteral("-");
+    return QStringLiteral("X: %1 Y: %2 Buttons: %3").arg(axisToString(xAxis()), axisToString(yAxis()), pressedButtons.join(QStringLiteral(" ")));
 }
 
 void GamePad::onButtonChanged(uint8_t button, bool pressed)
@@ -120,6 +156,7 @@ void GamePad::onButtonChanged(uint8_t button, bool pressed)
         emit startButtonChanged(pressed);
         break;
     }
+    emit debugStringChanged();
 }
 
 void GamePad::onAxisChanged(uint8_t axis, int16_t position)
@@ -132,4 +169,5 @@ void GamePad::onAxisChanged(uint8_t axis, int16_t position)
         emit yAxisChanged(position);
         break;
     }
+    emit debugStringChanged();
 }

@@ -29,6 +29,7 @@ Item {
 
     readonly property int fontSize: 20
     readonly property int statusIconFontSize: 24
+    readonly property int subHeaderFontSize: 24
     readonly property int headerFontSize: 28
 
     readonly property int toolButtonSize: 64

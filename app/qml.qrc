@@ -28,5 +28,6 @@
         <file>controls/MyNavigationBar.qml</file>
         <file>controls/MyNavigationButton.qml</file>
         <file>controls/MyStatusIcon.qml</file>
+        <file>img/gamepad.png</file>
     </qresource>
 </RCC>
