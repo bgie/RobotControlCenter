@@ -14,27 +14,15 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-#pragma once
-#include <IJoystick.h>
-#include <QObject>
-#include <QScopedPointer>
+#include "FactoryMethod.h"
 
-struct _SDL_Joystick;
-typedef struct _SDL_Joystick SDL_Joystick;
+FactoryMethod::FactoryMethod(std::function<QObject*()> factory, QObject* parent)
+    : QObject(parent)
+    , _factory(factory)
+{
+}
 
-class Joystick : public IJoystick {
-    Q_OBJECT
-public:
-    explicit Joystick(SDL_Joystick* joy, QObject* parent = nullptr);
-    virtual ~Joystick();
-
-    virtual bool isButtonPressed(uint8_t button) const override;
-    virtual int16_t axisPosition(uint8_t axis) const override;
-
-    void setButtonChanged(uint8_t button, bool pressed);
-    void setAxisChanged(uint8_t axis, int16_t position);
-
-private:
-    struct Data;
-    QScopedPointer<Data> _d;
-};
+QObject* FactoryMethod::create() const
+{
+    return _factory();
+}

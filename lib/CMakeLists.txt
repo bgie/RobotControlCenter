@@ -17,10 +17,14 @@
 cmake_minimum_required(VERSION 3.14)
 
 add_library(lib
-  SDL2EventLoop.cpp
-  JoystickManager.cpp
-  IJoystick.cpp
-  Joystick.cpp
+  joystick/SDL2EventLoop.cpp
+  joystick/JoystickManager.cpp
+  joystick/IJoystick.cpp
+  joystick/Joystick.cpp
+  joystick/GamePad.cpp
+  joystick/GamePadManager.cpp
+  settings/SettingsController.cpp
+  util/FactoryMethod.cpp
 )
 
 target_include_directories(lib PUBLIC .)

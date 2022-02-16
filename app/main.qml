@@ -45,13 +45,16 @@ Window {
         Row {
             anchors.right: parent.right
             anchors.top: parent.top
-            anchors.margins: 8
+            anchors.margins: Style.windowMargins
+
+            MyStatusIcon {
+                source: "/img/gamepad-white.png"
+                subText: gamePadManager.count
+                showSubIcon: gamePadManager.count === 0
+            }
 
             MyToolButton {
                 id: settingsButton
-                width: 64
-                height: 64
-                anchors.margins: 8
                 sourceLight: "img/gear-white.png"
                 sourceDark: "img/gear-black.png"
                 backgroundColor: window.color
@@ -60,13 +63,13 @@ Window {
             }
 
             Item {
-                width: 16
-                height: 16
+                width: Style.mediumMargin
+                height: 1
             }
 
             Item {
-                width: 64
-                height: 64
+                width: Style.toolButtonSize
+                height: Style.toolButtonSize
 
                 MyToolButton {
                     id: closeButton

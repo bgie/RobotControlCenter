@@ -14,9 +14,7 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-#ifndef TESTFACTORY_H
-#define TESTFACTORY_H
-
+#pragma once
 #include <QList>
 #include <QObject>
 #include <QTest>
@@ -38,5 +36,3 @@ public:
 private:
     QList<std::function<QObject*()>> _constructors;
 };
-
-#endif // TESTFACTORY_H

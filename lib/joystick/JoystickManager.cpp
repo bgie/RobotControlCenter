@@ -15,8 +15,8 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 #include "JoystickManager.h"
+#include "Joystick.h"
 #include "SDL2EventLoop.h"
-#include <Joystick.h>
 #include <QHash>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_joystick.h>
@@ -59,6 +59,8 @@ void JoystickManager::setEventLoop(SDL2EventLoop* eventLoop)
     if (_d->eventLoop) {
         connect(_d->eventLoop, &SDL2EventLoop::joystickAdded, this, &JoystickManager::onJoystickAddedEvent);
         connect(_d->eventLoop, &SDL2EventLoop::joystickRemoved, this, &JoystickManager::onJoystickRemovedEvent);
+        connect(_d->eventLoop, &SDL2EventLoop::joystickAxisChanged, this, &JoystickManager::onJoystickAxisChangedEvent);
+        connect(_d->eventLoop, &SDL2EventLoop::joystickButtonChanged, this, &JoystickManager::onJoystickButtonChangedEvent);
     }
     initJoysticks();
 }

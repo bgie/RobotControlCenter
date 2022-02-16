@@ -30,6 +30,8 @@ MyDialog {
 
     signal exitClicked
 
+    property SettingsController controller: settingsControllerFactory.create()
+
     onCloseClicked: exitClicked()
 
     MyNavigationBar {

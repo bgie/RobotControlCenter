@@ -31,6 +31,8 @@ Button {
     hoverEnabled: true
     implicitHeight: darkImage.sourceSize.height
     implicitWidth: darkImage.sourceSize.width
+    width: Style.toolButtonSize
+    height: Style.toolButtonSize
 
     contentItem: Item {
         id: imageContainer

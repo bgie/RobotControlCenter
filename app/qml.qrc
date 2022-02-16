@@ -27,5 +27,6 @@
         <file>img/exit-black.png</file>
         <file>controls/MyNavigationBar.qml</file>
         <file>controls/MyNavigationButton.qml</file>
+        <file>controls/MyStatusIcon.qml</file>
     </qresource>
 </RCC>

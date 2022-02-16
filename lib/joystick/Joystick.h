@@ -15,14 +15,26 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 #pragma once
+#include "IJoystick.h"
 #include <QObject>
+#include <QScopedPointer>
 
-class TestSourceCode : public QObject
-{
+struct _SDL_Joystick;
+typedef struct _SDL_Joystick SDL_Joystick;
+
+class Joystick : public IJoystick {
     Q_OBJECT
-private slots:
-    void source_code_must_contain_license_header();
+public:
+    explicit Joystick(SDL_Joystick* joy, QObject* parent = nullptr);
+    virtual ~Joystick();
+
+    virtual bool isButtonPressed(uint8_t button) const override;
+    virtual int16_t axisPosition(uint8_t axis) const override;
+
+    void setButtonChanged(uint8_t button, bool pressed);
+    void setAxisChanged(uint8_t axis, int16_t position);
 
 private:
-    QByteArray readEntireFile(QString fullFileName);
+    struct Data;
+    QScopedPointer<Data> _d;
 };

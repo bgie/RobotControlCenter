@@ -18,18 +18,21 @@ pragma Singleton
 import QtQuick 2.0
 
 Item {
-    readonly property int windowMargins: 20
-    readonly property int smallMargin: 10
-    readonly property int mediumMargin: 20
-    readonly property int largeMargin: 30
-    readonly property int extraLargeMargin: 50
+    readonly property int windowMargins: 8
+    readonly property int smallMargin: 8
+    readonly property int mediumMargin: 16
+    readonly property int largeMargin: 32
+    readonly property int extraLargeMargin: 48
 
     readonly property int smallRadius: 3
     readonly property int largeRadius: 12
 
     readonly property int fontSize: 20
+    readonly property int statusIconFontSize: 24
     readonly property int headerFontSize: 28
 
+    readonly property int toolButtonSize: 64
+    readonly property int statusIconSize: 64
     readonly property int navigationButtonSize: 96
     readonly property int navigationButtonIconMargin: 16
 

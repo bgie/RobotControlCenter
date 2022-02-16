@@ -16,13 +16,35 @@
 */
 #pragma once
 #include <QObject>
+#include <QVector>
 
-class TestSourceCode : public QObject
+class JoystickManager;
+class IJoystick;
+class GamePad;
+
+class GamePadManager : public QObject
 {
     Q_OBJECT
-private slots:
-    void source_code_must_contain_license_header();
+    Q_PROPERTY(QList<QObject*> gamePads READ gamePadQObjects NOTIFY gamePadsChanged)
+    Q_PROPERTY(int count READ count NOTIFY gamePadsChanged)
+
+public:
+    explicit GamePadManager(JoystickManager& joystickManager, QObject* parent = nullptr);
+
+    QVector<GamePad*> gamepads() const;
+    int count() const;
+    QList<QObject*> gamePadQObjects() const;
+
+signals:
+    void gamePadAdded(GamePad* g);
+    void gamePadRemoved(GamePad* g);
+    void gamePadsChanged();
 
 private:
-    QByteArray readEntireFile(QString fullFileName);
+    void onJoystickAdded(IJoystick* j);
+    void onJoystickRemoved(IJoystick* j);
+
+private:
+    JoystickManager& _joystickManager;
+    QVector<GamePad*> _gamepads;
 };

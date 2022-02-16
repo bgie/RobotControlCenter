@@ -14,15 +14,12 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-#pragma once
-#include <QObject>
+#include "SettingsController.h"
 
-class TestSourceCode : public QObject
+SettingsController::SettingsController(QObject *parent) : QObject(parent)
 {
-    Q_OBJECT
-private slots:
-    void source_code_must_contain_license_header();
+}
 
-private:
-    QByteArray readEntireFile(QString fullFileName);
-};
+SettingsController::~SettingsController()
+{
+}

@@ -17,12 +17,18 @@
 #pragma once
 #include <QObject>
 
-class TestSourceCode : public QObject
+class IJoystick : public QObject
 {
-    Q_OBJECT
-private slots:
-    void source_code_must_contain_license_header();
+     Q_OBJECT
+public:
+    explicit IJoystick(QObject* parent = nullptr);
 
-private:
-    QByteArray readEntireFile(QString fullFileName);
+    virtual bool isButtonPressed(uint8_t button) const = 0;
+    virtual int16_t axisPosition(uint8_t axis) const = 0;
+
+signals:
+    void buttonDown(uint8_t button);
+    void buttonUp(uint8_t button);
+    void buttonChanged(uint8_t button, bool pressed);
+    void axisChanged(uint8_t axis, int16_t position);
 };

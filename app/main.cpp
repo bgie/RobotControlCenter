@@ -14,10 +14,15 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-#include "JoystickManager.h"
-#include "SDL2EventLoop.h"
+#include "joystick/GamePad.h"
+#include "joystick/GamePadManager.h"
+#include "joystick/JoystickManager.h"
+#include "joystick/SDL2EventLoop.h"
+#include "settings/SettingsController.h"
+#include "util/FactoryMethod.h"
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
+#include <QQmlContext>
 #include <QTimer>
 
 int main(int argc, char *argv[])
@@ -28,16 +33,25 @@ int main(int argc, char *argv[])
     QGuiApplication app(argc, argv);
 
     qmlRegisterSingletonType(QUrl("qrc:/Style.qml"), "RobotControlCenter", 1, 0, "Style");
+    qmlRegisterType<SettingsController>("RobotControlCenter", 1, 0, "SettingsController");
+    qmlRegisterUncreatableType<GamePadManager>("RobotControlCenter", 1, 0, "GamePadManager", "Has constructor args");
 
     SDL2EventLoop loop;
-    JoystickManager manager;
-    manager.setEventLoop(&loop);
+    JoystickManager joystickManager;
+    joystickManager.setEventLoop(&loop);
+    GamePadManager gamePadManger(joystickManager);
 
     QTimer idleTimer;
     QObject::connect(&idleTimer, &QTimer::timeout, &loop, &SDL2EventLoop::processEvents);
     idleTimer.start(0);
 
     QQmlApplicationEngine engine;
+
+    FactoryMethod settingsControllerFactory([&]() -> QObject* {
+        return new SettingsController();
+    });
+    engine.rootContext()->setContextProperty(QStringLiteral("settingsControllerFactory"), &settingsControllerFactory);
+    engine.rootContext()->setContextProperty(QStringLiteral("gamePadManager"), &gamePadManger);
     engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
     if (engine.rootObjects().isEmpty()) {
         return -1;

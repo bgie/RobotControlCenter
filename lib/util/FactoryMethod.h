@@ -16,13 +16,18 @@
 */
 #pragma once
 #include <QObject>
+#include <functional>
 
-class TestSourceCode : public QObject
+// Register a factory method to QML from a lambda
+// allows dependency injection for types created from QML.
+class FactoryMethod : public QObject
 {
-    Q_OBJECT
-private slots:
-    void source_code_must_contain_license_header();
+     Q_OBJECT
+public:
+    explicit FactoryMethod(std::function<QObject*()> factory, QObject* parent = nullptr);
+
+    Q_INVOKABLE QObject* create() const;
 
 private:
-    QByteArray readEntireFile(QString fullFileName);
+    std::function<QObject*()> _factory;
 };
