@@ -20,7 +20,7 @@ import RobotControlCenter 1.0
 
 ComboBox {
     id: control
-    font.pointSize: Style.fontSize
+    font.pixelSize: Style.fontSize
 
 //    contentItem: Text {
 //        text: control.text

@@ -15,6 +15,7 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 #include "ImageItem.h"
+#include "camera/CameraController.h"
 #include "camera/CameraManager.h"
 #include "joystick/GamePad.h"
 #include "joystick/GamePadManager.h"
@@ -53,11 +54,14 @@ int main(int argc, char *argv[])
     });
 
     CameraManager cameraManager;
+    CameraController cameraController;
+    QObject::connect(&cameraManager, &CameraManager::currentDeviceChanged, &cameraController, &CameraController::setVideoDevice);
 
     QQmlApplicationEngine engine;
     engine.rootContext()->setContextProperty(QStringLiteral("settingsControllerFactory"), &settingsControllerFactory);
     engine.rootContext()->setContextProperty(QStringLiteral("gamePadManager"), &gamePadManger);
     engine.rootContext()->setContextProperty(QStringLiteral("cameraManager"), &cameraManager);
+    engine.rootContext()->setContextProperty(QStringLiteral("cameraController"), &cameraController);
     engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
     if (engine.rootObjects().isEmpty()) {
         return -1;

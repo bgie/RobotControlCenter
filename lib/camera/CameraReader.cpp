@@ -147,9 +147,6 @@ bool CameraReader::readFrame()
         }
     }
 
-    QElapsedTimer timer;
-    timer.start();
-
     auto jpgBuffera = reinterpret_cast<const uchar*>(_buffers.at(buffer.index).start);
     QImage img = QImage::fromData(jpgBuffera, _buffers.at(buffer.index).length, "JPG");
     img = img.convertToFormat(QImage::Format_RGB888);
@@ -159,7 +156,7 @@ bool CameraReader::readFrame()
         qCritical() << "VIDIOC_QBUF error, errno: " << errno;
     }
 
-    emit frameRead(img, timer);
+    emit frameRead(img);
     return true;
 }
 

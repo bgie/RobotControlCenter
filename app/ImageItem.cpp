@@ -35,26 +35,21 @@ QSGNode* ImageItem::updatePaintNode(QSGNode* oldNode, QQuickItem::UpdatePaintNod
 {
     auto node = dynamic_cast<QSGSimpleTextureNode*>(oldNode);
     if (!node || _imageChanged) {
-        if (_image.isNull()) {
-            delete node;
-            node = nullptr;
-        } else {
-            if (!node) {
-                node = new QSGSimpleTextureNode();
-            }
-
-            QSGTexture* texture = window()->createTextureFromImage(_image);
-            node->setOwnsTexture(true);
-            node->setRect(boundingRect());
-            node->setTexture(texture);
-
-            QSizeF boundRect = this->size();
-            QSizeF fittingRect = QSizeF(_image.size()).scaled(boundRect, Qt::KeepAspectRatio);
-            QPointF origin((boundRect.width() - fittingRect.width()) / 2, (boundRect.height() - fittingRect.height()) / 2);
-            node->setRect(QRectF(origin, fittingRect));
-
-            node->markDirty(QSGNode::DirtyForceUpdate);
+        if (!node) {
+            node = new QSGSimpleTextureNode();
         }
+
+        QSGTexture* texture = window()->createTextureFromImage(_image);
+        node->setOwnsTexture(true);
+        node->setRect(boundingRect());
+        node->setTexture(texture);
+
+        QSizeF boundRect = this->size();
+        QSizeF fittingRect = QSizeF(_image.size()).scaled(boundRect, Qt::KeepAspectRatio);
+        QPointF origin((boundRect.width() - fittingRect.width()) / 2, (boundRect.height() - fittingRect.height()) / 2);
+        node->setRect(QRectF(origin, fittingRect));
+
+        node->markDirty(QSGNode::DirtyForceUpdate);
         _imageChanged = false;
     }
     return node;

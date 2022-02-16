@@ -15,7 +15,6 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 #pragma once
-#include <QElapsedTimer>
 #include <QImage>
 #include <QSize>
 #include <QThread>
@@ -31,7 +30,7 @@ public:
     virtual ~CameraReader();
 
 signals:
-    void frameRead(const QImage img, QElapsedTimer timer);
+    void frameRead(const QImage img);
 
 protected:
     virtual void run() override;

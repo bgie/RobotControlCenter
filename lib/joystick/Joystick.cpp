@@ -15,7 +15,6 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 #include "Joystick.h"
-#include <QDebug>
 #include <QHash>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_joystick.h>
@@ -57,8 +56,6 @@ int16_t Joystick::axisPosition(uint8_t axis) const
 
 void Joystick::setButtonChanged(uint8_t button, bool pressed)
 {
-    qDebug() << "button" << button;
-
     _d->buttonState[button] = pressed;
     emit buttonChanged(button, pressed);
     if (pressed) {

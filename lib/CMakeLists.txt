@@ -26,6 +26,7 @@ add_library(lib
   camera/Camera.cpp
   camera/CameraReader.cpp
   camera/CameraManager.cpp
+  camera/CameraController.cpp
   settings/SettingsController.cpp
   util/FactoryMethod.cpp
 )

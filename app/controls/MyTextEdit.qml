@@ -30,7 +30,7 @@ Rectangle {
         id: textEdit
         anchors.fill: parent
         anchors.margins: 10
-        font.pointSize: Style.fontSize
+        font.pixelSize: Style.fontSize
         color: enabled ? Style.black : Style.mediumGray
         selectByMouse: true
     }

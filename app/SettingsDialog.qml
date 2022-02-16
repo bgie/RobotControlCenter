@@ -24,8 +24,8 @@ import RobotControlCenter 1.0
 import './controls/'
 
 MyDialog {
-    width: 1024
-    height: 600
+    width: 1200
+    height: 1000
     title: "Settings"
 
     signal exitClicked
@@ -88,10 +88,10 @@ MyDialog {
         anchors.top: parent.top
         anchors.bottom: parent.bottom
         anchors.left: navigationBar.right
-        anchors.margins: Style.largeMargin
 
         Grid {  // GamePad panel
             anchors.fill: parent
+            anchors.margins: Style.largeMargin
             visible: gamepadButton.selected
             columns: 2
 
@@ -118,20 +118,28 @@ MyDialog {
                     MyLabel {
                         width: parent.width
                         horizontalAlignment: Qt.AlignHCenter
+                        wrapMode: Text.WordWrap
                         text: modelData.debugString
                     }
                 }
             }
         }
 
-        // Camera panel
-        ColumnLayout {
+        ColumnLayout { // Camera panel
             anchors.fill: parent
             visible: cameraButton.selected
-            spacing: Style.smallMargin
+            spacing: 0
 
-            Row {
-                Repeater {
+            Rectangle {
+                color: Style.black
+                Layout.fillWidth: true
+                height: 160
+
+                ListView {
+                    anchors.fill: parent
+                    anchors.margins: 16
+                    clip: true
+                    orientation: Qt.Horizontal
                     model: cameraManager.availableDevices
 
                     delegate: MyToolButton {
@@ -143,10 +151,11 @@ MyDialog {
                         sourceDark: "img/camera-black.png"
                         imageMargins: 20
                         imageBottomMargin: 48
+                        backgroundColor: Style.black
 
                         MyLabel {
                             anchors.fill: parent
-                            anchors.margins: Style.smallMargin
+                            anchors.margins: Style.mediumMargin
                             verticalAlignment: Qt.AlignBottom
                             horizontalAlignment: Qt.AlignHCenter
                             text: modelData
@@ -157,9 +166,73 @@ MyDialog {
                     }
                 }
             }
-            Item {
+
+            GridLayout {
+                rows: 2
+                flow: GridLayout.TopToBottom
+                Layout.margins: Style.largeMargin
+                columnSpacing: Style.mediumMargin
+                rowSpacing: Style.smallMargin
+
+                MyLabel {
+                    text: "Format"
+                }
+                MyComboBox {
+                    enabled: !cameraController.isCameraStreaming
+                    model: cameraController.videoFormats
+                    Layout.preferredWidth: 380
+                    Layout.leftMargin: Style.mediumMargin
+                    currentIndex: cameraController.currentVideoFormatIndex
+                    onCurrentIndexChanged: cameraController.setCurrentVideoFormatIndex(currentIndex)
+                }
+                MyLabel {
+                    text: "Gain"
+                }
+                MyTextEdit {
+                    Layout.leftMargin: Style.mediumMargin
+                    Layout.preferredWidth: 60
+                    text: cameraController.gain
+                    onTextChanged: cameraController.gain = parseInt(text)
+                }
+                MyLabel {
+                    text: "Exposure"
+                }
+                MyTextEdit {
+                    Layout.leftMargin: Style.mediumMargin
+                    Layout.preferredWidth: 60
+                    text: cameraController.exposure
+                    onTextChanged: cameraController.exposure = parseInt(text)
+                }
+
+                MyLabel {
+                    text: "Streaming"
+                }
+                Row {
+                    Layout.leftMargin: Style.mediumMargin
+                    MyButton {
+                        id: startCameraButton
+                        text: "Start"
+                        backgroundColor: Style.darkGray
+                        enabled: cameraController.canCameraStream && !cameraController.isCameraStreaming
+                        visible: !cameraController.isCameraStreaming
+                        onClicked: cameraController.startCameraStream()
+                    }
+                    MyButton {
+                        text: "Stop"
+                        backgroundColor: Style.darkGray
+                        visible: cameraController.isCameraStreaming
+                        onClicked: cameraController.stopCameraStream()
+                        width: startCameraButton.width
+                    }
+                }
+            }
+
+            ImageItem {
                 Layout.fillHeight: true
                 Layout.fillWidth: true
+                Layout.margins: Style.largeMargin
+
+                image: cameraController.image
             }
         }
     }
