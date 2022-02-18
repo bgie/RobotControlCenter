@@ -40,7 +40,21 @@ MyDialog {
         anchors.top: parent.top
         anchors.bottom: parent.bottom
 
-        selectedButton: gamepadButton
+        selectedButton: cameraButton
+
+        MyNavigationButton {
+            id: cameraButton
+            navigationBar: navigationBar
+            sourceLight: "img/camera-white.png"
+            sourceDark: "img/camera-black.png"
+        }
+
+        MyNavigationButton {
+            id: markerButton
+            navigationBar: navigationBar
+            sourceLight: "img/marker.png"
+            sourceDark: sourceLight
+        }
 
         MyNavigationButton {
             id: gamepadButton
@@ -63,13 +77,6 @@ MyDialog {
             sourceDark: "img/tank-black.png"
         }
 
-        MyNavigationButton {
-            id: cameraButton
-            navigationBar: navigationBar
-            sourceLight: "img/camera-white.png"
-            sourceDark: "img/camera-black.png"
-        }
-
         bottomButtons: [
             MyNavigationButton {
                 id: exitButton
@@ -89,42 +96,6 @@ MyDialog {
         anchors.bottom: parent.bottom
         anchors.left: navigationBar.right
 
-        Grid {  // GamePad panel
-            anchors.fill: parent
-            anchors.margins: Style.largeMargin
-            visible: gamepadButton.selected
-            columns: 2
-
-            Repeater {
-                model: gamePadManager.gamePads
-
-                delegate:  Column {
-                    spacing: Style.mediumMargin
-                    width: 256
-
-                    MyLabel {
-                        width: parent.width
-                        horizontalAlignment: Qt.AlignCenter
-                        text: "Player " + (index+1)
-                        font.pixelSize: Style.subHeaderFontSize
-                    }
-
-                    Image {
-                        id: gamePadImage
-                        width: parent.width
-                        source: "/img/gamepad.png"
-                    }
-
-                    MyLabel {
-                        width: parent.width
-                        horizontalAlignment: Qt.AlignHCenter
-                        wrapMode: Text.WordWrap
-                        text: modelData.debugString
-                    }
-                }
-            }
-        }
-
         ColumnLayout { // Camera panel
             anchors.fill: parent
             visible: cameraButton.selected
@@ -143,7 +114,7 @@ MyDialog {
                     model: cameraManager.availableDevices
 
                     delegate: MyToolButton {
-                        selected: modelData === cameraManager.currentDevice
+                        selected: modelData === cameraController.videoDevice
                         width: 160
                         height: 128
 
@@ -162,7 +133,7 @@ MyDialog {
                             color: parent.foregroundInverted ? Style.black : Style.lightGray
                         }
 
-                        onClicked: cameraManager.currentDevice = modelData
+                        onClicked: cameraController.videoDevice = modelData
                     }
                 }
             }
@@ -171,7 +142,7 @@ MyDialog {
                 rows: 2
                 flow: GridLayout.TopToBottom
                 Layout.margins: Style.largeMargin
-                columnSpacing: Style.mediumMargin
+                columnSpacing: Style.largeMargin
                 rowSpacing: Style.smallMargin
 
                 MyLabel {
@@ -227,12 +198,130 @@ MyDialog {
                 }
             }
 
-            ImageItem {
+            Item {
                 Layout.fillHeight: true
                 Layout.fillWidth: true
                 Layout.margins: Style.largeMargin
 
-                image: cameraController.image
+                ImageItem {
+                    anchors.fill: parent
+                    image: cameraController.image
+                    visible: hasImage
+                }
+            }
+        }
+
+        ColumnLayout { // Marker panel
+            anchors.fill: parent
+            visible: markerButton.selected
+            spacing: 0
+
+            GridLayout {
+                rows: 2
+                flow: GridLayout.TopToBottom
+                Layout.margins: Style.largeMargin
+                columnSpacing: Style.largeMargin
+                rowSpacing: Style.smallMargin
+
+                MyLabel {
+                    text: "Calibration File"
+                }
+                Row {
+                    Layout.leftMargin: Style.mediumMargin
+                    spacing: Style.smallMargin
+                    MyTextEdit {
+                        width: 800
+                        text: calibrationController.calibrationFile
+                        onTextChanged: calibrationController.calibrationFile = text
+                    }
+                    Image {
+                        width: 32
+                        height: 32
+                        source: "/img/error-red.png"
+                        visible: !calibrationController.loaded
+                    }
+                    Image {
+                        width: 32
+                        height: 32
+                        source: "/img/checkmark-white.png"
+                        visible: calibrationController.loaded
+                    }
+                }
+
+                MyLabel {
+                    text: "Camera"
+                }
+                Row {
+                    Layout.leftMargin: Style.mediumMargin
+                    MyButton {
+                        id: startMarkerCameraButton
+                        text: "Start"
+                        backgroundColor: Style.darkGray
+                        enabled: cameraController.canCameraStream && !cameraController.isCameraStreaming
+                        visible: !cameraController.isCameraStreaming
+                        onClicked: cameraController.startCameraStream()
+                    }
+                    MyButton {
+                        text: "Stop"
+                        backgroundColor: Style.darkGray
+                        visible: cameraController.isCameraStreaming
+                        onClicked: cameraController.stopCameraStream()
+                        width: startMarkerCameraButton.width
+                    }
+                }
+            }
+
+            Item {
+                Layout.fillHeight: true
+                Layout.fillWidth: true
+                Layout.margins: Style.largeMargin
+
+                ImageItem {
+                    anchors.fill: parent
+                    image: controller.arucoImage
+                    visible: hasImage
+                }
+            }
+        }
+
+        Grid {  // GamePad panel
+            anchors.fill: parent
+            anchors.margins: Style.largeMargin
+            visible: gamepadButton.selected
+            columns: 2
+
+            MyLabel {
+                text: "No gamepads connected"
+                visible: gamePadManager.count === 0
+            }
+
+            Repeater {
+                model: gamePadManager.gamePads
+
+                delegate:  Column {
+                    spacing: Style.mediumMargin
+                    width: 256
+
+                    MyLabel {
+                        width: parent.width
+                        horizontalAlignment: Qt.AlignCenter
+                        text: "Player " + (index+1)
+                        font.pixelSize: Style.subHeaderFontSize
+                    }
+
+                    Image {
+                        id: gamePadImage
+                        width: parent.width
+                        source: "/img/gamepad.png"
+                    }
+
+                    MyLabel {
+                        width: parent.width
+                        horizontalAlignment: Qt.AlignHCenter
+                        wrapMode: Text.WordWrap
+                        text: modelData.debugString
+                    }
+                }
             }
         }
     }

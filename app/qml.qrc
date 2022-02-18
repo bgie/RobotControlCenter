@@ -29,5 +29,9 @@
         <file>controls/MyNavigationButton.qml</file>
         <file>controls/MyStatusIcon.qml</file>
         <file>img/gamepad.png</file>
+        <file>img/marker.png</file>
+        <file>img/checkmark-white.png</file>
+        <file>img/error-red.png</file>
+        <file>img/checkmark-black.png</file>
     </qresource>
 </RCC>

@@ -36,15 +36,6 @@ QStringList CameraManager::availableDevices() const
     return _availableDevices;
 }
 
-void CameraManager::setCurrentDevice(QString currentDevice)
-{
-    if (_currentDevice == currentDevice)
-        return;
-
-    _currentDevice = currentDevice;
-    emit currentDeviceChanged(_currentDevice);
-}
-
 void CameraManager::updateAvailableDevices()
 {
     QSet<QString> oldDevices = _availableDevices.toSet();
@@ -69,9 +60,4 @@ void CameraManager::updateAvailableDevices()
     if (hasChange) {
         emit availableDevicesChanged(_availableDevices);
     }
-}
-
-QString CameraManager::currentDevice() const
-{
-    return _currentDevice;
 }

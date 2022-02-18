@@ -1,45 +1,49 @@
 /*  RobotControlCenter
     Copyright (C) 2021-2022 Kuppens Brecht
-    
+
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
-    
+
     This program is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
-    
+
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 #pragma once
-#include <QImage>
-#include <QQuickItem>
+#include <QObject>
 
-class ImageItem : public QQuickItem
-{
+namespace cv {
+class Mat;
+}
+
+class CalibrationController : public QObject {
     Q_OBJECT
-    Q_PROPERTY(QImage image READ image WRITE setImage NOTIFY imageChanged)
-    Q_PROPERTY(bool hasImage READ hasImage NOTIFY imageChanged)
+    Q_PROPERTY(QString calibrationFile READ calibrationFile WRITE setCalibrationFile NOTIFY calibrationFileChanged)
+    Q_PROPERTY(bool loaded READ loaded NOTIFY calibrationFileChanged)
 
 public:
-    explicit ImageItem(QQuickItem* parent = nullptr);
-    virtual ~ImageItem() override;
+    explicit CalibrationController(QObject* parent = nullptr);
+    virtual ~CalibrationController();
 
-    virtual QSGNode* updatePaintNode(QSGNode* oldNode, QQuickItem::UpdatePaintNodeData* updatePaintNodeData) override;
-    virtual void geometryChanged(const QRectF& newGeometry, const QRectF& oldGeometry) override;
-    QImage image() const;
-    bool hasImage() const;
+    QString calibrationFile() const;
+    bool loaded() const;
 
 public slots:
-    void setImage(QImage image);
+    void setCalibrationFile(QString calibrationFile);
 
 signals:
-    void imageChanged(QImage image);
+    void calibrationFileChanged(QString calibrationFile);
+    void calibrationChanged(const cv::Mat& cameraMatrix, const cv::Mat& distCoefs);
 
 private:
-    QImage _image;
-    bool _imageChanged;
+    void load();
+
+private:
+    struct Data;
+    QScopedPointer<Data> _d;
 };

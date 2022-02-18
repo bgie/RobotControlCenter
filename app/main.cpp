@@ -14,7 +14,10 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
+#include "AppSettings.h"
 #include "ImageItem.h"
+#include "aruco/Aruco.h"
+#include "aruco/CalibrationController.h"
 #include "camera/CameraController.h"
 #include "camera/CameraManager.h"
 #include "joystick/GamePad.h"
@@ -28,6 +31,8 @@
 #include <QQmlContext>
 #include <QTimer>
 
+const char* const noCreateQml = "Cannot create from QML, has constructor args";
+
 int main(int argc, char *argv[])
 {
     QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
@@ -37,8 +42,10 @@ int main(int argc, char *argv[])
 
     qmlRegisterSingletonType(QUrl("qrc:/Style.qml"), "RobotControlCenter", 1, 0, "Style");
     qmlRegisterType<ImageItem>("RobotControlCenter", 1, 0, "ImageItem");
-    qmlRegisterType<SettingsController>("RobotControlCenter", 1, 0, "SettingsController");
-    qmlRegisterUncreatableType<GamePadManager>("RobotControlCenter", 1, 0, "GamePadManager", "Has constructor args");
+    qmlRegisterUncreatableType<SettingsController>("RobotControlCenter", 1, 0, "SettingsController", noCreateQml);
+    qmlRegisterUncreatableType<GamePadManager>("RobotControlCenter", 1, 0, "GamePadManager", noCreateQml);
+
+    AppSettings settings;
 
     SDL2EventLoop loop;
     JoystickManager joystickManager;
@@ -49,22 +56,41 @@ int main(int argc, char *argv[])
     QObject::connect(&idleTimer, &QTimer::timeout, &loop, &SDL2EventLoop::processEvents);
     idleTimer.start(0);
 
-    FactoryMethod settingsControllerFactory([&]() -> QObject* {
-        return new SettingsController();
-    });
-
     CameraManager cameraManager;
     CameraController cameraController;
-    QObject::connect(&cameraManager, &CameraManager::currentDeviceChanged, &cameraController, &CameraController::setVideoDevice);
+    cameraController.setVideoDevice(settings.cameraDevice());
+    cameraController.setGain(settings.gain());
+    cameraController.setExposure(settings.exposure());
+    cameraController.setCurrentVideoFormatIndex(settings.videoFormatIndex());
+    QObject::connect(&cameraController, &CameraController::videoDeviceChanged, &settings, &AppSettings::setCameraDevice);
+    QObject::connect(&cameraController, &CameraController::gainChanged, &settings, &AppSettings::setGain);
+    QObject::connect(&cameraController, &CameraController::exposureChanged, &settings, &AppSettings::setExposure);
+    QObject::connect(&cameraController, &CameraController::currentVideoFormatIndexChanged, &settings, &AppSettings::setVideoFormatIndex);
+
+    CalibrationController calibrationController;
+    Aruco aruco;
+    QObject::connect(&calibrationController, &CalibrationController::calibrationChanged, &aruco, &Aruco::setCameraMatrix);
+    calibrationController.setCalibrationFile(settings.calibrationFile());
+    QObject::connect(&calibrationController, &CalibrationController::calibrationFileChanged, &settings, &AppSettings::setCalibrationFile);
+
+    FactoryMethod settingsControllerFactory([&]() -> QObject* {
+        auto result = new SettingsController(aruco);
+        QObject::connect(&cameraController, &CameraController::frameReadAsync, result, &SettingsController::setImage, Qt::DirectConnection);
+        return result;
+    });
 
     QQmlApplicationEngine engine;
     engine.rootContext()->setContextProperty(QStringLiteral("settingsControllerFactory"), &settingsControllerFactory);
     engine.rootContext()->setContextProperty(QStringLiteral("gamePadManager"), &gamePadManger);
     engine.rootContext()->setContextProperty(QStringLiteral("cameraManager"), &cameraManager);
     engine.rootContext()->setContextProperty(QStringLiteral("cameraController"), &cameraController);
+    engine.rootContext()->setContextProperty(QStringLiteral("calibrationController"), &calibrationController);
     engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
     if (engine.rootObjects().isEmpty()) {
         return -1;
     }
-    return app.exec();
+    auto result = app.exec();
+
+    cameraController.stopCameraStream();
+    return result;
 }

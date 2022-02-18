@@ -28,6 +28,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package(Qt5 COMPONENTS Core Quick Test REQUIRED)
 find_package(SDL2 REQUIRED)
+find_package(OpenCV REQUIRED core imgproc aruco)
 
 add_subdirectory(lib)
 add_subdirectory(tests)

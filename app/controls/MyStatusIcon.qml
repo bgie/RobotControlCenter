@@ -62,6 +62,6 @@ Rectangle {
         anchors.margins: Style.smallMargin
         width: 24
         height: 24
-        source: "/img/x-red.png"
+        source: "/img/error-red.png"
     }
 }

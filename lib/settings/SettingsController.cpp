@@ -15,11 +15,31 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 #include "SettingsController.h"
+#include "aruco/Aruco.h"
 
-SettingsController::SettingsController(QObject *parent) : QObject(parent)
+SettingsController::SettingsController(Aruco& aruco, QObject* parent)
+    : QObject(parent)
+    , _aruco(aruco)
 {
 }
 
 SettingsController::~SettingsController()
 {
+}
+
+QImage SettingsController::arucoImage() const
+{
+    return _arucoImage;
+}
+
+void SettingsController::setImage(QImage newImage)
+{
+    if (_image == newImage)
+        return;
+
+    _image = newImage;
+    _arucoImage = _image;
+    _aruco.drawMarkers(_arucoImage, _aruco.detectMarkers(_arucoImage));
+
+    emit arucoImageChanged(_arucoImage);
 }

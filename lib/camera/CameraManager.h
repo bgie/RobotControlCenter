@@ -22,23 +22,16 @@ class QFileSystemWatcher;
 class CameraManager : public QObject {
     Q_OBJECT
     Q_PROPERTY(QStringList availableDevices READ availableDevices NOTIFY availableDevicesChanged)
-    Q_PROPERTY(QString currentDevice READ currentDevice WRITE setCurrentDevice NOTIFY currentDeviceChanged)
 
 public:
     explicit CameraManager(QObject* parent = nullptr);
 
     QStringList availableDevices() const;
 
-    QString currentDevice() const;
-
-public slots:
-    void setCurrentDevice(QString currentDevice);
-
 signals:
     void availableDevicesChanged(QStringList list);
     void availableDeviceAdded(QString deviceName);
     void availableDeviceRemoved(QString deviceName);
-    void currentDeviceChanged(QString currentDevice);
 
 private:
     void updateAvailableDevices();
@@ -46,5 +39,4 @@ private:
 private:
     QStringList _availableDevices;
     QFileSystemWatcher& _watcher;
-    QString _currentDevice;
 };

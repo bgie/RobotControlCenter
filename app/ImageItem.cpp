@@ -67,6 +67,11 @@ QImage ImageItem::image() const
     return _image;
 }
 
+bool ImageItem::hasImage() const
+{
+    return !_image.isNull();
+}
+
 void ImageItem::setImage(QImage image)
 {
     if (_image == image)

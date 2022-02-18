@@ -17,6 +17,8 @@
 cmake_minimum_required(VERSION 3.14)
 
 add_library(lib
+  aruco/CalibrationController.cpp
+  aruco/Aruco.cpp
   joystick/SDL2EventLoop.cpp
   joystick/JoystickManager.cpp
   joystick/IJoystick.cpp
@@ -32,6 +34,8 @@ add_library(lib
 )
 
 target_include_directories(lib PUBLIC .)
+target_include_directories(lib PUBLIC ${OpenCV_INCLUDE_DIRS})
 
 target_link_libraries(lib Qt5::Core Qt5::Quick)
 target_link_libraries(lib SDL2)
+target_link_libraries(lib ${OpenCV_LIBS})

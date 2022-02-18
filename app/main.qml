@@ -53,6 +53,12 @@ Window {
                 showSubIcon: gamePadManager.count === 0
             }
 
+            MyStatusIcon {
+                source: "/img/camera-white.png"
+                showSubIcon: true
+                subIconSource: cameraController.connectPossible ? "/img/checkmark-white.png" : "/img/error-red.png"
+            }
+
             MyToolButton {
                 id: settingsButton
                 sourceLight: "img/gear-white.png"

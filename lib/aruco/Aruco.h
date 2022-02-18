@@ -1,45 +1,49 @@
 /*  RobotControlCenter
     Copyright (C) 2021-2022 Kuppens Brecht
-    
+
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
-    
+
     This program is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
-    
+
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 #pragma once
 #include <QImage>
-#include <QQuickItem>
+#include <QObject>
+#include <QScopedPointer>
+#include <QString>
+#include <opencv2/core/mat.hpp>
+#include <vector>
 
-class ImageItem : public QQuickItem
-{
+class Aruco : public QObject {
     Q_OBJECT
-    Q_PROPERTY(QImage image READ image WRITE setImage NOTIFY imageChanged)
-    Q_PROPERTY(bool hasImage READ hasImage NOTIFY imageChanged)
 
 public:
-    explicit ImageItem(QQuickItem* parent = nullptr);
-    virtual ~ImageItem() override;
+    struct Markers {
+        std::vector<std::vector<cv::Point2f>> corners;
+        std::vector<int> ids;
+        std::vector<cv::Vec3d> rvecs, tvecs;
+    };
 
-    virtual QSGNode* updatePaintNode(QSGNode* oldNode, QQuickItem::UpdatePaintNodeData* updatePaintNodeData) override;
-    virtual void geometryChanged(const QRectF& newGeometry, const QRectF& oldGeometry) override;
-    QImage image() const;
-    bool hasImage() const;
+public:
+    explicit Aruco(QObject* parent = nullptr);
+    virtual ~Aruco();
 
-public slots:
-    void setImage(QImage image);
+    void setCameraMatrix(const cv::Mat& cameraMatrix, const cv::Mat& distCoeffs);
+    Markers detectMarkers(QImage image) const;
+    std::vector<float> calc2dAngles(const Markers& markers) const;
+    void drawMarkers(QImage& image, const Markers& markers) const;
 
-signals:
-    void imageChanged(QImage image);
+    void generateMarkerImageFiles(QString path) const;
 
 private:
-    QImage _image;
-    bool _imageChanged;
+    struct Data;
+    QScopedPointer<Data> _d;
 };
