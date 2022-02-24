@@ -26,7 +26,7 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_package(Qt5 COMPONENTS Core Quick Test REQUIRED)
+find_package(Qt5 COMPONENTS Core Quick Network Test REQUIRED)
 find_package(SDL2 REQUIRED)
 find_package(OpenCV REQUIRED core imgproc aruco)
 

@@ -24,6 +24,7 @@
 #include "joystick/GamePadManager.h"
 #include "joystick/JoystickManager.h"
 #include "joystick/SDL2EventLoop.h"
+#include "network/RobotNetwork.h"
 #include "settings/SettingsController.h"
 #include "util/FactoryMethod.h"
 #include <QGuiApplication>
@@ -73,6 +74,8 @@ int main(int argc, char *argv[])
     calibrationController.setCalibrationFile(settings.calibrationFile());
     QObject::connect(&calibrationController, &CalibrationController::calibrationFileChanged, &settings, &AppSettings::setCalibrationFile);
 
+    RobotNetwork robotNetwork;
+
     FactoryMethod settingsControllerFactory([&]() -> QObject* {
         auto result = new SettingsController(aruco);
         QObject::connect(&cameraController, &CameraController::frameReadAsync, result, &SettingsController::setImage, Qt::DirectConnection);
@@ -84,6 +87,7 @@ int main(int argc, char *argv[])
     engine.rootContext()->setContextProperty(QStringLiteral("gamePadManager"), &gamePadManger);
     engine.rootContext()->setContextProperty(QStringLiteral("cameraManager"), &cameraManager);
     engine.rootContext()->setContextProperty(QStringLiteral("cameraController"), &cameraController);
+    engine.rootContext()->setContextProperty(QStringLiteral("robotNetwork"), &robotNetwork);
     engine.rootContext()->setContextProperty(QStringLiteral("calibrationController"), &calibrationController);
     engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
     if (engine.rootObjects().isEmpty()) {

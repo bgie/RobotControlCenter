@@ -30,12 +30,14 @@ add_library(lib
   camera/CameraManager.cpp
   camera/CameraController.cpp
   settings/SettingsController.cpp
+  network/RobotNetwork.cpp
+  network/Robot.cpp
   util/FactoryMethod.cpp
 )
 
 target_include_directories(lib PUBLIC .)
 target_include_directories(lib PUBLIC ${OpenCV_INCLUDE_DIRS})
 
-target_link_libraries(lib Qt5::Core Qt5::Quick)
+target_link_libraries(lib Qt5::Core Qt5::Quick Qt5::Network)
 target_link_libraries(lib SDL2)
 target_link_libraries(lib ${OpenCV_LIBS})
