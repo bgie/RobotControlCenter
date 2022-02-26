@@ -24,7 +24,7 @@ import RobotControlCenter 1.0
 import './controls/'
 
 MyDialog {
-    dialogWidth: 1200
+    dialogWidth: 1400
     dialogHeight: 1000
     title: "Settings"
 
@@ -144,7 +144,7 @@ MyDialog {
                 MyComboBox {
                     enabled: !cameraController.isCameraStreaming
                     model: cameraController.videoFormats
-                    Layout.preferredWidth: 380
+                    Layout.preferredWidth: 600
                     Layout.leftMargin: Style.mediumMargin
                     currentIndex: cameraController.currentVideoFormatIndex
                     onCurrentIndexChanged: cameraController.setCurrentVideoFormatIndex(currentIndex)
@@ -206,13 +206,14 @@ MyDialog {
 
         ColumnLayout { // Marker panel
             anchors.fill: parent
+            anchors.margins: Style.largeMargin
             visible: markerButton.selected
-            spacing: 0
+            spacing: Style.largeMargin
 
             GridLayout {
                 rows: 2
                 flow: GridLayout.TopToBottom
-                Layout.margins: Style.largeMargin
+
                 columnSpacing: Style.largeMargin
                 rowSpacing: Style.smallMargin
 
@@ -223,7 +224,7 @@ MyDialog {
                     Layout.leftMargin: Style.mediumMargin
                     spacing: Style.smallMargin
                     MyTextEdit {
-                        width: 800
+                        width: 1000
                         text: calibrationController.calibrationFile
                         onTextChanged: calibrationController.calibrationFile = text
                     }
@@ -264,10 +265,36 @@ MyDialog {
                 }
             }
 
+            GridLayout {
+                rows: 2
+                flow: GridLayout.TopToBottom
+
+                columnSpacing: Style.largeMargin
+                rowSpacing: Style.smallMargin
+
+                MyLabel {
+                    text: "Reference Plane"
+                }
+                MyLabel {
+                    Layout.leftMargin: Style.mediumMargin
+                    Layout.preferredWidth: 260
+                    text: controller.hasPlane
+                        ? "\u03B1=" + controller.planeAlpha.toFixed(1) + " deg " + "\u03B2=" + controller.planeBeta.toFixed(1) + " deg"
+                        : "-"
+                }
+
+                MyLabel {
+                    text: "Detected Markers"
+                }
+                MyLabel {
+                    Layout.leftMargin: Style.mediumMargin
+                    text: controller.markerIds
+                }
+            }
+
             Item {
                 Layout.fillHeight: true
                 Layout.fillWidth: true
-                Layout.margins: Style.largeMargin
 
                 ImageItem {
                     anchors.fill: parent

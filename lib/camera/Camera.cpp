@@ -65,6 +65,7 @@ public:
         , videoFormatIndex(-1)
         , exposure(100)
         , gain(255)
+        , framesPerSecond(0.0f)
     {
     }
 
@@ -74,6 +75,7 @@ public:
     int videoFormatIndex;
     int exposure;
     int gain;
+    float framesPerSecond;
     QScopedPointer<CameraReader> reader;
 };
 
@@ -151,6 +153,13 @@ QStringList Camera::videoFormats() const
 void Camera::setVideoFormatIndex(int i)
 {
     _d->videoFormatIndex = i;
+
+    if (canStream()) {
+        auto fps = _d->videoFormats.at(_d->videoFormatIndex).fps;
+        setFramesPerSecond(static_cast<float>(fps.first) / fps.second);
+    } else {
+        setFramesPerSecond(0.0f);
+    }
 }
 
 void Camera::setExposure(int val)
@@ -245,6 +254,11 @@ void Camera::stopStream()
     }
 }
 
+float Camera::framesPerSecond() const
+{
+    return _d->framesPerSecond;
+}
+
 bool Camera::isValidDevice(QString deviceName)
 {
     return QFile::exists(deviceName);
@@ -270,4 +284,13 @@ void Camera::updateGain()
     if (-1 == xioctl(_d->fd, VIDIOC_S_CTRL, &ctrl)) {
         qCritical() << "Cannot set gain value";
     }
+}
+
+void Camera::setFramesPerSecond(float newValue)
+{
+    if (_d->framesPerSecond == newValue)
+        return;
+
+    _d->framesPerSecond = newValue;
+    emit framesPerSecondChanged(newValue);
 }

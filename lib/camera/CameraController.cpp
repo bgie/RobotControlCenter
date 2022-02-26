@@ -43,12 +43,15 @@ void CameraController::connect()
         _camera.reset(new Camera(_videoDevice));
         QObject::connect(_camera.data(), &Camera::frameRead, this, &CameraController::frameReadAsync, Qt::DirectConnection);
         QObject::connect(_camera.data(), &Camera::frameRead, this, &CameraController::setImage, Qt::QueuedConnection);
+        QObject::connect(_camera.data(), &Camera::framesPerSecondChanged, this, &CameraController::framesPerSecondChanged);
 
         auto formats = _camera->videoFormats();
         setVideoFormats(formats);
         setCurrentVideoFormatIndex(-1);
         _camera->setExposure(_exposure);
         _camera->setGain(_gain);
+
+        emit framesPerSecondChanged(_camera->framesPerSecond());
     }
 }
 
@@ -102,6 +105,11 @@ bool CameraController::canCameraStream() const
 bool CameraController::isCameraStreaming() const
 {
     return _isCameraStreaming;
+}
+
+float CameraController::framesPerSecond() const
+{
+    return _camera.isNull() ? 0.0f : _camera->framesPerSecond();
 }
 
 QImage CameraController::image() const

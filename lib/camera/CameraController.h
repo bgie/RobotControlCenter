@@ -31,6 +31,7 @@ class CameraController : public QObject {
     Q_PROPERTY(bool canCameraStream READ canCameraStream NOTIFY canCameraStreamChanged)
     Q_PROPERTY(bool isCameraStreaming READ isCameraStreaming NOTIFY isCameraStreamingChanged)
     Q_PROPERTY(QImage image READ image NOTIFY imageChanged)
+    Q_PROPERTY(float framesPerSecond READ framesPerSecond NOTIFY framesPerSecondChanged)
 
 public:
     explicit CameraController(QObject* parent = nullptr);
@@ -47,6 +48,7 @@ public:
     Q_INVOKABLE void startCameraStream();
     Q_INVOKABLE void stopCameraStream();
     bool isCameraStreaming() const;
+    float framesPerSecond() const;
 
     QImage image() const;
 
@@ -68,6 +70,7 @@ signals:
     void isCameraStreamingChanged(bool isCameraStreaming);
     void frameReadAsync(QImage image);
     void imageChanged(QImage image);
+    void framesPerSecondChanged(float newValue);
 
 private slots:
     void setConnectPossible(bool connectPossible);

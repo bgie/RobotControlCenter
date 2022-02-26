@@ -18,6 +18,7 @@
 #include "ImageItem.h"
 #include "aruco/Aruco.h"
 #include "aruco/CalibrationController.h"
+#include "aruco/MarkerTracker.h"
 #include "camera/CameraController.h"
 #include "camera/CameraManager.h"
 #include "joystick/GamePad.h"
@@ -31,6 +32,7 @@
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
+#include <QThread>
 #include <QTimer>
 
 const char* const noCreateQml = "Cannot create from QML, has constructor args";
@@ -78,12 +80,18 @@ int main(int argc, char *argv[])
     calibrationController.setCalibrationFile(settings.calibrationFile());
     QObject::connect(&calibrationController, &CalibrationController::calibrationFileChanged, &settings, &AppSettings::setCalibrationFile);
 
+    QThread trackingThread;
+    MarkerTracker tracker(aruco);
+    tracker.moveToThread(&trackingThread);
+    trackingThread.start(QThread::TimeCriticalPriority);
+    QObject::connect(&cameraController, &CameraController::frameReadAsync, &tracker, &MarkerTracker::processFrame, Qt::QueuedConnection);
+    QObject::connect(&cameraController, &CameraController::framesPerSecondChanged, &tracker, &MarkerTracker::setFramesPerSecond, Qt::QueuedConnection);
+    tracker.setFramesPerSecond(cameraController.framesPerSecond());
+
     RobotNetwork robotNetwork;
 
     FactoryMethod settingsControllerFactory([&]() -> QObject* {
-        auto result = new SettingsController(aruco);
-        QObject::connect(&cameraController, &CameraController::frameReadAsync, result, &SettingsController::setImage, Qt::DirectConnection);
-        return result;
+        return new SettingsController(tracker);
     });
 
     QQmlApplicationEngine engine;
@@ -100,5 +108,7 @@ int main(int argc, char *argv[])
     auto result = app.exec();
 
     cameraController.stopCameraStream();
+    trackingThread.quit();
+    trackingThread.wait();
     return result;
 }

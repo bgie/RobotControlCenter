@@ -19,6 +19,12 @@ cmake_minimum_required(VERSION 3.14)
 add_library(lib
   aruco/CalibrationController.cpp
   aruco/Aruco.cpp
+  aruco/Marker.cpp
+  aruco/MarkerTracker.cpp
+  aruco/Plane3d.cpp
+  kalman/RotationCounter.cpp
+  kalman/KalmanTracker1D.cpp
+  kalman/KalmanTracker3D.cpp
   joystick/SDL2EventLoop.cpp
   joystick/JoystickManager.cpp
   joystick/IJoystick.cpp

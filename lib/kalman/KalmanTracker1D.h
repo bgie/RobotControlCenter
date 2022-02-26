@@ -15,44 +15,32 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 #pragma once
-#include <QImage>
-#include <QObject>
 #include <QScopedPointer>
 
-class Camera : public QObject {
-    Q_OBJECT
-    Q_PROPERTY(float framesPerSecond READ framesPerSecond NOTIFY framesPerSecondChanged)
-
+class KalmanTracker1D {
 public:
-    explicit Camera(QString deviceName, QObject *parent = nullptr);
-    virtual ~Camera();
+    struct Params {
+        Params(double positionProcessNoiseCov = 1, double velocityProcessNoiseCov = 1, double measurementNoiseCov = 1, double notUpdatedTimeoutInMsec = 3000);
 
-    QString deviceName() const;
-   
-    QStringList videoFormats() const;
-    void setVideoFormatIndex(int i);
+        double positionProcessNoiseCov;
+        double velocityProcessNoiseCov;
+        double measurementNoiseCov;
+        double notUpdatedTimeoutInMsec;
+    };
 
-    void setExposure(int val);
-    void setGain(int val);
+    KalmanTracker1D(const Params& p = Params());
+    ~KalmanTracker1D();
 
-    bool canStream() const;
+    void update(double position);
+    void predict(double elapsedMsec);
 
-    void startStream();
-    void stopStream();
+    bool hasPosition() const;
+    double position() const;
+    double velocity() const;
 
-    float framesPerSecond() const;
-
-    static bool isValidDevice(QString deviceName);
-
-signals:
-    void frameRead(const QImage image);
-    void framesPerSecondChanged(float value);
-
-private:
-    void updateExposure();
-    void updateGain();
-    void setFramesPerSecond(float newValue);
-
+    static const Params& movingRobotParams();
+    static const Params& staticMarkerParams();
+    
 private:
     struct Data;
     QScopedPointer<Data> _d;

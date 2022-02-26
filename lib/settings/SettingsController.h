@@ -17,27 +17,42 @@
 #pragma once
 #include <QImage>
 #include <QObject>
+#include <QScopedPointer>
 
-class Aruco;
+class MarkerTracker;
 
 class SettingsController : public QObject {
     Q_OBJECT
     Q_PROPERTY(QImage arucoImage READ arucoImage NOTIFY arucoImageChanged)
+    Q_PROPERTY(bool hasPlane READ hasPlane NOTIFY planeChanged)
+    Q_PROPERTY(float planeAlpha READ planeAlpha NOTIFY planeChanged)
+    Q_PROPERTY(float planeBeta READ planeBeta NOTIFY planeChanged)
+    Q_PROPERTY(QString markerIds READ markerIds NOTIFY markerIdsChanged)
 
 public:
-    explicit SettingsController(Aruco& aruco, QObject* parent = nullptr);
+    explicit SettingsController(MarkerTracker& tracker, QObject* parent = nullptr);
     virtual ~SettingsController() override;
 
     QImage arucoImage() const;
 
-public slots:
-    void setImage(QImage newImage);
+    bool hasPlane() const;
+    float planeAlpha() const;
+    float planeBeta() const;
+
+    QString markerIds() const;
 
 signals:
     void arucoImageChanged(QImage arucoImage);
+    void planeChanged();
+    void markerIdsChanged();
 
 private:
-    Aruco& _aruco;
-    QImage _image;
-    QImage _arucoImage;
+    void updateArucoImage();
+    void setArucoImage(QImage newImage);
+    void updateMarkerInfo();
+    void setMarkerIds(QString newIds);
+
+private:
+    struct Data;
+    QScopedPointer<Data> _d;
 };
