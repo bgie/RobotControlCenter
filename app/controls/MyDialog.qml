@@ -20,41 +20,60 @@ import RobotControlCenter 1.0
 Rectangle {
     property alias title: titleLabel.text
     default property alias content: insideDialog.data
+    property alias dialogWidth: dialog.width
+    property alias dialogHeight: dialog.height
 
     signal closeClicked
 
-    radius: 4
-    color: Style.darkGray
+    id: dialogShadow
+    color: "#B0000000"
 
-    MyLabel {
-        id: titleLabel
-        anchors.top: parent.top
-        anchors.margins: 10
-        anchors.horizontalCenter: parent.horizontalCenter
-        font.pixelSize: Style.headerFontSize
+    MouseArea {
+        anchors.fill: parent
+        hoverEnabled: true
+        acceptedButtons: Qt.AllButtons
     }
 
     Rectangle {
-        id: insideDialog
+        id: dialog
+        anchors.centerIn: parent
 
-        anchors.fill: parent
-        anchors.margins: 8
-        anchors.topMargin: 28 + Style.headerFontSize
-        color: Style.darkerGray
-    }
+        width: 200
+        height: 200
 
-    MyToolButton {
-        id: closeButton
-        width: 40
-        height: 40
-        anchors.margins: 8
-        anchors.right: parent.right
-        anchors.top: parent.top
-        sourceLight: "/img/x-white.png"
-        sourceDark: "/img/x-red.png"
-        imageMargins: 4
-        backgroundColor: "#600000"
-        radius: 20
-        onClicked: closeClicked()
+        radius: 4
+        color: Style.darkGray
+
+        MyLabel {
+            id: titleLabel
+            anchors.top: parent.top
+            anchors.margins: 10
+            anchors.horizontalCenter: parent.horizontalCenter
+            font.pixelSize: Style.headerFontSize
+        }
+
+        Rectangle {
+            id: insideDialog
+
+            anchors.fill: parent
+            anchors.margins: 8
+            anchors.topMargin: 28 + Style.headerFontSize
+            color: Style.darkerGray
+        }
+
+        MyToolButton {
+            id: closeButton
+            width: 40
+            height: 40
+            anchors.margins: 8
+            anchors.right: parent.right
+            anchors.top: parent.top
+            sourceLight: "/img/x-white.png"
+            sourceDark: "/img/x-red.png"
+            imageMargins: 4
+            backgroundColor: "#600000"
+            radius: 20
+            onClicked: closeClicked()
+        }
     }
 }

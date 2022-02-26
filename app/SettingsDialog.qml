@@ -24,8 +24,8 @@ import RobotControlCenter 1.0
 import './controls/'
 
 MyDialog {
-    width: 1200
-    height: 1000
+    dialogWidth: 1200
+    dialogHeight: 1000
     title: "Settings"
 
     signal exitClicked
@@ -61,13 +61,6 @@ MyDialog {
             navigationBar: navigationBar
             sourceLight: "img/gamepad-white.png"
             sourceDark: "img/gamepad-black.png"
-        }
-
-        MyNavigationButton {
-            id: antennaButton
-            navigationBar: navigationBar
-            sourceLight: "img/antenna-white.png"
-            sourceDark: "img/antenna-black.png"
         }
 
         MyNavigationButton {
@@ -299,6 +292,8 @@ MyDialog {
                 model: gamePadManager.gamePads
 
                 delegate:  Column {
+                    property GamePad gamePad: modelData
+
                     spacing: Style.mediumMargin
                     width: 256
 
@@ -319,9 +314,142 @@ MyDialog {
                         width: parent.width
                         horizontalAlignment: Qt.AlignHCenter
                         wrapMode: Text.WordWrap
-                        text: modelData.debugString
+                        text: gamePad.debugString
                     }
                 }
+            }
+        }
+
+        Grid {  // Tanks panel
+            anchors.fill: parent
+            anchors.margins: Style.largeMargin
+            visible: tankButton.selected
+            columns: 2
+
+            Row {
+                visible: !robotNetwork.connected
+                spacing: Style.smallMargin
+
+                Image {
+                    width: 48
+                    height: 48
+                    source: "/img/error-red.png"
+                }
+
+                MyLabel {
+                    text: "Network connection error\n" + robotNetwork.connectionError
+                }
+            }
+
+            MyLabel {
+                text: "No robots connected"
+                visible: robotNetwork.connected && robotNetwork.count === 0
+            }
+
+            Repeater {
+                model: robotNetwork.robots
+
+                delegate:  Row {
+                    property Robot robot: modelData
+
+                    spacing: Style.mediumMargin
+                    width: 500
+
+                    Image {
+                        width: 128
+                        height: 110
+                        source: "/img/tank-white.png"
+                    }
+
+                    Column {
+                        spacing: Style.mediumMargin
+
+                        MyLabel {
+                            text: "Robot " + robot.id
+                            font.pixelSize: Style.subHeaderFontSize
+                        }
+
+                        Row {
+                            spacing: Style.smallMargin
+                            Image {
+                                width: 32
+                                height: 32
+                                fillMode: Image.PreserveAspectFit
+                                source: "/img/battery-high-white.png"
+                            }
+                            MyLabel {
+                                height: 32
+                                verticalAlignment: Qt.AlignVCenter
+                                text: robot.batteryVoltage.toFixed(2) + "V"
+                            }
+                            Item {
+                                width: Style.mediumMargin
+                                height: 1
+                            }
+                            Image {
+                                width: 32
+                                height: 32
+                                fillMode: Image.PreserveAspectFit
+                                source: "/img/antenna-white.png"
+                            }
+                            MyLabel {
+                                height: 32
+                                verticalAlignment: Qt.AlignVCenter
+                                text: robot.url
+                            }
+                        }
+
+                        Row {
+                            spacing: Style.smallMargin
+                            MyLabel {
+                                height: commandInput.height
+                                verticalAlignment: Qt.AlignVCenter
+                                text: "Command"
+                            }
+                            MyTextEdit {
+                                id: commandInput
+                                width: 400
+                            }
+                            MyButton {
+                                text: "Send"
+                                backgroundColor: Style.darkGray
+                                enabled: commandInput.text
+                                onClicked: robot.sendCommand(commandInput.text)
+                            }
+                            MyToolButton {
+                                width: commandInput.height
+                                height: commandInput.height
+                                sourceLight: "img/help-white.png"
+                                sourceDark: "img/help-black.png"
+                                onClicked: commandsHelpPanel.visible = true
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    MyDialog {
+        id: commandsHelpPanel
+        anchors.fill: parent
+        visible: false
+        dialogWidth: 600
+        dialogHeight: 240
+        title: "Robot Commands"
+
+        onCloseClicked: visible = false
+
+        Column {
+            anchors.fill: parent
+            anchors.margins: Style.largeMargin
+            spacing: Style.mediumMargin
+
+            MyLabel {
+                text: "MOTOR left_speed right_speed\n  Where speed is a value in range [-1024, 1024]"
+            }
+            MyLabel {
+                text: "SERVO angle_1 angle_2\n  Where angle is a value in range [0, 180]"
             }
         }
     }

@@ -23,7 +23,8 @@ class Robot;
 
 class RobotNetwork : public QObject {
     Q_OBJECT
-    Q_PROPERTY(bool connected READ connected WRITE setConnected NOTIFY connectedChanged)
+    Q_PROPERTY(bool connected READ connected NOTIFY connectedChanged)
+    Q_PROPERTY(QString connectionError READ connectionError NOTIFY connectedChanged)
     Q_PROPERTY(QList<QObject*> robots READ robotQObjects NOTIFY robotsChanged)
     Q_PROPERTY(int count READ count NOTIFY robotsChanged)
 public:
@@ -31,6 +32,8 @@ public:
     virtual ~RobotNetwork();
 
     bool connected() const;
+    QString connectionError() const;
+
     QList<QObject*> robotQObjects() const;
     int count() const;
 
@@ -41,7 +44,7 @@ signals:
     void robotsChanged();
 
 private:
-    void setConnected(bool connected);
+    void setConnected(bool connected, QString errorString);
 
     void readListenerSocket();
     void discoverRobots();

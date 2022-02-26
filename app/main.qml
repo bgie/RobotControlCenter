@@ -41,89 +41,78 @@ Window {
             text: "Under construction"
         }
 
-
         Row {
-            anchors.right: parent.right
+            id: statusIcons
+            anchors.right: closeButton.left
             anchors.top: parent.top
-            anchors.margins: Style.windowMargins
+            anchors.topMargin: Style.windowMargins
+            anchors.rightMargin: Style.largeMargin
 
             MyStatusIcon {
                 source: "/img/gamepad-white.png"
                 subText: gamePadManager.count
                 showSubIcon: gamePadManager.count === 0
+                highlighted: statusIconsMouseArea.containsMouse
             }
             MyStatusIcon {
                 source: "/img/camera-white.png"
                 showSubIcon: true
                 subIconSource: cameraController.connectPossible ? "/img/checkmark-white.png" : "/img/error-red.png"
+                highlighted: statusIconsMouseArea.containsMouse
             }
             MyStatusIcon {
                 source: "/img/antenna-white.png"
                 showSubIcon: true
                 subIconSource: robotNetwork.connected ? "/img/checkmark-white.png" : "/img/error-red.png"
+                highlighted: statusIconsMouseArea.containsMouse
             }
             MyStatusIcon {
                 source: "/img/tank-white.png"
                 subText: robotNetwork.count
                 showSubIcon: robotNetwork.count === 0
+                highlighted: statusIconsMouseArea.containsMouse
             }
+        }
+
+        MouseArea {
+            id: statusIconsMouseArea
+            anchors.fill: statusIcons
+            hoverEnabled: true
+            onClicked: settingsDialog.active = true
+        }
+
+        Item {
+            id: closeButton
+            anchors.right: parent.right
+            anchors.top: parent.top
+            anchors.margins: Style.windowMargins
+
+            width: Style.toolButtonSize
+            height: Style.toolButtonSize
 
             MyToolButton {
-                id: settingsButton
-                sourceLight: "img/gear-white.png"
-                sourceDark: "img/gear-black.png"
-                backgroundColor: window.color
-                radius: Style.largeRadius
-                onClicked: selected = !selected
-            }
-
-            Item {
-                width: Style.mediumMargin
-                height: 1
-            }
-
-            Item {
-                width: Style.toolButtonSize
-                height: Style.toolButtonSize
-
-                MyToolButton {
-                    id: closeButton
-                    anchors.centerIn: parent
-                    width: 48
-                    height: 48
-                    sourceLight: "img/x-white.png"
-                    sourceDark: "img/x-red.png"
-                    imageMargins: 4
-                    backgroundColor: "#600000"
-                    radius: 32
-                    onClicked: window.close()
-                }
+                anchors.centerIn: parent
+                width: 48
+                height: 48
+                sourceLight: "img/x-white.png"
+                sourceDark: "img/x-red.png"
+                imageMargins: 4
+                backgroundColor: "#600000"
+                radius: 32
+                onClicked: window.close()
             }
         }
     }
 
-    Rectangle {
-        id: dialogShadow
-        visible: dialogLoader.active
+    Loader {
+        id: settingsDialog
         anchors.fill: parent
-        color: "#B0000000"
-
-        MouseArea {
-            anchors.fill: parent
-            hoverEnabled: true
-            acceptedButtons: Qt.AllButtons
-        }
-
-        Loader {
-            id: dialogLoader
-            anchors.centerIn: parent
-            source: "SettingsDialog.qml"
-            active: settingsButton.selected
-        }
+        source: "SettingsDialog.qml"
+        active: false
 
         Connections {
-            target: dialogLoader.item
-            onExitClicked: settingsButton.selected = false
+            target: settingsDialog.item
+            onExitClicked: settingsDialog.active = false
         }
     }
 }

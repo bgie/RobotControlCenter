@@ -24,6 +24,7 @@
 #include "joystick/GamePadManager.h"
 #include "joystick/JoystickManager.h"
 #include "joystick/SDL2EventLoop.h"
+#include "network/Robot.h"
 #include "network/RobotNetwork.h"
 #include "settings/SettingsController.h"
 #include "util/FactoryMethod.h"
@@ -45,6 +46,9 @@ int main(int argc, char *argv[])
     qmlRegisterType<ImageItem>("RobotControlCenter", 1, 0, "ImageItem");
     qmlRegisterUncreatableType<SettingsController>("RobotControlCenter", 1, 0, "SettingsController", noCreateQml);
     qmlRegisterUncreatableType<GamePadManager>("RobotControlCenter", 1, 0, "GamePadManager", noCreateQml);
+    qmlRegisterUncreatableType<GamePad>("RobotControlCenter", 1, 0, "GamePad", noCreateQml);
+    qmlRegisterUncreatableType<RobotNetwork>("RobotControlCenter", 1, 0, "RobotNetwork", noCreateQml);
+    qmlRegisterUncreatableType<Robot>("RobotControlCenter", 1, 0, "Robot", noCreateQml);
 
     AppSettings settings;
 

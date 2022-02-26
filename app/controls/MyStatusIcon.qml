@@ -24,8 +24,9 @@ Rectangle {
     property int imageMargins: Style.smallMargin
     property bool showSubIcon: false
     property alias subIconSource: subIcon.source
+    property bool highlighted: false
 
-    color: Style.darkerGray
+    color: highlighted ? Style.darkGray : Style.darkerGray
 
     implicitHeight: image.sourceSize.height
     implicitWidth: image.sourceSize.width

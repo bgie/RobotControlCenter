@@ -36,12 +36,15 @@ struct DiscoveredRobot {
 struct RobotNetwork::Data {
     Data()
         : connected(false)
+        , connectionError(QStringLiteral("Starting up"))
     {
     }
 
     bool connected;
+    QString connectionError;
     QTimer discoveryTimer;
-    QUdpSocket listener;
+    QUdpSocket listenSocket;
+    QUdpSocket sendSocket;
     QHash<QByteArray, Robot*> robots;
 };
 
@@ -49,8 +52,8 @@ RobotNetwork::RobotNetwork(QObject* parent)
     : QObject(parent)
     , _d(new Data())
 {
-    _d->listener.bind(listenAddress, CONTROL_CENTER_UDP_PORT, QAbstractSocket::DontShareAddress);
-    connect(&_d->listener, &QUdpSocket::readyRead, this, &RobotNetwork::readListenerSocket);
+    _d->listenSocket.bind(listenAddress, CONTROL_CENTER_UDP_PORT, QAbstractSocket::DontShareAddress);
+    connect(&_d->listenSocket, &QUdpSocket::readyRead, this, &RobotNetwork::readListenerSocket);
 
     connect(&_d->discoveryTimer, &QTimer::timeout, this, &RobotNetwork::discoverRobots);
     _d->discoveryTimer.start(DISCOVER_INTERVAL_MSEC);
@@ -64,6 +67,11 @@ RobotNetwork::~RobotNetwork()
 bool RobotNetwork::connected() const
 {
     return _d->connected;
+}
+
+QString RobotNetwork::connectionError() const
+{
+    return _d->connectionError;
 }
 
 QList<QObject*> RobotNetwork::robotQObjects() const
@@ -80,12 +88,13 @@ int RobotNetwork::count() const
     return _d->robots.size();
 }
 
-void RobotNetwork::setConnected(bool connected)
+void RobotNetwork::setConnected(bool connected, QString errorString)
 {
-    if (_d->connected == connected)
+    if (_d->connected == connected && _d->connectionError == errorString)
         return;
 
     _d->connected = connected;
+    _d->connectionError = errorString;
     emit connectedChanged(_d->connected);
 }
 
@@ -93,8 +102,8 @@ void RobotNetwork::readListenerSocket()
 {
     QList<Robot*> newRobots;
 
-    while (_d->listener.hasPendingDatagrams()) {
-        QNetworkDatagram datagram = _d->listener.receiveDatagram();
+    while (_d->listenSocket.hasPendingDatagrams()) {
+        QNetworkDatagram datagram = _d->listenSocket.receiveDatagram();
         auto parts = datagram.data().split(' ');
         if (parts.size() >= 2) {
             QByteArray id = parts.at(0);
@@ -102,7 +111,7 @@ void RobotNetwork::readListenerSocket()
 
             Robot* r = _d->robots[id];
             if (!r) {
-                newRobots << (_d->robots[id] = r = new Robot(id, this));
+                newRobots << (_d->robots[id] = r = new Robot(id, datagram.senderAddress(), ROBOT_UDP_PORT, this));
             }
             r->discoveryMessageReceived(voltage);
         }
@@ -118,14 +127,15 @@ void RobotNetwork::readListenerSocket()
 
 void RobotNetwork::discoverRobots()
 {
-    QUdpSocket socket;
-    setConnected(-1 != socket.writeDatagram(discoverMessage, QHostAddress(QHostAddress::Broadcast), ROBOT_UDP_PORT));
+    const qint64 bytesSent = _d->sendSocket.writeDatagram(discoverMessage, QHostAddress(QHostAddress::Broadcast), ROBOT_UDP_PORT);
+    const bool sendOk = (bytesSent == discoverMessage.size());
+    setConnected(sendOk, sendOk ? QString() : QStringLiteral("%1 - %2").arg(_d->sendSocket.error()).arg(_d->sendSocket.errorString()));
 
     QList<Robot*> removedRobots;
     QMutableHashIterator<QByteArray, Robot*> it(_d->robots);
     while (it.hasNext()) {
         Robot* r = it.next().value();
-        if (r->connectionTimedOut()) {
+        if (r->hasConnectionTimedOut()) {
             removedRobots << r;
             it.remove();
         }

@@ -15,25 +15,38 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 #pragma once
+#include <QHostAddress>
 #include <QObject>
 
-class Robot : public QObject
-{
-     Q_OBJECT
+class Robot : public QObject {
+    Q_OBJECT
+    Q_PROPERTY(QString id READ idString CONSTANT)
+    Q_PROPERTY(QString url READ url CONSTANT)
+    Q_PROPERTY(float batteryVoltage READ batteryVoltage NOTIFY batteryVoltageChanged)
+
 public:
-    explicit Robot(QByteArray id, QObject* parent = nullptr);
+    Robot(QByteArray id, QHostAddress address, int port, QObject* parent = nullptr);
     virtual ~Robot();
 
     QByteArray id() const;
+    QString idString() const;
+    QString url() const;
+
     float batteryVoltage() const;
 
     void discoveryMessageReceived(float batteryVoltage);
-    bool connectionTimedOut() const;
+    bool hasConnectionTimedOut() const;
+
+    Q_INVOKABLE void sendCommand(QString command);
 
 signals:
+    void batteryVoltageChanged();
+
+private:
+    void setBatteryVoltage(float newVoltage);
+    bool sendCommand(QByteArray command);
 
 private:
     struct Data;
     QScopedPointer<Data> _d;
 };
-

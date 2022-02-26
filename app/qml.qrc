@@ -33,5 +33,8 @@
         <file>img/checkmark-white.png</file>
         <file>img/error-red.png</file>
         <file>img/checkmark-black.png</file>
+        <file>img/battery-high-white.png</file>
+        <file>img/help-white.png</file>
+        <file>img/help-black.png</file>
     </qresource>
 </RCC>
