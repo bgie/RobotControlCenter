@@ -28,6 +28,7 @@ class SettingsController : public QObject {
     Q_PROPERTY(float planeAlpha READ planeAlpha NOTIFY planeChanged)
     Q_PROPERTY(float planeBeta READ planeBeta NOTIFY planeChanged)
     Q_PROPERTY(QString markerIds READ markerIds NOTIFY markerIdsChanged)
+    Q_PROPERTY(QString serializedMarkers READ serializedMarkers NOTIFY serializedMarkersChanged)
 
 public:
     explicit SettingsController(MarkerTracker& tracker, QObject* parent = nullptr);
@@ -40,17 +41,20 @@ public:
     float planeBeta() const;
 
     QString markerIds() const;
+    QString serializedMarkers() const;
 
 signals:
     void arucoImageChanged(QImage arucoImage);
     void planeChanged();
     void markerIdsChanged();
+    void serializedMarkersChanged();
 
 private:
     void updateArucoImage();
     void setArucoImage(QImage newImage);
     void updateMarkerInfo();
     void setMarkerIds(QString newIds);
+    void setSerializedMarkers(QString newValue);
 
 private:
     struct Data;

@@ -38,13 +38,13 @@ public:
     bool hasConnectionTimedOut() const;
 
     Q_INVOKABLE void sendCommand(QString command);
+    bool sendCommand(QByteArray command);
 
 signals:
     void batteryVoltageChanged();
 
 private:
-    void setBatteryVoltage(float newVoltage);
-    bool sendCommand(QByteArray command);
+    void setBatteryVoltage(float newVoltage);    
 
 private:
     struct Data;

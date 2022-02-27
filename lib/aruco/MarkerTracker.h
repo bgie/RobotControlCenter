@@ -39,10 +39,15 @@ public:
     QImage annotatedImage() const;
     QList<QVector3D> points() const;
     QList<int> ids() const;
+    QByteArray serializedMarkers() const;
 
 signals:
     void framesPerSecondChanged(float framesPerSecond);
     void frameProcessed();
+    void markersChanged(QByteArray serializedMarkers);
+
+private:
+    QByteArray serializedMarkersImpl() const;
 
 private:
     struct Data;

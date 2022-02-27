@@ -74,6 +74,11 @@ QString RobotNetwork::connectionError() const
     return _d->connectionError;
 }
 
+QList<Robot*> RobotNetwork::robots() const
+{
+    return _d->robots.values();
+}
+
 QList<QObject*> RobotNetwork::robotQObjects() const
 {
     QList<QObject*> result;

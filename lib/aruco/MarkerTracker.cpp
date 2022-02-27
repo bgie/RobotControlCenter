@@ -16,6 +16,7 @@
 */
 #include "MarkerTracker.h"
 #include "Marker.h"
+#include <QBuffer>
 #include <QDebug>
 #include <QImage>
 #include <QMutexLocker>
@@ -92,7 +93,10 @@ void MarkerTracker::processFrame(QImage image)
     _d->image = image;
     _d->markers = markers;
 
+    auto serialized = serializedMarkersImpl();
+
     lock.unlock();
+    emit markersChanged(serialized);
     emit frameProcessed();
 }
 
@@ -135,4 +139,35 @@ QList<int> MarkerTracker::ids() const
         }
     }
     return result;
+}
+
+QByteArray MarkerTracker::serializedMarkers() const
+{
+    QMutexLocker lock(&_d->mutex);
+    return serializedMarkersImpl();
+}
+
+QByteArray MarkerTracker::serializedMarkersImpl() const
+{
+    QBuffer buffer;
+    buffer.open(QIODevice::WriteOnly);
+    QTextStream out(&buffer);
+    bool firstItem = true;
+
+    for (auto it = _d->idToMarker.cbegin(); it != _d->idToMarker.cend(); ++it) {
+        if (it.value()->isDetectedFiltered()) {
+            if (firstItem) {
+                firstItem = false;
+            } else {
+                out << ";";
+            }
+            out << "id:" << it.key()
+                << " x:" << static_cast<int>(qRound(it.value()->filteredPos().x()))
+                << " y:" << static_cast<int>(qRound(it.value()->filteredPos().y()))
+                << " a:" << static_cast<int>(qRound(it.value()->filteredAngle() * 180 / M_PI));
+        }
+    }
+    out << "\n";
+    out.flush();
+    return buffer.buffer();
 }

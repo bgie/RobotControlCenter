@@ -38,6 +38,11 @@ add_library(lib
   settings/SettingsController.cpp
   network/RobotNetwork.cpp
   network/Robot.cpp
+  pipe/NonBlockingPipe.cpp
+  pipe/NonBlockingSenderPipe.cpp
+  pipe/NonBlockingReceiverPipe.cpp
+  pipe/PipeController.cpp
+  pipe/RobotCommandPipe.cpp
   util/FactoryMethod.cpp
 )
 

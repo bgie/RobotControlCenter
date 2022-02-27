@@ -23,6 +23,8 @@ const QString EXPOSURE_KEY(QStringLiteral("Exposure"));
 const QString GAIN_KEY(QStringLiteral("Gain"));
 const QString VIDEOFORMATINDEX_KEY(QStringLiteral("VideoFormatIndex"));
 const QString CALIBRATIONFILE_KEY(QStringLiteral("CalibrationFile"));
+const QString CAMERA_PIPE_PATH_KEY(QStringLiteral("CameraPipePath"));
+const QString ROBOT_PIPES_PATH_KEY(QStringLiteral("RobotPipesPath"));
 }
 
 AppSettings::AppSettings(QObject *parent) : QObject(parent)
@@ -32,7 +34,9 @@ AppSettings::AppSettings(QObject *parent) : QObject(parent)
     _exposure = settings.value(EXPOSURE_KEY, 100).toInt();
     _gain = settings.value(GAIN_KEY, 255).toInt();
     _videoFormatIndex = settings.value(VIDEOFORMATINDEX_KEY, -1).toInt();
-    _calibrationFile = settings.value(CALIBRATIONFILE_KEY, QStringLiteral("~/CameraCalibration.json")).toString();
+    _calibrationFile = settings.value(CALIBRATIONFILE_KEY, QStringLiteral("CameraCalibration.json")).toString();
+    _cameraPipePath = settings.value(CAMERA_PIPE_PATH_KEY, QStringLiteral("/robots/camera")).toString();
+    _robotPipesPath = settings.value(ROBOT_PIPES_PATH_KEY, QStringLiteral("/robots")).toString();
 }
 
 QString AppSettings::cameraDevice() const
@@ -58,6 +62,16 @@ int AppSettings::videoFormatIndex() const
 QString AppSettings::calibrationFile() const
 {
     return _calibrationFile;
+}
+
+QString AppSettings::cameraPipePath() const
+{
+    return _cameraPipePath;
+}
+
+QString AppSettings::robotPipesPath() const
+{
+    return _robotPipesPath;
 }
 
 void AppSettings::setCameraDevice(QString cameraDevice)
@@ -123,4 +137,30 @@ void AppSettings::setCalibrationFile(QString calibrationFile)
     settings.setValue(CALIBRATIONFILE_KEY, _calibrationFile);
 
     emit calibrationFileChanged(_calibrationFile);
+}
+
+void AppSettings::setCameraPipePath(QString newPath)
+{
+    if (_cameraPipePath == newPath)
+        return;
+
+    _cameraPipePath = newPath;
+
+    QSettings settings;
+    settings.setValue(CAMERA_PIPE_PATH_KEY, newPath);
+
+    emit cameraPipePathChanged(newPath);
+}
+
+void AppSettings::setRobotPipesPath(QString newPath)
+{
+    if (_robotPipesPath == newPath)
+        return;
+
+    _robotPipesPath = newPath;
+
+    QSettings settings;
+    settings.setValue(ROBOT_PIPES_PATH_KEY, newPath);
+
+    emit robotPipesPathChanged(newPath);
 }

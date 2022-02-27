@@ -70,6 +70,13 @@ MyDialog {
             sourceDark: "img/tank-black.png"
         }
 
+        MyNavigationButton {
+            id: pipeButton
+            navigationBar: navigationBar
+            sourceLight: "img/pipe-white.png"
+            sourceDark: "img/pipe-black.png"
+        }
+
         bottomButtons: [
             MyNavigationButton {
                 id: exitButton
@@ -222,21 +229,24 @@ MyDialog {
                 }
                 Row {
                     Layout.leftMargin: Style.mediumMargin
-                    spacing: Style.smallMargin
+                    spacing: Style.mediumMargin
                     MyTextEdit {
+                        id: calibrationFile
                         width: 1000
                         text: calibrationController.calibrationFile
                         onTextChanged: calibrationController.calibrationFile = text
                     }
                     Image {
                         width: 32
-                        height: 32
+                        height: calibrationFile.height
+                        fillMode: Image.PreserveAspectFit
                         source: "/img/error-red.png"
                         visible: !calibrationController.loaded
                     }
                     Image {
                         width: 32
-                        height: 32
+                        height: calibrationFile.height
+                        fillMode: Image.PreserveAspectFit
                         source: "/img/checkmark-white.png"
                         visible: calibrationController.loaded
                     }
@@ -278,17 +288,32 @@ MyDialog {
                 MyLabel {
                     Layout.leftMargin: Style.mediumMargin
                     Layout.preferredWidth: 260
-                    text: controller.hasPlane
-                        ? "\u03B1=" + controller.planeAlpha.toFixed(1) + " deg " + "\u03B2=" + controller.planeBeta.toFixed(1) + " deg"
-                        : "-"
-                }
-
-                MyLabel {
-                    text: "Detected Markers"
-                }
-                MyLabel {
-                    Layout.leftMargin: Style.mediumMargin
                     text: controller.markerIds
+                }
+                Row {
+                    Layout.rowSpan: 2
+                    visible: controller.hasPlane
+                    spacing: Style.mediumMargin
+
+                    MyLabel {
+                        text: "\u03B1"
+                    }
+                    MyLabel {
+                        text: controller.planeAlpha.toFixed(1)
+                        font.pixelSize: 48
+                    }
+                    Item {
+                        width: Style.largeMargin
+                        height: 1
+                    }
+
+                    MyLabel {
+                        text: "\u03B2"
+                    }
+                    MyLabel {
+                        text: controller.planeBeta.toFixed(1)
+                        font.pixelSize: 48
+                    }
                 }
             }
 
@@ -300,6 +325,13 @@ MyDialog {
                     anchors.fill: parent
                     image: controller.arucoImage
                     visible: hasImage
+                }
+
+                MyLabel {
+                    anchors.left: parent.left
+                    anchors.top: parent.top
+                    font.pixelSize: Style.tinyFontSize
+                    text: controller.serializedMarkers
                 }
             }
         }
@@ -347,11 +379,11 @@ MyDialog {
             }
         }
 
-        Grid {  // Tanks panel
+        Column {  // Tanks panel
             anchors.fill: parent
             anchors.margins: Style.largeMargin
             visible: tankButton.selected
-            columns: 2
+            spacing: Style.largeMargin
 
             Row {
                 visible: !robotNetwork.connected
@@ -380,7 +412,6 @@ MyDialog {
                     property Robot robot: modelData
 
                     spacing: Style.mediumMargin
-                    width: 500
 
                     Image {
                         width: 128
@@ -451,8 +482,121 @@ MyDialog {
                                 onClicked: commandsHelpPanel.visible = true
                             }
                         }
+
+                        Item {
+                            height: Style.largeMargin
+                            width: 1
+                        }
                     }
                 }
+            }
+        }
+
+        ColumnLayout { // Pipe panel
+            anchors.fill: parent
+            anchors.margins: Style.largeMargin
+            visible: pipeButton.selected
+            spacing: Style.largeMargin
+
+            ColumnLayout {
+                spacing: Style.smallMargin
+
+                MyLabel {
+                    text: "Named pipe for camera marker tracking output"
+                }
+                Row {
+                    Layout.leftMargin: Style.mediumMargin
+                    spacing: Style.mediumMargin
+                    MyTextEdit {
+                        id: cameraPipePath
+                        width: 400
+                        text: pipeController.cameraPipePath
+                        onTextChanged: pipeController.cameraPipePath = text
+                    }
+                    Image {
+                        width: 32
+                        height: cameraPipePath.height
+                        fillMode: Image.PreserveAspectFit
+                        source: "/img/error-red.png"
+                        visible: pipeController.cameraPipeHasError
+                    }
+                    Image {
+                        width: 32
+                        height: cameraPipePath.height
+                        fillMode: Image.PreserveAspectFit
+                        source: "/img/checkmark-white.png"
+                        visible: !pipeController.cameraPipeHasError
+                    }
+                    MyLabel {
+                        height: cameraPipePath.height
+                        verticalAlignment: Qt.AlignVCenter
+                        text: pipeController.cameraPipeErrorString
+                    }
+                }
+            }
+            ColumnLayout {
+                spacing: Style.smallMargin
+
+                MyLabel {
+                    text: "Base path for robot command pipes"
+                }
+                Row {
+                    Layout.leftMargin: Style.mediumMargin
+                    spacing: Style.mediumMargin
+                    MyTextEdit {
+                        id: robotPipesPath
+                        width: 400
+                        text: pipeController.robotPipesPath
+                        onTextChanged: pipeController.robotPipesPath = text
+                    }
+                }
+
+            }
+            ColumnLayout {
+                spacing: Style.smallMargin
+
+                MyLabel {
+                    text: "Robot command pipes"
+                }
+
+                ColumnLayout {
+                    Layout.leftMargin: Style.mediumMargin
+
+                    Repeater {
+                        model: pipeController.robotCommandPipes
+
+                        delegate:  Row {
+                            property RobotCommandPipe robot: modelData
+                            spacing: Style.mediumMargin
+                            MyLabel {
+                                id: robotPipePath
+                                text: robot.path
+                            }
+                            Image {
+                                width: robotPipePath.height
+                                height: robotPipePath.height
+                                fillMode: Image.PreserveAspectFit
+                                source: "/img/error-red.png"
+                                visible: robot.hasError
+                            }
+                            Image {
+                                width: robotPipePath.height
+                                height: robotPipePath.height
+                                fillMode: Image.PreserveAspectFit
+                                source: "/img/checkmark-white.png"
+                                visible: !robot.hasError
+                            }
+                            MyLabel {
+                                text: robot.errorString
+                            }
+                        }
+                    }
+                }
+            }
+
+            Item {
+                Layout.fillHeight: true
+                Layout.fillWidth: true
             }
         }
     }

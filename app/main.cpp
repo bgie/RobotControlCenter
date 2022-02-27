@@ -27,6 +27,8 @@
 #include "joystick/SDL2EventLoop.h"
 #include "network/Robot.h"
 #include "network/RobotNetwork.h"
+#include "pipe/PipeController.h"
+#include "pipe/RobotCommandPipe.h"
 #include "settings/SettingsController.h"
 #include "util/FactoryMethod.h"
 #include <QGuiApplication>
@@ -51,6 +53,8 @@ int main(int argc, char *argv[])
     qmlRegisterUncreatableType<GamePad>("RobotControlCenter", 1, 0, "GamePad", noCreateQml);
     qmlRegisterUncreatableType<RobotNetwork>("RobotControlCenter", 1, 0, "RobotNetwork", noCreateQml);
     qmlRegisterUncreatableType<Robot>("RobotControlCenter", 1, 0, "Robot", noCreateQml);
+    qmlRegisterUncreatableType<PipeController>("RobotControlCenter", 1, 0, "PipeController", noCreateQml);
+    qmlRegisterUncreatableType<RobotCommandPipe>("RobotControlCenter", 1, 0, "RobotCommandPipe", noCreateQml);
 
     AppSettings settings;
 
@@ -89,6 +93,17 @@ int main(int argc, char *argv[])
     tracker.setFramesPerSecond(cameraController.framesPerSecond());
 
     RobotNetwork robotNetwork;
+    PipeController pipeController;
+    pipeController.setCameraPipePath(settings.cameraPipePath());
+    pipeController.setRobotPipesPath(settings.robotPipesPath());
+    QObject::connect(&pipeController, &PipeController::cameraPipePathChanged, &settings, &AppSettings::setCameraPipePath);
+    QObject::connect(&pipeController, &PipeController::robotPipesPathChanged, &settings, &AppSettings::setRobotPipesPath);
+    QObject::connect(&tracker, &MarkerTracker::markersChanged, &pipeController, &PipeController::sendCameraMessage, Qt::QueuedConnection);
+    foreach (Robot* r, robotNetwork.robots()) {
+        pipeController.addRobot(r);
+    }
+    QObject::connect(&robotNetwork, &RobotNetwork::robotAdded, &pipeController, &PipeController::addRobot);
+    QObject::connect(&robotNetwork, &RobotNetwork::robotRemoved, &pipeController, &PipeController::removeRobot);
 
     FactoryMethod settingsControllerFactory([&]() -> QObject* {
         return new SettingsController(tracker);
@@ -101,6 +116,7 @@ int main(int argc, char *argv[])
     engine.rootContext()->setContextProperty(QStringLiteral("cameraController"), &cameraController);
     engine.rootContext()->setContextProperty(QStringLiteral("robotNetwork"), &robotNetwork);
     engine.rootContext()->setContextProperty(QStringLiteral("calibrationController"), &calibrationController);
+    engine.rootContext()->setContextProperty(QStringLiteral("pipeController"), &pipeController);
     engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
     if (engine.rootObjects().isEmpty()) {
         return -1;

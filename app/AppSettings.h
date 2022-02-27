@@ -24,6 +24,8 @@ class AppSettings : public QObject {
     Q_PROPERTY(int gain READ gain WRITE setGain NOTIFY gainChanged)
     Q_PROPERTY(int videoFormatIndex READ videoFormatIndex WRITE setVideoFormatIndex NOTIFY videoFormatIndexChanged)
     Q_PROPERTY(QString calibrationFile READ calibrationFile WRITE setCalibrationFile NOTIFY calibrationFileChanged)
+    Q_PROPERTY(QString cameraPipePath READ cameraPipePath WRITE setCameraPipePath NOTIFY cameraPipePathChanged)
+    Q_PROPERTY(QString robotPipesPath READ robotPipesPath WRITE setRobotPipesPath NOTIFY robotPipesPathChanged)
 
 public:
     explicit AppSettings(QObject* parent = nullptr);
@@ -33,6 +35,8 @@ public:
     int gain() const;
     int videoFormatIndex() const;
     QString calibrationFile() const;
+    QString cameraPipePath() const;
+    QString robotPipesPath() const;
 
 public slots:
     void setCameraDevice(QString cameraDevice);
@@ -40,6 +44,8 @@ public slots:
     void setGain(int gain);
     void setVideoFormatIndex(int videoFormatIndex);
     void setCalibrationFile(QString calibrationFile);
+    void setCameraPipePath(QString newPath);
+    void setRobotPipesPath(QString newPath);
 
 signals:
     void cameraDeviceChanged(QString cameraDevice);
@@ -47,6 +53,8 @@ signals:
     void gainChanged(int gain);
     void videoFormatIndexChanged(int videoFormatIndex);
     void calibrationFileChanged(QString calibrationFile);
+    void cameraPipePathChanged(QString newPath);
+    void robotPipesPathChanged(QString newPath);
 
 private:
     QString _cameraDevice;
@@ -54,4 +62,6 @@ private:
     int _gain;
     int _videoFormatIndex;
     QString _calibrationFile;
+    QString _cameraPipePath;
+    QString _robotPipesPath;
 };

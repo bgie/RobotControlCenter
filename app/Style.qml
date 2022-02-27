@@ -27,6 +27,7 @@ Item {
     readonly property int smallRadius: 3
     readonly property int largeRadius: 12
 
+    readonly property int tinyFontSize: 14
     readonly property int fontSize: 20
     readonly property int statusIconFontSize: 24
     readonly property int subHeaderFontSize: 24

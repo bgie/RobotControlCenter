@@ -36,5 +36,7 @@
         <file>img/battery-high-white.png</file>
         <file>img/help-white.png</file>
         <file>img/help-black.png</file>
+        <file>img/pipe-white.png</file>
+        <file>img/pipe-black.png</file>
     </qresource>
 </RCC>

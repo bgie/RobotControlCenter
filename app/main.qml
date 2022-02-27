@@ -49,15 +49,15 @@ Window {
             anchors.rightMargin: Style.largeMargin
 
             MyStatusIcon {
-                source: "/img/gamepad-white.png"
-                subText: gamePadManager.count
-                showSubIcon: gamePadManager.count === 0
-                highlighted: statusIconsMouseArea.containsMouse
-            }
-            MyStatusIcon {
                 source: "/img/camera-white.png"
                 showSubIcon: true
                 subIconSource: cameraController.connectPossible ? "/img/checkmark-white.png" : "/img/error-red.png"
+                highlighted: statusIconsMouseArea.containsMouse
+            }
+            MyStatusIcon {
+                source: "/img/gamepad-white.png"
+                subText: gamePadManager.count
+                showSubIcon: gamePadManager.count === 0
                 highlighted: statusIconsMouseArea.containsMouse
             }
             MyStatusIcon {

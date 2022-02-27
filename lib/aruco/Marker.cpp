@@ -18,6 +18,7 @@
 #include "kalman/KalmanTracker1D.h"
 #include "kalman/KalmanTracker3D.h"
 #include "kalman/RotationCounter.h"
+#include <math.h>
 
 struct Marker::Data {
     Data(int id)
@@ -95,5 +96,6 @@ QVector3D Marker::filteredPos() const
 
 float Marker::filteredAngle() const
 {
-    return _d->angleFilter.position();
+    double a = _d->angleFilter.position();
+    return a - (2 * M_PI * floor(a / (2 * M_PI)));
 }

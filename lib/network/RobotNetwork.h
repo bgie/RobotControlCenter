@@ -34,6 +34,7 @@ public:
     bool connected() const;
     QString connectionError() const;
 
+    QList<Robot*> robots() const;
     QList<QObject*> robotQObjects() const;
     int count() const;
 

@@ -37,6 +37,7 @@ struct SettingsController::Data {
     float planeAlpha;
     float planeBeta;
     QString markerIds;
+    QString serializedMarkers;
 };
 
 SettingsController::SettingsController(MarkerTracker& tracker, QObject* parent)
@@ -79,6 +80,11 @@ QString SettingsController::markerIds() const
     return _d->markerIds;
 }
 
+QString SettingsController::serializedMarkers() const
+{
+    return _d->serializedMarkers;
+}
+
 void SettingsController::setArucoImage(QImage newImage)
 {
     if (_d->image == newImage)
@@ -110,7 +116,9 @@ void SettingsController::updateMarkerInfo()
     foreach (int id, ids) {
         idStrings << QString::number(id);
     }
-    setMarkerIds(idStrings.empty() ? QStringLiteral("-") : idStrings.join(QStringLiteral(", ")));
+    setMarkerIds(idStrings.empty() ? QStringLiteral("-") : QStringLiteral("ids: %1").arg(idStrings.join(QStringLiteral(", "))));
+
+    setSerializedMarkers(_d->tracker.serializedMarkers().replace(';', '\n'));
 }
 
 void SettingsController::setMarkerIds(QString newIds)
@@ -120,4 +128,13 @@ void SettingsController::setMarkerIds(QString newIds)
 
     _d->markerIds = newIds;
     emit markerIdsChanged();
+}
+
+void SettingsController::setSerializedMarkers(QString newValue)
+{
+    if (_d->serializedMarkers == newValue)
+        return;
+
+    _d->serializedMarkers = newValue;
+    emit serializedMarkersChanged();
 }
