@@ -17,6 +17,7 @@
 #pragma once
 
 #include <QList>
+#include <QMap>
 #include <QObject>
 
 class Robot;
@@ -38,14 +39,19 @@ public:
     QList<QObject*> robotQObjects() const;
     int count() const;
 
+    QMap<QByteArray, int> robot2Marker() const;
+    void setRobot2Marker(QMap<QByteArray, int> values);
+
 signals:
     void connectedChanged(bool connected);
     void robotAdded(Robot* r);
     void robotRemoved(Robot* r);
     void robotsChanged();
+    void robot2MarkerChanged(QMap<QByteArray, int> values);
 
 private:
     void setConnected(bool connected, QString errorString);
+    void onRobotMarkerIdChanged(int newId);
 
     void readListenerSocket();
     void discoverRobots();

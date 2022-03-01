@@ -15,17 +15,11 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 #pragma once
+#include <QMap>
 #include <QObject>
 
 class AppSettings : public QObject {
     Q_OBJECT
-    Q_PROPERTY(QString cameraDevice READ cameraDevice WRITE setCameraDevice NOTIFY cameraDeviceChanged)
-    Q_PROPERTY(int exposure READ exposure WRITE setExposure NOTIFY exposureChanged)
-    Q_PROPERTY(int gain READ gain WRITE setGain NOTIFY gainChanged)
-    Q_PROPERTY(int videoFormatIndex READ videoFormatIndex WRITE setVideoFormatIndex NOTIFY videoFormatIndexChanged)
-    Q_PROPERTY(QString calibrationFile READ calibrationFile WRITE setCalibrationFile NOTIFY calibrationFileChanged)
-    Q_PROPERTY(QString cameraPipePath READ cameraPipePath WRITE setCameraPipePath NOTIFY cameraPipePathChanged)
-    Q_PROPERTY(QString robotPipesPath READ robotPipesPath WRITE setRobotPipesPath NOTIFY robotPipesPathChanged)
 
 public:
     explicit AppSettings(QObject* parent = nullptr);
@@ -37,6 +31,7 @@ public:
     QString calibrationFile() const;
     QString cameraPipePath() const;
     QString robotPipesPath() const;
+    QMap<QByteArray, int> robot2Marker() const;
 
 public slots:
     void setCameraDevice(QString cameraDevice);
@@ -46,15 +41,7 @@ public slots:
     void setCalibrationFile(QString calibrationFile);
     void setCameraPipePath(QString newPath);
     void setRobotPipesPath(QString newPath);
-
-signals:
-    void cameraDeviceChanged(QString cameraDevice);
-    void exposureChanged(int exposure);
-    void gainChanged(int gain);
-    void videoFormatIndexChanged(int videoFormatIndex);
-    void calibrationFileChanged(QString calibrationFile);
-    void cameraPipePathChanged(QString newPath);
-    void robotPipesPathChanged(QString newPath);
+    void setRobot2Marker(QMap<QByteArray, int> values);
 
 private:
     QString _cameraDevice;
@@ -64,4 +51,5 @@ private:
     QString _calibrationFile;
     QString _cameraPipePath;
     QString _robotPipesPath;
+    QMap<QByteArray, int> _robot2Marker;
 };

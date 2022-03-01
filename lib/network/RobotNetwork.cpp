@@ -46,6 +46,7 @@ struct RobotNetwork::Data {
     QUdpSocket listenSocket;
     QUdpSocket sendSocket;
     QHash<QByteArray, Robot*> robots;
+    QMap<QByteArray, int> robot2Marker;
 };
 
 RobotNetwork::RobotNetwork(QObject* parent)
@@ -93,6 +94,26 @@ int RobotNetwork::count() const
     return _d->robots.size();
 }
 
+QMap<QByteArray, int> RobotNetwork::robot2Marker() const
+{
+    return _d->robot2Marker;
+}
+
+void RobotNetwork::setRobot2Marker(QMap<QByteArray, int> values)
+{
+    if (_d->robot2Marker == values)
+        return;
+
+    _d->robot2Marker = values;
+
+    for (auto it = _d->robot2Marker.cbegin(); it != _d->robot2Marker.cend(); ++it) {
+        if (auto robot = _d->robots.value(it.key())) {
+            robot->setMarkerId(it.value());
+        }
+    }
+    emit robot2MarkerChanged(_d->robot2Marker);
+}
+
 void RobotNetwork::setConnected(bool connected, QString errorString)
 {
     if (_d->connected == connected && _d->connectionError == errorString)
@@ -101,6 +122,17 @@ void RobotNetwork::setConnected(bool connected, QString errorString)
     _d->connected = connected;
     _d->connectionError = errorString;
     emit connectedChanged(_d->connected);
+}
+
+void RobotNetwork::onRobotMarkerIdChanged(int newId)
+{
+    if (auto robot = qobject_cast<Robot*>(sender())) {
+        int oldId = _d->robot2Marker.value(robot->id(), -1);
+        if (oldId != newId) {
+            _d->robot2Marker[robot->id()] = newId;
+            emit robot2MarkerChanged(_d->robot2Marker);
+        }
+    }
 }
 
 void RobotNetwork::readListenerSocket()
@@ -116,7 +148,11 @@ void RobotNetwork::readListenerSocket()
 
             Robot* r = _d->robots[id];
             if (!r) {
-                newRobots << (_d->robots[id] = r = new Robot(id, datagram.senderAddress(), ROBOT_UDP_PORT, this));
+                r = new Robot(id, datagram.senderAddress(), ROBOT_UDP_PORT, this);
+                r->setMarkerId(_d->robot2Marker.value(id, -1));
+                connect(r, &Robot::markerIdChanged, this, &RobotNetwork::onRobotMarkerIdChanged);
+                _d->robots[id] = r;
+                newRobots << r;
             }
             r->discoveryMessageReceived(voltage);
         }

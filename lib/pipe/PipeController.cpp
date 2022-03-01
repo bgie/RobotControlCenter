@@ -16,6 +16,7 @@
 */
 #include "PipeController.h"
 #include "NonBlockingSenderPipe.h"
+#include "RobotCameraPipe.h"
 #include "RobotCommandPipe.h"
 #include "network/Robot.h"
 #include <QList>
@@ -24,7 +25,8 @@
 struct PipeController::Data {
     QScopedPointer<NonBlockingSenderPipe> cameraPipe;
     QString robotPipesPath;
-    QList<RobotCommandPipe*> robots;
+    QList<RobotCommandPipe*> robotCommandPipes;
+    QList<RobotCameraPipe*> robotCameraPipes;
 };
 
 PipeController::PipeController(QObject* parent)
@@ -32,7 +34,7 @@ PipeController::PipeController(QObject* parent)
     , _d(new Data())
 {
     auto timer = new QTimer(this);
-    connect(timer, &QTimer::timeout, this, &PipeController::receiveRobotPipes);
+    connect(timer, &QTimer::timeout, this, &PipeController::receiveCommandsOnRobotPipes);
     timer->start(1);
 }
 
@@ -67,21 +69,41 @@ void PipeController::setRobotPipesPath(QString newPath)
 
     _d->robotPipesPath = newPath;
 
-    QMutableListIterator it(_d->robots);
+    QMutableListIterator it(_d->robotCommandPipes);
     while (it.hasNext()) {
         Robot* robot = it.value()->robot();
         it.value()->deleteLater();
         it.setValue(createRobotCommandPipe(robot));
     }
+    QMutableListIterator it2(_d->robotCameraPipes);
+    while (it2.hasNext()) {
+        Robot* robot = it2.value()->robot();
+        it2.value()->deleteLater();
+        it2.setValue(createRobotCameraPipe(robot));
+    }
 
     emit robotPipesPathChanged(newPath);
-    emit robotCommandPipesChanged();
+    emit robotPipesChanged();
+}
+
+bool PipeController::robotsConnected() const
+{
+    return !_d->robotCommandPipes.empty();
 }
 
 QList<QObject*> PipeController::robotCommandPipes() const
 {
     QList<QObject*> result;
-    foreach (auto robot, _d->robots) {
+    foreach (auto robot, _d->robotCommandPipes) {
+        result << robot;
+    }
+    return result;
+}
+
+QList<QObject*> PipeController::robotCameraPipes() const
+{
+    QList<QObject*> result;
+    foreach (auto robot, _d->robotCameraPipes) {
         result << robot;
     }
     return result;
@@ -96,20 +118,34 @@ void PipeController::sendCameraMessage(QByteArray serializedMarkers)
 
 void PipeController::addRobot(Robot* robot)
 {
-    _d->robots.append(createRobotCommandPipe(robot));
-    emit robotCommandPipesChanged();
+    _d->robotCommandPipes.append(createRobotCommandPipe(robot));
+    _d->robotCameraPipes.append(createRobotCameraPipe(robot));
+    emit robotPipesChanged();
 }
 
 void PipeController::removeRobot(Robot* r)
 {
-    QMutableListIterator it(_d->robots);
+    bool changed = false;
+    QMutableListIterator it(_d->robotCommandPipes);
     while (it.hasNext()) {
         if (it.next()->robot() == r) {
             it.value()->deleteLater();
             it.remove();
-            emit robotCommandPipesChanged();
+            changed = true;
             break;
         }
+    }
+    QMutableListIterator it2(_d->robotCameraPipes);
+    while (it2.hasNext()) {
+        if (it2.next()->robot() == r) {
+            it2.value()->deleteLater();
+            it2.remove();
+            changed = true;
+            break;
+        }
+    }
+    if (changed) {
+        emit robotPipesChanged();
     }
 }
 
@@ -131,9 +167,15 @@ RobotCommandPipe* PipeController::createRobotCommandPipe(Robot* robot)
     return new RobotCommandPipe(path, robot, this);
 }
 
-void PipeController::receiveRobotPipes()
+RobotCameraPipe* PipeController::createRobotCameraPipe(Robot* robot)
 {
-    foreach (auto robot, _d->robots) {
+    QString path = RobotCameraPipe::generatePath(_d->robotPipesPath, robot->id());
+    return new RobotCameraPipe(path, robot, this);
+}
+
+void PipeController::receiveCommandsOnRobotPipes()
+{
+    foreach (auto robot, _d->robotCommandPipes) {
         robot->receive();
     }
 }

@@ -25,10 +25,10 @@ import './controls/'
 
 Window {
     id: window
-    width: 800
-    height: 600
+    width: 1400
+    height: 1000
     visible: true
-    visibility: Window.FullScreen
+    // visibility: Window.FullScreen
     title: qsTr("Robot Control Center")
     color: Style.darkerGray
 
@@ -36,41 +36,64 @@ Window {
         id: content
         anchors.fill: parent
 
-        MyLabel {
+        Column {
             anchors.centerIn: parent
-            text: "Under construction"
+            spacing: Style.largeMargin
+
+            Row {
+                spacing: Style.mediumMargin
+                Image {
+                    width: 64
+                    height: 64
+                    fillMode: Image.PreserveAspectFit
+                    source: "img/under-construction-white.png"
+                }
+                Column {
+                    MyLabel {
+                        text: "Game Mode"
+                        font.pixelSize: Style.headerFontSize
+                    }
+                    MyLabel {
+                        text: "[under construction]"
+                        font.italic: true
+                        font.pixelSize: Style.subHeaderFontSize
+                    }
+                }
+            }
+
+            MyIconTextButton {
+                sourceLight: "img/keyboard-white.png"
+                sourceDark: "img/keyboard-black.png"
+                text: "Python programming mode"
+            }
         }
 
         Row {
             id: statusIcons
-            anchors.right: closeButton.left
-            anchors.top: parent.top
-            anchors.topMargin: Style.windowMargins
-            anchors.rightMargin: Style.largeMargin
+            anchors.right: parent.right
+            anchors.bottom: parent.bottom
+            anchors.margins: Style.windowMargins
+            opacity: statusIconsMouseArea.containsMouse ? 1 : 0.4
 
             MyStatusIcon {
                 source: "/img/camera-white.png"
                 showSubIcon: true
                 subIconSource: cameraController.connectPossible ? "/img/checkmark-white.png" : "/img/error-red.png"
-                highlighted: statusIconsMouseArea.containsMouse
             }
             MyStatusIcon {
                 source: "/img/gamepad-white.png"
                 subText: gamePadManager.count
                 showSubIcon: gamePadManager.count === 0
-                highlighted: statusIconsMouseArea.containsMouse
             }
             MyStatusIcon {
                 source: "/img/antenna-white.png"
                 showSubIcon: true
                 subIconSource: robotNetwork.connected ? "/img/checkmark-white.png" : "/img/error-red.png"
-                highlighted: statusIconsMouseArea.containsMouse
             }
             MyStatusIcon {
                 source: "/img/tank-white.png"
                 subText: robotNetwork.count
                 showSubIcon: robotNetwork.count === 0
-                highlighted: statusIconsMouseArea.containsMouse
             }
         }
 
@@ -78,7 +101,29 @@ Window {
             id: statusIconsMouseArea
             anchors.fill: statusIcons
             hoverEnabled: true
-            onClicked: settingsDialog.active = true
+            onClicked: {
+                if (window.width < 1400)
+                    window.width = 1400
+                if (window.height < 1000)
+                    window.height = 1000
+                settingsDialog.active = true
+            }
+        }
+
+        MyToolButton {
+            id: fullscreenButton
+            anchors.right: closeButton.left
+            anchors.top: closeButton.top
+            anchors.rightMargin: Style.mediumMargin
+            width: 64
+            height: 64
+            sourceLight: "img/fullscreen-white.png"
+            sourceDark: "img/fullscreen-black.png"
+
+            onClicked: {
+                window.visibility = Window.FullScreen
+                fullscreenButton.visible = false
+            }
         }
 
         Item {

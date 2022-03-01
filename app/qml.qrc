@@ -38,5 +38,12 @@
         <file>img/help-black.png</file>
         <file>img/pipe-white.png</file>
         <file>img/pipe-black.png</file>
+        <file>img/under-construction-white.png</file>
+        <file>img/under-construction-black.png</file>
+        <file>img/keyboard-white.png</file>
+        <file>img/keyboard-black.png</file>
+        <file>img/fullscreen-white.png</file>
+        <file>img/fullscreen-black.png</file>
+        <file>controls/MyIconTextButton.qml</file>
     </qresource>
 </RCC>

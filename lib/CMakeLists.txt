@@ -43,6 +43,7 @@ add_library(lib
   pipe/NonBlockingReceiverPipe.cpp
   pipe/PipeController.cpp
   pipe/RobotCommandPipe.cpp
+  pipe/RobotCameraPipe.cpp
   util/FactoryMethod.cpp
 )
 

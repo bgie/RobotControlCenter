@@ -460,6 +460,23 @@ MyDialog {
                         Row {
                             spacing: Style.smallMargin
                             MyLabel {
+                                height: markerIdInput.height
+                                width: commandLabel.width
+                                verticalAlignment: Qt.AlignVCenter
+                                text: "Marker id"
+                            }
+                            MyTextEdit {
+                                id: markerIdInput
+                                width: 60
+                                text: robot.markerId
+                                onTextChanged: robot.markerId = parseInt(text)
+                            }
+                        }
+
+                        Row {
+                            spacing: Style.smallMargin
+                            MyLabel {
+                                id: commandLabel
                                 height: commandInput.height
                                 verticalAlignment: Qt.AlignVCenter
                                 text: "Command"
@@ -550,50 +567,99 @@ MyDialog {
                         onTextChanged: pipeController.robotPipesPath = text
                     }
                 }
-
             }
-            ColumnLayout {
-                spacing: Style.smallMargin
 
-                MyLabel {
-                    text: "Robot command pipes"
-                }
+            MyLabel {
+                text: "No robots connected"
+                visible: !pipeController.robotsConnected
+            }
 
+            Row {
+                visible: pipeController.robotsConnected
+                spacing: Style.largeMargin
                 ColumnLayout {
-                    Layout.leftMargin: Style.mediumMargin
+                    spacing: Style.smallMargin
 
-                    Repeater {
-                        model: pipeController.robotCommandPipes
+                    MyLabel {
+                        text: "Command pipes"
+                    }
 
-                        delegate:  Row {
-                            property RobotCommandPipe robot: modelData
-                            spacing: Style.mediumMargin
-                            MyLabel {
-                                id: robotPipePath
-                                text: robot.path
+                    ColumnLayout {
+                        Layout.leftMargin: Style.mediumMargin
+
+                        Repeater {
+                            model: pipeController.robotCommandPipes
+
+                            delegate:  Row {
+                                property RobotCommandPipe robot: modelData
+                                spacing: Style.mediumMargin
+                                MyLabel {
+                                    id: robotPipePath
+                                    text: robot.path
+                                }
+                                Image {
+                                    width: robotPipePath.height
+                                    height: robotPipePath.height
+                                    fillMode: Image.PreserveAspectFit
+                                    source: "/img/error-red.png"
+                                    visible: robot.hasError
+                                }
+                                Image {
+                                    width: robotPipePath.height
+                                    height: robotPipePath.height
+                                    fillMode: Image.PreserveAspectFit
+                                    source: "/img/checkmark-white.png"
+                                    visible: !robot.hasError
+                                }
+                                MyLabel {
+                                    text: robot.errorString
+                                }
                             }
-                            Image {
-                                width: robotPipePath.height
-                                height: robotPipePath.height
-                                fillMode: Image.PreserveAspectFit
-                                source: "/img/error-red.png"
-                                visible: robot.hasError
-                            }
-                            Image {
-                                width: robotPipePath.height
-                                height: robotPipePath.height
-                                fillMode: Image.PreserveAspectFit
-                                source: "/img/checkmark-white.png"
-                                visible: !robot.hasError
-                            }
-                            MyLabel {
-                                text: robot.errorString
+                        }
+                    }
+                }
+                ColumnLayout {
+                    spacing: Style.smallMargin
+
+                    MyLabel {
+                        text: "Camera pipes"
+                    }
+
+                    ColumnLayout {
+                        Layout.leftMargin: Style.mediumMargin
+
+                        Repeater {
+                            model: pipeController.robotCameraPipes
+
+                            delegate:  Row {
+                                property RobotCameraPipe robot: modelData
+                                spacing: Style.mediumMargin
+                                MyLabel {
+                                    id: robotCameraPipePath
+                                    text: robot.path
+                                }
+                                Image {
+                                    width: robotCameraPipePath.height
+                                    height: robotCameraPipePath.height
+                                    fillMode: Image.PreserveAspectFit
+                                    source: "/img/error-red.png"
+                                    visible: robot.hasError
+                                }
+                                Image {
+                                    width: robotCameraPipePath.height
+                                    height: robotCameraPipePath.height
+                                    fillMode: Image.PreserveAspectFit
+                                    source: "/img/checkmark-white.png"
+                                    visible: !robot.hasError
+                                }
+                                MyLabel {
+                                    text: robot.errorString
+                                }
                             }
                         }
                     }
                 }
             }
-
             Item {
                 Layout.fillHeight: true
                 Layout.fillWidth: true

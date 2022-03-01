@@ -28,6 +28,7 @@
 #include "network/Robot.h"
 #include "network/RobotNetwork.h"
 #include "pipe/PipeController.h"
+#include "pipe/RobotCameraPipe.h"
 #include "pipe/RobotCommandPipe.h"
 #include "settings/SettingsController.h"
 #include "util/FactoryMethod.h"
@@ -55,6 +56,7 @@ int main(int argc, char *argv[])
     qmlRegisterUncreatableType<Robot>("RobotControlCenter", 1, 0, "Robot", noCreateQml);
     qmlRegisterUncreatableType<PipeController>("RobotControlCenter", 1, 0, "PipeController", noCreateQml);
     qmlRegisterUncreatableType<RobotCommandPipe>("RobotControlCenter", 1, 0, "RobotCommandPipe", noCreateQml);
+    qmlRegisterUncreatableType<RobotCameraPipe>("RobotControlCenter", 1, 0, "RobotCameraPipe", noCreateQml);
 
     AppSettings settings;
 
@@ -93,6 +95,9 @@ int main(int argc, char *argv[])
     tracker.setFramesPerSecond(cameraController.framesPerSecond());
 
     RobotNetwork robotNetwork;
+    robotNetwork.setRobot2Marker(settings.robot2Marker());
+    QObject::connect(&robotNetwork, &RobotNetwork::robot2MarkerChanged, &settings, &AppSettings::setRobot2Marker);
+
     PipeController pipeController;
     pipeController.setCameraPipePath(settings.cameraPipePath());
     pipeController.setRobotPipesPath(settings.robotPipesPath());

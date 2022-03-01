@@ -25,6 +25,7 @@ const QString VIDEOFORMATINDEX_KEY(QStringLiteral("VideoFormatIndex"));
 const QString CALIBRATIONFILE_KEY(QStringLiteral("CalibrationFile"));
 const QString CAMERA_PIPE_PATH_KEY(QStringLiteral("CameraPipePath"));
 const QString ROBOT_PIPES_PATH_KEY(QStringLiteral("RobotPipesPath"));
+const QString ROBOT_2_MARKER_KEY(QStringLiteral("Robot2Marker"));
 }
 
 AppSettings::AppSettings(QObject *parent) : QObject(parent)
@@ -37,6 +38,10 @@ AppSettings::AppSettings(QObject *parent) : QObject(parent)
     _calibrationFile = settings.value(CALIBRATIONFILE_KEY, QStringLiteral("CameraCalibration.json")).toString();
     _cameraPipePath = settings.value(CAMERA_PIPE_PATH_KEY, QStringLiteral("/robots/camera")).toString();
     _robotPipesPath = settings.value(ROBOT_PIPES_PATH_KEY, QStringLiteral("/robots")).toString();
+    auto r2m = settings.value(ROBOT_2_MARKER_KEY).toMap();
+    for (auto it = r2m.cbegin(); it != r2m.cend(); ++it) {
+        _robot2Marker.insert(it.key().toLatin1(), it.value().toInt());
+    }
 }
 
 QString AppSettings::cameraDevice() const
@@ -74,6 +79,11 @@ QString AppSettings::robotPipesPath() const
     return _robotPipesPath;
 }
 
+QMap<QByteArray, int> AppSettings::robot2Marker() const
+{
+    return _robot2Marker;
+}
+
 void AppSettings::setCameraDevice(QString cameraDevice)
 {
     if (_cameraDevice == cameraDevice)
@@ -83,8 +93,6 @@ void AppSettings::setCameraDevice(QString cameraDevice)
 
     QSettings settings;
     settings.setValue(VIDEODEVICE_KEY, _cameraDevice);
-
-    emit cameraDeviceChanged(_cameraDevice);
 }
 
 void AppSettings::setExposure(int exposure)
@@ -96,8 +104,6 @@ void AppSettings::setExposure(int exposure)
 
     QSettings settings;
     settings.setValue(EXPOSURE_KEY, _exposure);
-
-    emit exposureChanged(_exposure);
 }
 
 void AppSettings::setGain(int gain)
@@ -109,8 +115,6 @@ void AppSettings::setGain(int gain)
 
     QSettings settings;
     settings.setValue(GAIN_KEY, _gain);
-
-    emit gainChanged(_gain);
 }
 
 void AppSettings::setVideoFormatIndex(int videoFormatIndex)
@@ -122,8 +126,6 @@ void AppSettings::setVideoFormatIndex(int videoFormatIndex)
 
     QSettings settings;
     settings.setValue(VIDEOFORMATINDEX_KEY, _videoFormatIndex);
-
-    emit videoFormatIndexChanged(_videoFormatIndex);
 }
 
 void AppSettings::setCalibrationFile(QString calibrationFile)
@@ -135,8 +137,6 @@ void AppSettings::setCalibrationFile(QString calibrationFile)
 
     QSettings settings;
     settings.setValue(CALIBRATIONFILE_KEY, _calibrationFile);
-
-    emit calibrationFileChanged(_calibrationFile);
 }
 
 void AppSettings::setCameraPipePath(QString newPath)
@@ -148,8 +148,6 @@ void AppSettings::setCameraPipePath(QString newPath)
 
     QSettings settings;
     settings.setValue(CAMERA_PIPE_PATH_KEY, newPath);
-
-    emit cameraPipePathChanged(newPath);
 }
 
 void AppSettings::setRobotPipesPath(QString newPath)
@@ -161,6 +159,19 @@ void AppSettings::setRobotPipesPath(QString newPath)
 
     QSettings settings;
     settings.setValue(ROBOT_PIPES_PATH_KEY, newPath);
+}
 
-    emit robotPipesPathChanged(newPath);
+void AppSettings::setRobot2Marker(QMap<QByteArray, int> values)
+{
+    if (_robot2Marker == values)
+        return;
+
+    _robot2Marker = values;
+
+    QSettings settings;
+    QMap<QString, QVariant> r2m;
+    for (auto it = _robot2Marker.cbegin(); it != _robot2Marker.cend(); ++it) {
+        r2m.insert(QString::fromLatin1(it.key()), QVariant(it.value()));
+    }
+    settings.setValue(ROBOT_2_MARKER_KEY, r2m);
 }

@@ -28,6 +28,8 @@ struct Robot::Data {
         : id(id)
         , address(address)
         , port(port)
+        , batteryVoltage(0.0f)
+        , markerId(-1)
     {
     }
 
@@ -35,6 +37,7 @@ struct Robot::Data {
     const QHostAddress address;
     const int port;
     float batteryVoltage;
+    int markerId;
     QElapsedTimer lastDiscoveryTime;
     QUdpSocket sendSocket;
 };
@@ -67,6 +70,25 @@ QString Robot::url() const
 float Robot::batteryVoltage() const
 {
     return _d->batteryVoltage;
+}
+
+bool Robot::hasMarkerId() const
+{
+    return _d->markerId >= 0;
+}
+
+int Robot::markerId() const
+{
+    return _d->markerId;
+}
+
+void Robot::setMarkerId(int newId)
+{
+    if (_d->markerId == newId)
+        return;
+
+    _d->markerId = newId;
+    emit markerIdChanged(_d->markerId);
 }
 
 void Robot::discoveryMessageReceived(float batteryVoltage)

@@ -23,6 +23,7 @@ class Robot : public QObject {
     Q_PROPERTY(QString id READ idString CONSTANT)
     Q_PROPERTY(QString url READ url CONSTANT)
     Q_PROPERTY(float batteryVoltage READ batteryVoltage NOTIFY batteryVoltageChanged)
+    Q_PROPERTY(int markerId READ markerId WRITE setMarkerId NOTIFY markerIdChanged)
 
 public:
     Robot(QByteArray id, QHostAddress address, int port, QObject* parent = nullptr);
@@ -34,6 +35,10 @@ public:
 
     float batteryVoltage() const;
 
+    bool hasMarkerId() const;
+    int markerId() const;
+    void setMarkerId(int newId = -1);
+
     void discoveryMessageReceived(float batteryVoltage);
     bool hasConnectionTimedOut() const;
 
@@ -42,6 +47,7 @@ public:
 
 signals:
     void batteryVoltageChanged();
+    void markerIdChanged(int newId);
 
 private:
     void setBatteryVoltage(float newVoltage);    

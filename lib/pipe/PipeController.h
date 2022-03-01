@@ -20,6 +20,7 @@
 
 class Robot;
 class RobotCommandPipe;
+class RobotCameraPipe;
 
 class PipeController : public QObject {
     Q_OBJECT
@@ -27,7 +28,9 @@ class PipeController : public QObject {
     Q_PROPERTY(bool cameraPipeHasError READ cameraPipeHasError NOTIFY cameraPipeErrorChanged)
     Q_PROPERTY(QString cameraPipeErrorString READ cameraPipeErrorString NOTIFY cameraPipeErrorChanged)
     Q_PROPERTY(QString robotPipesPath READ robotPipesPath WRITE setRobotPipesPath NOTIFY robotPipesPathChanged)
-    Q_PROPERTY(QList<QObject*> robotCommandPipes READ robotCommandPipes NOTIFY robotCommandPipesChanged)
+    Q_PROPERTY(bool robotsConnected READ robotsConnected NOTIFY robotPipesChanged)
+    Q_PROPERTY(QList<QObject*> robotCommandPipes READ robotCommandPipes NOTIFY robotPipesChanged)
+    Q_PROPERTY(QList<QObject*> robotCameraPipes READ robotCameraPipes NOTIFY robotPipesChanged)
 
 public:
     explicit PipeController(QObject* parent = nullptr);
@@ -41,7 +44,9 @@ public:
     QString robotPipesPath() const;
     void setRobotPipesPath(QString newPath);
 
+    bool robotsConnected() const;
     QList<QObject*> robotCommandPipes() const;
+    QList<QObject*> robotCameraPipes() const;
 
 public slots:
     void sendCameraMessage(QByteArray serializedMarkers);
@@ -52,11 +57,12 @@ signals:
     void cameraPipePathChanged(QString newPath);
     void cameraPipeErrorChanged();
     void robotPipesPathChanged(QString newPath);
-    void robotCommandPipesChanged();
+    void robotPipesChanged();
 
 private:
     RobotCommandPipe* createRobotCommandPipe(Robot* robot);
-    void receiveRobotPipes();
+    RobotCameraPipe* createRobotCameraPipe(Robot* robot);
+    void receiveCommandsOnRobotPipes();
 
 private:
     struct Data;

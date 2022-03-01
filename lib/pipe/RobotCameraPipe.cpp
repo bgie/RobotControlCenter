@@ -14,33 +14,26 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-#include "RobotCommandPipe.h"
-#include "NonBlockingReceiverPipe.h"
+#include "RobotCameraPipe.h"
 #include "network/Robot.h"
 #include <QDir>
 
-RobotCommandPipe::RobotCommandPipe(QString path, Robot* robot, QObject* parent)
-    : NonBlockingReceiverPipe(path, parent)
+RobotCameraPipe::RobotCameraPipe(QString path, Robot* robot, QObject* parent)
+    : NonBlockingSenderPipe(path, parent)
     , _robot(robot)
 {
-    connect(this, &NonBlockingReceiverPipe::received, this, &RobotCommandPipe::sendCommand);
 }
 
-RobotCommandPipe::~RobotCommandPipe()
+RobotCameraPipe::~RobotCameraPipe()
 {
 }
 
-Robot* RobotCommandPipe::robot() const
+Robot* RobotCameraPipe::robot() const
 {
     return _robot;
 }
 
-QString RobotCommandPipe::generatePath(QString basePath, QByteArray id)
+QString RobotCameraPipe::generatePath(QString basePath, QByteArray id)
 {
-    return QDir(basePath).absoluteFilePath(QStringLiteral("robot-%1-cmd").arg(QString::fromLatin1(id)));
-}
-
-void RobotCommandPipe::sendCommand(QByteArray command)
-{
-    _robot->sendCommand(command.trimmed().toUpper());
+    return QDir(basePath).absoluteFilePath(QStringLiteral("robot-%1-cam").arg(QString::fromLatin1(id)));
 }
