@@ -50,7 +50,7 @@ Window {
                 }
                 Column {
                     MyLabel {
-                        text: "Game Mode"
+                        text: "Game mode"
                         font.pixelSize: Style.headerFontSize
                     }
                     MyLabel {

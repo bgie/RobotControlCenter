@@ -61,6 +61,7 @@ Button {
             verticalAlignment: Qt.AlignVCenter
             font.pixelSize: Style.headerFontSize
             color: foregroundInverted ? Style.black : Style.lightGray
+            transform: Translate { y: control.down ? buttonDownDistance : 0 }
         }
     }
     background: Rectangle {
