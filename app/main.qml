@@ -28,13 +28,13 @@ Window {
     width: 1400
     height: 1000
     visible: true
-    // visibility: Window.FullScreen
     title: qsTr("Robot Control Center")
     color: Style.darkerGray
 
     Item {
-        id: content
+        id: mainMenu
         anchors.fill: parent
+        visible: !gameScreen.active
 
         Column {
             anchors.centerIn: parent
@@ -65,87 +65,101 @@ Window {
                 sourceLight: "img/keyboard-white.png"
                 sourceDark: "img/keyboard-black.png"
                 text: "Python programming mode"
+                onClicked: {
+                    gameScreen.source = "PythonGameScreen.qml"
+                    gameScreen.active = true
+                }
             }
         }
+    }
+    Loader {
+        id: gameScreen
+        anchors.fill: parent
+        active: false
 
-        Row {
-            id: statusIcons
-            anchors.right: parent.right
-            anchors.bottom: parent.bottom
-            anchors.margins: Style.windowMargins
-            opacity: statusIconsMouseArea.containsMouse ? 1 : 0.4
-
-            MyStatusIcon {
-                source: "/img/camera-white.png"
-                showSubIcon: true
-                subIconSource: cameraController.connectPossible ? "/img/checkmark-white.png" : "/img/error-red.png"
-            }
-            MyStatusIcon {
-                source: "/img/gamepad-white.png"
-                subText: gamePadManager.count
-                showSubIcon: gamePadManager.count === 0
-            }
-            MyStatusIcon {
-                source: "/img/antenna-white.png"
-                showSubIcon: true
-                subIconSource: robotNetwork.connected ? "/img/checkmark-white.png" : "/img/error-red.png"
-            }
-            MyStatusIcon {
-                source: "/img/tank-white.png"
-                subText: robotNetwork.count
-                showSubIcon: robotNetwork.count === 0
-            }
+        Connections {
+            target: gameScreen.item
+            onExitClicked: gameScreen.active = false
         }
+    }
 
-        MouseArea {
-            id: statusIconsMouseArea
-            anchors.fill: statusIcons
-            hoverEnabled: true
-            onClicked: {
-                if (window.width < 1400)
-                    window.width = 1400
-                if (window.height < 1000)
-                    window.height = 1000
-                settingsDialog.active = true
-            }
+    Row {
+        id: statusIcons
+        anchors.right: parent.right
+        anchors.bottom: parent.bottom
+        anchors.margins: Style.windowMargins
+        opacity: statusIconsMouseArea.containsMouse ? 1 : 0.4
+
+        MyStatusIcon {
+            source: "/img/camera-white.png"
+            showSubIcon: true
+            subIconSource: cameraController.connectPossible ? "/img/checkmark-white.png" : "/img/error-red.png"
         }
+        MyStatusIcon {
+            source: "/img/gamepad-white.png"
+            subText: gamePadManager.count
+            showSubIcon: gamePadManager.count === 0
+        }
+        MyStatusIcon {
+            source: "/img/antenna-white.png"
+            showSubIcon: true
+            subIconSource: robotNetwork.connected ? "/img/checkmark-white.png" : "/img/error-red.png"
+        }
+        MyStatusIcon {
+            source: "/img/tank-white.png"
+            subText: robotNetwork.count
+            showSubIcon: robotNetwork.count === 0
+        }
+    }
+
+    MouseArea {
+        id: statusIconsMouseArea
+        anchors.fill: statusIcons
+        hoverEnabled: true
+        onClicked: {
+            if (window.width < 1400)
+                window.width = 1400
+            if (window.height < 1000)
+                window.height = 1000
+            settingsDialog.active = true
+        }
+    }
+
+    MyToolButton {
+        id: fullscreenButton
+        anchors.right: closeButton.left
+        anchors.top: closeButton.top
+        anchors.rightMargin: Style.mediumMargin
+        width: 64
+        height: 64
+        sourceLight: "img/fullscreen-white.png"
+        sourceDark: "img/fullscreen-black.png"
+
+        onClicked: {
+            window.visibility = Window.FullScreen
+            fullscreenButton.visible = false
+        }
+    }
+
+    Item {
+        id: closeButton
+        anchors.right: parent.right
+        anchors.top: parent.top
+        anchors.margins: Style.windowMargins
+
+        width: Style.toolButtonSize
+        height: Style.toolButtonSize
 
         MyToolButton {
-            id: fullscreenButton
-            anchors.right: closeButton.left
-            anchors.top: closeButton.top
-            anchors.rightMargin: Style.mediumMargin
-            width: 64
-            height: 64
-            sourceLight: "img/fullscreen-white.png"
-            sourceDark: "img/fullscreen-black.png"
-
-            onClicked: {
-                window.visibility = Window.FullScreen
-                fullscreenButton.visible = false
-            }
-        }
-
-        Item {
-            id: closeButton
-            anchors.right: parent.right
-            anchors.top: parent.top
-            anchors.margins: Style.windowMargins
-
-            width: Style.toolButtonSize
-            height: Style.toolButtonSize
-
-            MyToolButton {
-                anchors.centerIn: parent
-                width: 48
-                height: 48
-                sourceLight: "img/x-white.png"
-                sourceDark: "img/x-red.png"
-                imageMargins: 4
-                backgroundColor: "#600000"
-                radius: 32
-                onClicked: window.close()
-            }
+            anchors.centerIn: parent
+            width: 48
+            height: 48
+            sourceLight: "img/x-white.png"
+            sourceDark: "img/x-red.png"
+            imageMargins: 4
+            backgroundColor: "#600000"
+            radius: 32
+            onClicked: window.close()
         }
     }
 

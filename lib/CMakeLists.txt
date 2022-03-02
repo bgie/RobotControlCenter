@@ -45,6 +45,7 @@ add_library(lib
   pipe/RobotCommandPipe.cpp
   pipe/RobotCameraPipe.cpp
   util/FactoryMethod.cpp
+  game/PythonGameMode.cpp
 )
 
 target_include_directories(lib PUBLIC .)

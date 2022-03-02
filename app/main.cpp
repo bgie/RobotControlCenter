@@ -21,6 +21,7 @@
 #include "aruco/MarkerTracker.h"
 #include "camera/CameraController.h"
 #include "camera/CameraManager.h"
+#include "game/PythonGameMode.h"
 #include "joystick/GamePad.h"
 #include "joystick/GamePadManager.h"
 #include "joystick/JoystickManager.h"
@@ -57,6 +58,7 @@ int main(int argc, char *argv[])
     qmlRegisterUncreatableType<PipeController>("RobotControlCenter", 1, 0, "PipeController", noCreateQml);
     qmlRegisterUncreatableType<RobotCommandPipe>("RobotControlCenter", 1, 0, "RobotCommandPipe", noCreateQml);
     qmlRegisterUncreatableType<RobotCameraPipe>("RobotControlCenter", 1, 0, "RobotCameraPipe", noCreateQml);
+    qmlRegisterUncreatableType<PythonGameMode>("RobotControlCenter", 1, 0, "PythonGameMode", noCreateQml);
 
     AppSettings settings;
 
@@ -113,9 +115,13 @@ int main(int argc, char *argv[])
     FactoryMethod settingsControllerFactory([&]() -> QObject* {
         return new SettingsController(tracker);
     });
+    FactoryMethod pythonGameModeFactory([&]() -> QObject* {
+        return new PythonGameMode(pipeController, cameraController, tracker);
+    });
 
     QQmlApplicationEngine engine;
     engine.rootContext()->setContextProperty(QStringLiteral("settingsControllerFactory"), &settingsControllerFactory);
+    engine.rootContext()->setContextProperty(QStringLiteral("pythonGameModeFactory"), &pythonGameModeFactory);
     engine.rootContext()->setContextProperty(QStringLiteral("gamePadManager"), &gamePadManger);
     engine.rootContext()->setContextProperty(QStringLiteral("cameraManager"), &cameraManager);
     engine.rootContext()->setContextProperty(QStringLiteral("cameraController"), &cameraController);
