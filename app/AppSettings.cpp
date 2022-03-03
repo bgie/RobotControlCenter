@@ -26,6 +26,7 @@ const QString CALIBRATIONFILE_KEY(QStringLiteral("CalibrationFile"));
 const QString CAMERA_PIPE_PATH_KEY(QStringLiteral("CameraPipePath"));
 const QString ROBOT_PIPES_PATH_KEY(QStringLiteral("RobotPipesPath"));
 const QString ROBOT_2_MARKER_KEY(QStringLiteral("Robot2Marker"));
+const QString WORLD_EDGE_KEY(QStringLiteral("WorldEdge"));
 }
 
 AppSettings::AppSettings(QObject *parent) : QObject(parent)
@@ -41,6 +42,10 @@ AppSettings::AppSettings(QObject *parent) : QObject(parent)
     auto r2m = settings.value(ROBOT_2_MARKER_KEY).toMap();
     for (auto it = r2m.cbegin(); it != r2m.cend(); ++it) {
         _robot2Marker.insert(it.key().toLatin1(), it.value().toInt());
+    }
+    auto edge = settings.value(WORLD_EDGE_KEY).toList();
+    foreach (auto p, edge) {
+        _worldEdge << p.toPointF();
     }
 }
 
@@ -82,6 +87,11 @@ QString AppSettings::robotPipesPath() const
 QMap<QByteArray, int> AppSettings::robot2Marker() const
 {
     return _robot2Marker;
+}
+
+QPolygonF AppSettings::worldEdge() const
+{
+    return _worldEdge;
 }
 
 void AppSettings::setCameraDevice(QString cameraDevice)
@@ -174,4 +184,18 @@ void AppSettings::setRobot2Marker(QMap<QByteArray, int> values)
         r2m.insert(QString::fromLatin1(it.key()), QVariant(it.value()));
     }
     settings.setValue(ROBOT_2_MARKER_KEY, r2m);
+}
+
+void AppSettings::setWorldEdge(QPolygonF newEdge)
+{
+    if (_worldEdge == newEdge)
+        return;
+
+    _worldEdge = newEdge;
+    QSettings settings;
+    QVariantList points;
+    foreach (const auto& p, newEdge) {
+        points << p;
+    }
+    settings.setValue(WORLD_EDGE_KEY, points);
 }

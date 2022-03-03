@@ -45,6 +45,7 @@ add_library(lib
   pipe/RobotCommandPipe.cpp
   pipe/RobotCameraPipe.cpp
   util/FactoryMethod.cpp
+  game/WorldEdge.cpp
   game/PythonGameMode.cpp
 )
 

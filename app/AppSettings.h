@@ -17,6 +17,7 @@
 #pragma once
 #include <QMap>
 #include <QObject>
+#include <QPolygonF>
 
 class AppSettings : public QObject {
     Q_OBJECT
@@ -32,6 +33,7 @@ public:
     QString cameraPipePath() const;
     QString robotPipesPath() const;
     QMap<QByteArray, int> robot2Marker() const;
+    QPolygonF worldEdge() const;
 
 public slots:
     void setCameraDevice(QString cameraDevice);
@@ -42,6 +44,7 @@ public slots:
     void setCameraPipePath(QString newPath);
     void setRobotPipesPath(QString newPath);
     void setRobot2Marker(QMap<QByteArray, int> values);
+    void setWorldEdge(QPolygonF newEdge);
 
 private:
     QString _cameraDevice;
@@ -52,4 +55,5 @@ private:
     QString _cameraPipePath;
     QString _robotPipesPath;
     QMap<QByteArray, int> _robot2Marker;
+    QPolygonF _worldEdge;
 };
