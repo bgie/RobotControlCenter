@@ -18,7 +18,7 @@
 #include "ImageItem.h"
 #include "aruco/Aruco.h"
 #include "aruco/CalibrationController.h"
-#include "aruco/MarkerTracker.h"
+#include "aruco/SceneTracker.h"
 #include "camera/CameraController.h"
 #include "camera/CameraManager.h"
 #include "game/PythonGameMode.h"
@@ -89,11 +89,11 @@ int main(int argc, char *argv[])
     QObject::connect(&calibrationController, &CalibrationController::calibrationFileChanged, &settings, &AppSettings::setCalibrationFile);
 
     QThread trackingThread;
-    MarkerTracker tracker(aruco);
+    SceneTracker tracker(aruco);
     tracker.moveToThread(&trackingThread);
     trackingThread.start(QThread::TimeCriticalPriority);
-    QObject::connect(&cameraController, &CameraController::frameReadAsync, &tracker, &MarkerTracker::processFrame, Qt::QueuedConnection);
-    QObject::connect(&cameraController, &CameraController::framesPerSecondChanged, &tracker, &MarkerTracker::setFramesPerSecond, Qt::QueuedConnection);
+    QObject::connect(&cameraController, &CameraController::frameReadAsync, &tracker, &SceneTracker::processFrame, Qt::QueuedConnection);
+    QObject::connect(&cameraController, &CameraController::framesPerSecondChanged, &tracker, &SceneTracker::setFramesPerSecond, Qt::QueuedConnection);
     tracker.setFramesPerSecond(cameraController.framesPerSecond());
 
     RobotNetwork robotNetwork;
@@ -105,7 +105,7 @@ int main(int argc, char *argv[])
     pipeController.setRobotPipesPath(settings.robotPipesPath());
     QObject::connect(&pipeController, &PipeController::cameraPipePathChanged, &settings, &AppSettings::setCameraPipePath);
     QObject::connect(&pipeController, &PipeController::robotPipesPathChanged, &settings, &AppSettings::setRobotPipesPath);
-    QObject::connect(&tracker, &MarkerTracker::markersChanged, &pipeController, &PipeController::sendCameraMessage, Qt::QueuedConnection);
+    QObject::connect(&tracker, &SceneTracker::markersChanged, &pipeController, &PipeController::sendCameraMessage, Qt::QueuedConnection);
     foreach (Robot* r, robotNetwork.robots()) {
         pipeController.addRobot(r);
     }

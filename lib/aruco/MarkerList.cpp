@@ -14,27 +14,17 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-#pragma once
-#include <QObject>
+#include "MarkerList.h"
+#include <QVector>
 
-class PipeController;
-class CameraController;
-class SceneTracker;
-
-class PythonGameMode : public QObject
-{
-     Q_OBJECT
-public:
-    PythonGameMode(PipeController& pipes, CameraController& camera, SceneTracker& tracker, QObject* parent = nullptr);
-    virtual ~PythonGameMode() override;
-
-signals:
-
-private:
-    void onTrackerCameraFrameProcessed();
-
-private:
-    struct Data;
-    QScopedPointer<Data> _d;
+struct MarkerList::Data : public QSharedData {
 };
 
+MarkerList::MarkerList()
+    : _d(new Data())
+{
+}
+
+MarkerList::~MarkerList()
+{
+}

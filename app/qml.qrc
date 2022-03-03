@@ -46,5 +46,7 @@
         <file>img/fullscreen-black.png</file>
         <file>controls/MyIconTextButton.qml</file>
         <file>PythonGameScreen.qml</file>
+        <file>img/world-white.png</file>
+        <file>img/world-black.png</file>
     </qresource>
 </RCC>

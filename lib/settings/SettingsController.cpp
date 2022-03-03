@@ -15,15 +15,15 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 #include "SettingsController.h"
-#include "aruco/MarkerTracker.h"
 #include "aruco/Plane3d.h"
+#include "aruco/SceneTracker.h"
 #include <QTimer>
 #include <math.h>
 
 #define REFRESH_MARKERINFO_INTERVAL_MSEC 500
 
 struct SettingsController::Data {
-    Data(MarkerTracker& tracker)
+    Data(SceneTracker& tracker)
         : tracker(tracker)
         , hasPlane(false)
         , planeAlpha(0.0f)
@@ -31,7 +31,7 @@ struct SettingsController::Data {
     {
     }
 
-    MarkerTracker& tracker;
+    SceneTracker& tracker;
     QImage image;
     bool hasPlane;
     float planeAlpha;
@@ -40,11 +40,11 @@ struct SettingsController::Data {
     QString serializedMarkers;
 };
 
-SettingsController::SettingsController(MarkerTracker& tracker, QObject* parent)
+SettingsController::SettingsController(SceneTracker& tracker, QObject* parent)
     : QObject(parent)
     , _d(new Data(tracker))
 {
-    QObject::connect(&tracker, &MarkerTracker::frameProcessed, this, &SettingsController::updateArucoImage);
+    QObject::connect(&tracker, &SceneTracker::frameProcessed, this, &SettingsController::updateArucoImage);
 
     auto timer = new QTimer(this);
     connect(timer, &QTimer::timeout, this, &SettingsController::updateMarkerInfo);

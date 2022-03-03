@@ -15,39 +15,27 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 #pragma once
-#include "Aruco.h"
-#include <QMap>
-#include <QMutex>
-#include <QObject>
+#include <QPointF>
+#include <QScopedPointer>
+#include <QVector3D>
 
-class Marker;
-
-class MarkerTracker : public QObject {
-    Q_OBJECT
-    Q_PROPERTY(float framesPerSecond READ framesPerSecond WRITE setFramesPerSecond NOTIFY framesPerSecondChanged)
-
+class MarkerTracker
+{
 public:
-    explicit MarkerTracker(Aruco& aruco, QObject* parent = nullptr);
-    virtual ~MarkerTracker() override;
+    MarkerTracker();
+    ~MarkerTracker();
 
-    float framesPerSecond() const;
-    void setFramesPerSecond(float newValue);
+    void setPositionRotation(const QPointF& screenPos, const QVector3D& newPos, float newAngle, float elapsedMsecs);
+    void setNotDetected(float elapsedMsecs);
 
-    void processFrame(QImage image);
+    bool isDetected() const;
+    QPointF screenPos() const;
+    QVector3D pos() const;
+    float angle() const;
 
-    QImage image() const;
-    QImage annotatedImage() const;
-    QList<QVector3D> points() const;
-    QList<int> ids() const;
-    QByteArray serializedMarkers() const;
-
-signals:
-    void framesPerSecondChanged(float framesPerSecond);
-    void frameProcessed();
-    void markersChanged(QByteArray serializedMarkers);
-
-private:
-    QByteArray serializedMarkersImpl() const;
+    bool isDetectedFiltered() const;
+    QVector3D filteredPos() const;
+    float filteredAngle() const;
 
 private:
     struct Data;

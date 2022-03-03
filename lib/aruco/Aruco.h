@@ -38,7 +38,7 @@ public:
 
     void setCameraMatrix(const cv::Mat& cameraMatrix, const cv::Mat& distCoeffs);
     Markers detectMarkers(QImage image) const;
-    std::vector<float> calc2dAngles(const Markers& markers) const;
+    float calc2dAngle(const cv::Vec3d& rvec, const cv::Vec3d& tvec) const;
     void drawMarkers(QImage& image, const Markers& markers) const;
 
     void generateMarkerImageFiles(QString path) const;

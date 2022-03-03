@@ -57,6 +57,13 @@ MyDialog {
         }
 
         MyNavigationButton {
+            id: worldButton
+            navigationBar: navigationBar
+            sourceLight: "img/world-white.png"
+            sourceDark: "img/world-black.png"
+        }
+
+        MyNavigationButton {
             id: gamepadButton
             navigationBar: navigationBar
             sourceLight: "img/gamepad-white.png"
@@ -313,6 +320,61 @@ MyDialog {
                     MyLabel {
                         text: controller.planeBeta.toFixed(1)
                         font.pixelSize: 48
+                    }
+                }
+            }
+
+            Item {
+                Layout.fillHeight: true
+                Layout.fillWidth: true
+
+                ImageItem {
+                    anchors.fill: parent
+                    image: controller.arucoImage
+                    visible: hasImage
+                }
+
+                MyLabel {
+                    anchors.left: parent.left
+                    anchors.top: parent.top
+                    font.pixelSize: Style.tinyFontSize
+                    text: controller.serializedMarkers
+                }
+            }
+        }
+
+        ColumnLayout { // World panel
+            anchors.fill: parent
+            anchors.margins: Style.largeMargin
+            visible: worldButton.selected
+            spacing: Style.largeMargin
+
+            GridLayout {
+                rows: 2
+                flow: GridLayout.TopToBottom
+
+                columnSpacing: Style.largeMargin
+                rowSpacing: Style.smallMargin
+
+                MyLabel {
+                    text: "Camera"
+                }
+                Row {
+                    Layout.leftMargin: Style.mediumMargin
+                    MyButton {
+                        id: startWorldCameraButton
+                        text: "Start"
+                        backgroundColor: Style.darkGray
+                        enabled: cameraController.canCameraStream && !cameraController.isCameraStreaming
+                        visible: !cameraController.isCameraStreaming
+                        onClicked: cameraController.startCameraStream()
+                    }
+                    MyButton {
+                        text: "Stop"
+                        backgroundColor: Style.darkGray
+                        visible: cameraController.isCameraStreaming
+                        onClicked: cameraController.stopCameraStream()
+                        width: startWorldCameraButton.width
                     }
                 }
             }

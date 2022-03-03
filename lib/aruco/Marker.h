@@ -15,27 +15,35 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 #pragma once
-#include <QScopedPointer>
 #include <QVector3D>
 
-class Marker
-{
+class Marker {
 public:
-    explicit Marker(int id);
-    ~Marker();
+    explicit Marker(int id = -1,
+        bool isDetected = false,
+        QPointF screenPos = QPointF(),
+        QVector3D pos = QVector3D(),
+        float angle = 0,
+        bool isDetectedFiltered = false,
+        QVector3D filteredPos = QVector3D(),
+        float filteredAngle = 0);
 
-    void setPositionRotation(const QVector3D& newPos, float newAngle, float elapsedMsecs);
-    void setNotDetected(float elapsedMsecs);
-
-    bool isDetected() const;
-    QVector3D pos() const;
-    float angle() const;
-
-    bool isDetectedFiltered() const;
-    QVector3D filteredPos() const;
-    float filteredAngle() const;
+    int id() const { return _id; }
+    bool isDetected() const { return _isDetected; }
+    QPointF screenPos() const { return _screenPos; }
+    QVector3D pos() const { return _pos; }
+    float angle() const { return _angle; }
+    bool isDetectedFiltered() const { return _isDetectedFiltered; }
+    QVector3D filteredPos() const { return _filteredPos; }
+    float filteredAngle() const { return _filteredAngle; }
 
 private:
-    struct Data;
-    QScopedPointer<Data> _d;
+    int _id;
+    bool _isDetected;
+    QPointF _screenPos;
+    QVector3D _pos;
+    float _angle;
+    bool _isDetectedFiltered;
+    QVector3D _filteredPos;
+    float _filteredAngle;
 };

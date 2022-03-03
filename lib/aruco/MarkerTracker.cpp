@@ -15,159 +15,91 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 #include "MarkerTracker.h"
-#include "Marker.h"
-#include <QBuffer>
-#include <QDebug>
-#include <QImage>
-#include <QMutexLocker>
+#include "kalman/KalmanTracker1D.h"
+#include "kalman/KalmanTracker3D.h"
+#include "kalman/RotationCounter.h"
+#include <math.h>
 
 struct MarkerTracker::Data {
-    Data(Aruco& aruco)
-        : aruco(aruco)
-        , framesPerSecond(1.0f)
+    Data()
+        : posFilter(KalmanTracker3D::movingRobotParams())
+        , angleFilter(KalmanTracker1D::movingRobotParams())
     {
     }
 
-    Aruco& aruco;
-    QMutex mutex;
-    QImage image;
-    Aruco::Markers markers;
-    QMap<int, Marker*> idToMarker;
-    float framesPerSecond;
+    bool isDetected;
+    QVector3D pos;
+    float angle;
+    KalmanTracker3D posFilter;
+    RotationCounter rotationCounter;
+    KalmanTracker1D angleFilter;
+    QPointF screenPos;
 };
 
-MarkerTracker::MarkerTracker(Aruco& aruco, QObject* parent)
-    : QObject(parent)
-    , _d(new Data(aruco))
+MarkerTracker::MarkerTracker()
+    : _d(new Data())
 {
 }
 
 MarkerTracker::~MarkerTracker()
 {
-    qDeleteAll(_d->idToMarker.values());
 }
 
-float MarkerTracker::framesPerSecond() const
+void MarkerTracker::setPositionRotation(const QPointF& screenPos, const QVector3D& newPos, float newAngle, float elapsedMsecs)
 {
-    QMutexLocker lock(&_d->mutex);
-    return _d->framesPerSecond;
+    _d->screenPos = screenPos;
+    _d->pos = newPos;
+    _d->posFilter.predict(elapsedMsecs);
+    _d->posFilter.update(newPos);
+
+    _d->angleFilter.predict(elapsedMsecs);
+    _d->rotationCounter.updateAngle(newAngle);
+    _d->angle = _d->rotationCounter.angleWithRotations();
+    _d->angleFilter.update(_d->rotationCounter.angleWithRotations());
+
+    _d->isDetected = true;
 }
 
-void MarkerTracker::setFramesPerSecond(float newValue)
+void MarkerTracker::setNotDetected(float elapsedMsecs)
 {
-    QMutexLocker lock(&_d->mutex);
-    if (qFuzzyCompare(_d->framesPerSecond, newValue))
-        return;
+    _d->posFilter.predict(elapsedMsecs);
+    _d->angleFilter.predict(elapsedMsecs);
 
-    _d->framesPerSecond = newValue;
-    lock.unlock();
-    emit framesPerSecondChanged(newValue);
+    _d->isDetected = false;
 }
 
-void MarkerTracker::processFrame(QImage image)
+bool MarkerTracker::isDetected() const
 {
-    auto markers = _d->aruco.detectMarkers(image);
-    auto angles = _d->aruco.calc2dAngles(markers);
-
-    QMutexLocker lock(&_d->mutex);
-    const float msecsPerFrame = 1000.0f / _d->framesPerSecond;
-    QSet<int> foundIds;
-    bool newIdAdded = false;
-    for (size_t i = 0; i < markers.ids.size(); ++i) {
-        const int id = markers.ids.at(i);
-        foundIds << id;
-
-        if (!_d->idToMarker.contains(id)) {
-            newIdAdded = true;
-            _d->idToMarker[id] = new Marker(id);
-        }
-        const auto& tvec = markers.tvecs.at(i);
-        const float angle = angles.at(i);
-        _d->idToMarker[id]->setPositionRotation(QVector3D(tvec[0], tvec[1], tvec[2]), angle, msecsPerFrame);
-    }
-    auto missingIds = _d->idToMarker.keys().toSet() - foundIds;
-    for (auto id : missingIds) {
-        _d->idToMarker[id]->setNotDetected(msecsPerFrame);
-    }
-
-    _d->image = image;
-    _d->markers = markers;
-
-    auto serialized = serializedMarkersImpl();
-
-    lock.unlock();
-    emit markersChanged(serialized);
-    emit frameProcessed();
+    return _d->isDetected;
 }
 
-QImage MarkerTracker::image() const
+QPointF MarkerTracker::screenPos() const
 {
-    return _d->image;
+    return _d->screenPos;
 }
 
-QImage MarkerTracker::annotatedImage() const
+QVector3D MarkerTracker::pos() const
 {
-    QMutexLocker lock(&_d->mutex);
-    QImage img = _d->image.copy();
-    Aruco::Markers markers = _d->markers;
-    lock.unlock();
-
-    _d->aruco.drawMarkers(img, markers);
-
-    return img;
+    return _d->pos;
 }
 
-QList<QVector3D> MarkerTracker::points() const
+float MarkerTracker::angle() const
 {
-    QList<QVector3D> result;
-    QMutexLocker lock(&_d->mutex);
-    for (auto it = _d->idToMarker.cbegin(); it != _d->idToMarker.cend(); ++it) {
-        if (it.value()->isDetectedFiltered()) {
-            result << it.value()->filteredPos();
-        }
-    }
-    return result;
+    return _d->angle;
 }
 
-QList<int> MarkerTracker::ids() const
+bool MarkerTracker::isDetectedFiltered() const
 {
-    QList<int> result;
-    QMutexLocker lock(&_d->mutex);
-    for (auto it = _d->idToMarker.cbegin(); it != _d->idToMarker.cend(); ++it) {
-        if (it.value()->isDetectedFiltered()) {
-            result << it.key();
-        }
-    }
-    return result;
+    return _d->posFilter.hasPosition() && _d->angleFilter.hasPosition();
 }
 
-QByteArray MarkerTracker::serializedMarkers() const
+QVector3D MarkerTracker::filteredPos() const
 {
-    QMutexLocker lock(&_d->mutex);
-    return serializedMarkersImpl();
+    return _d->posFilter.position();
 }
 
-QByteArray MarkerTracker::serializedMarkersImpl() const
+float MarkerTracker::filteredAngle() const
 {
-    QBuffer buffer;
-    buffer.open(QIODevice::WriteOnly);
-    QTextStream out(&buffer);
-    bool firstItem = true;
-
-    for (auto it = _d->idToMarker.cbegin(); it != _d->idToMarker.cend(); ++it) {
-        if (it.value()->isDetectedFiltered()) {
-            if (firstItem) {
-                firstItem = false;
-            } else {
-                out << ";";
-            }
-            out << "id:" << it.key()
-                << " x:" << static_cast<int>(qRound(it.value()->filteredPos().x()))
-                << " y:" << static_cast<int>(qRound(it.value()->filteredPos().y()))
-                << " a:" << static_cast<int>(qRound(it.value()->filteredAngle() * 180 / M_PI));
-        }
-    }
-    out << "\n";
-    out.flush();
-    return buffer.buffer();
+    double a = _d->angleFilter.position();
+    return a - (2 * M_PI * floor(a / (2 * M_PI)));
 }

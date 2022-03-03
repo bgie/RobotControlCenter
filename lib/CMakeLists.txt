@@ -19,9 +19,11 @@ cmake_minimum_required(VERSION 3.14)
 add_library(lib
   aruco/CalibrationController.cpp
   aruco/Aruco.cpp
-  aruco/Marker.cpp
   aruco/MarkerTracker.cpp
+  aruco/SceneTracker.cpp
   aruco/Plane3d.cpp
+  aruco/MarkerList.cpp
+  aruco/Marker.cpp
   kalman/RotationCounter.cpp
   kalman/KalmanTracker1D.cpp
   kalman/KalmanTracker3D.cpp

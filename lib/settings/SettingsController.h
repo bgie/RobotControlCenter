@@ -19,7 +19,7 @@
 #include <QObject>
 #include <QScopedPointer>
 
-class MarkerTracker;
+class SceneTracker;
 
 class SettingsController : public QObject {
     Q_OBJECT
@@ -31,7 +31,7 @@ class SettingsController : public QObject {
     Q_PROPERTY(QString serializedMarkers READ serializedMarkers NOTIFY serializedMarkersChanged)
 
 public:
-    explicit SettingsController(MarkerTracker& tracker, QObject* parent = nullptr);
+    explicit SettingsController(SceneTracker& tracker, QObject* parent = nullptr);
     virtual ~SettingsController() override;
 
     QImage arucoImage() const;

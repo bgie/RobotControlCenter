@@ -59,19 +59,12 @@ Aruco::Markers Aruco::detectMarkers(QImage image) const
     return result;
 }
 
-std::vector<float> Aruco::calc2dAngles(const Aruco::Markers& markers) const
+float Aruco::calc2dAngle(const cv::Vec3d& rvec, const cv::Vec3d& tvec) const
 {
-    std::vector<cv::Point3f> axesPoints;
-    axesPoints.push_back(cv::Point3f(0, 0, 0));
-    axesPoints.push_back(cv::Point3f(1, 0, 0));
-    std::vector<float> results;
-
-    for (uint i = 0; i < markers.rvecs.size(); ++i) {
-        std::vector<cv::Point2f> proj;
-        projectPoints(axesPoints, markers.rvecs.at(i), markers.tvecs.at(i), _d->cameraMatrix, _d->distCoeffs, proj);
-        results.push_back(atan2(proj.at(1).y - proj.at(0).y, proj.at(1).x - proj.at(0).x));
-    }
-    return results;
+    static std::vector<cv::Point3f> axesPoints({ cv::Point3f(0, 0, 0), cv::Point3f(1, 0, 0) });
+    std::vector<cv::Point2f> proj;
+    projectPoints(axesPoints, rvec, tvec, _d->cameraMatrix, _d->distCoeffs, proj);
+    return atan2(proj.at(1).y - proj.at(0).y, proj.at(1).x - proj.at(0).x);
 }
 
 void Aruco::drawMarkers(QImage& image, const Aruco::Markers& markers) const

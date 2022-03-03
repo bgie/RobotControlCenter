@@ -15,26 +15,16 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 #pragma once
-#include <QObject>
+#include <QExplicitlySharedDataPointer>
 
-class PipeController;
-class CameraController;
-class SceneTracker;
-
-class PythonGameMode : public QObject
+class MarkerList
 {
-     Q_OBJECT
 public:
-    PythonGameMode(PipeController& pipes, CameraController& camera, SceneTracker& tracker, QObject* parent = nullptr);
-    virtual ~PythonGameMode() override;
-
-signals:
-
-private:
-    void onTrackerCameraFrameProcessed();
+    MarkerList();
+    ~MarkerList();
 
 private:
     struct Data;
-    QScopedPointer<Data> _d;
+    QExplicitlySharedDataPointer<Data> _d;
 };
 

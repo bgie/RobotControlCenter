@@ -82,6 +82,18 @@ bool WorldEdge::isInside(QPointF pos) const
     return _d->points.containsPoint(pos, Qt::OddEvenFill);
 }
 
+QRectF WorldEdge::bounds() const
+{
+    return _d->points.boundingRect();
+}
+
+QRectF WorldEdge::boundsWithMargin(float ratio) const
+{
+    QRectF result = _d->points.boundingRect();
+    QSizeF margin = result.size() * ratio;
+    return result.adjusted(-margin.width(), -margin.height(), +margin.width(), +margin.height());
+}
+
 void WorldEdge::sortPoints(QPolygonF& points)
 {
     if (points.size() > 1) {

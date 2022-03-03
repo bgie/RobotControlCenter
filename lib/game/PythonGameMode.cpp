@@ -15,12 +15,12 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 #include "PythonGameMode.h"
-#include "aruco/MarkerTracker.h"
+#include "aruco/SceneTracker.h"
 #include "camera/CameraController.h"
 #include "pipe/PipeController.h"
 
 struct PythonGameMode::Data {
-    Data(PipeController& pipes, CameraController& camera, MarkerTracker& tracker)
+    Data(PipeController& pipes, CameraController& camera, SceneTracker& tracker)
         : pipes(pipes)
         , camera(camera)
         , tracker(tracker)
@@ -29,14 +29,14 @@ struct PythonGameMode::Data {
 
     PipeController& pipes;
     CameraController& camera;
-    MarkerTracker& tracker;
+    SceneTracker& tracker;
 };
 
-PythonGameMode::PythonGameMode(PipeController& pipes, CameraController& camera, MarkerTracker& tracker, QObject* parent)
+PythonGameMode::PythonGameMode(PipeController& pipes, CameraController& camera, SceneTracker& tracker, QObject* parent)
     : QObject(parent)
     , _d(new Data(pipes, camera, tracker))
 {
-    connect(&tracker, &MarkerTracker::frameProcessed, this, &PythonGameMode::onTrackerCameraFrameProcessed);
+    connect(&tracker, &SceneTracker::frameProcessed, this, &PythonGameMode::onTrackerCameraFrameProcessed);
 
     _d->camera.startCameraStream();
 }

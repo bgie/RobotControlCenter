@@ -35,6 +35,8 @@ public:
     bool removeAt(int index);
 
     bool isInside(QPointF pos) const;
+    QRectF bounds() const;
+    QRectF boundsWithMargin(float ratio = 0.125) const;
 
 signals:
     void pointsChanged();
