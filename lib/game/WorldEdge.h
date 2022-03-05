@@ -19,27 +19,35 @@
 #include <QPolygonF>
 #include <QVariantList>
 
+// the edge of the world, defined on a 2d plane with a fixed z position in 3d
 class WorldEdge : public QObject {
     Q_OBJECT
-    Q_PROPERTY(QVariantList points READ pointsVariantList NOTIFY pointsChanged)
+    Q_PROPERTY(int count READ count NOTIFY pointsChanged)
+    Q_PROPERTY(float z READ z WRITE setZ NOTIFY zChanged)
 
 public:
     explicit WorldEdge(QObject* parent = nullptr);
     virtual ~WorldEdge() override;
 
-    QVariantList pointsVariantList() const;
+    int count() const;
     QPolygonF points() const;
     void setPoints(QPolygonF newPoints);
 
-    void addPoint(QPointF pos);
+    void addPoint(float x, float y, float z);
     bool removeAt(int index);
 
     bool isInside(QPointF pos) const;
     QRectF bounds() const;
     QRectF boundsWithMargin(float ratio = 0.125) const;
 
+    float z() const;
+    void setZ(float newValue);
+
+    Q_INVOKABLE void reset();
+
 signals:
     void pointsChanged();
+    void zChanged(float newValue);
 
 private:
     void sortPoints(QPolygonF& points);

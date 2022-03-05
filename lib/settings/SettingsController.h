@@ -18,8 +18,11 @@
 #include <QImage>
 #include <QObject>
 #include <QScopedPointer>
+#include <QVariantList>
 
 class SceneTracker;
+class WorldEdge;
+class Aruco;
 
 class SettingsController : public QObject {
     Q_OBJECT
@@ -28,10 +31,11 @@ class SettingsController : public QObject {
     Q_PROPERTY(float planeAlpha READ planeAlpha NOTIFY planeChanged)
     Q_PROPERTY(float planeBeta READ planeBeta NOTIFY planeChanged)
     Q_PROPERTY(QString markerIds READ markerIds NOTIFY markerIdsChanged)
+    Q_PROPERTY(QVariantList markerScreenPoints READ markerScreenPoints NOTIFY markerScreenPointsChanged)
     Q_PROPERTY(QString serializedMarkers READ serializedMarkers NOTIFY serializedMarkersChanged)
 
 public:
-    explicit SettingsController(SceneTracker& tracker, QObject* parent = nullptr);
+    SettingsController(SceneTracker& tracker, WorldEdge& worldEdge, Aruco& aruco, QObject* parent = nullptr);
     virtual ~SettingsController() override;
 
     QImage arucoImage() const;
@@ -41,12 +45,16 @@ public:
     float planeBeta() const;
 
     QString markerIds() const;
+    QVariantList markerScreenPoints() const;
     QString serializedMarkers() const;
+
+    Q_INVOKABLE void addPointToWorldEdge(float x, float y, float z);
 
 signals:
     void arucoImageChanged(QImage arucoImage);
     void planeChanged();
     void markerIdsChanged();
+    void markerScreenPointsChanged();
     void serializedMarkersChanged();
 
 private:

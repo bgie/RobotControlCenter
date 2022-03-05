@@ -22,6 +22,8 @@
 #include <opencv2/core/mat.hpp>
 #include <vector>
 
+class PolygonF;
+
 class Aruco : public QObject {
     Q_OBJECT
 
@@ -40,6 +42,7 @@ public:
     Markers detectMarkers(QImage image) const;
     float calc2dAngle(const cv::Vec3d& rvec, const cv::Vec3d& tvec) const;
     void drawMarkers(QImage& image, const Markers& markers) const;
+    void drawPolygon(QImage& image, const QPolygonF& polygon, float z);
 
     void generateMarkerImageFiles(QString path) const;
 

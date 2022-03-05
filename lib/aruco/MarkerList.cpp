@@ -15,16 +15,35 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 #include "MarkerList.h"
-#include <QVector>
-
-struct MarkerList::Data : public QSharedData {
-};
+#include <QBuffer>
+#include <QTextStream>
+#include <math.h>
 
 MarkerList::MarkerList()
-    : _d(new Data())
 {
 }
 
-MarkerList::~MarkerList()
+QByteArray MarkerList::serialize() const
 {
+    QBuffer buffer;
+    buffer.open(QIODevice::WriteOnly);
+    QTextStream out(&buffer);
+    bool firstItem = true;
+
+    for (auto it = this->cbegin(); it != this->cend(); ++it) {
+        if (it->isDetectedFiltered()) {
+            if (firstItem) {
+                firstItem = false;
+            } else {
+                out << ";";
+            }
+            out << "id:" << it->id()
+                << " x:" << static_cast<int>(qRound(it->filteredPos().x()))
+                << " y:" << static_cast<int>(qRound(it->filteredPos().y()))
+                << " a:" << static_cast<int>(qRound(it->filteredAngle() * 180 / M_PI));
+        }
+    }
+    out << "\n";
+    out.flush();
+    return buffer.buffer();
 }

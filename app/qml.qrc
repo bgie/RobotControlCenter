@@ -48,5 +48,8 @@
         <file>PythonGameScreen.qml</file>
         <file>img/world-white.png</file>
         <file>img/world-black.png</file>
+        <file>img/plus-white.png</file>
+        <file>img/plus-black.png</file>
+        <file>img/plus-yellow.png</file>
     </qresource>
 </RCC>

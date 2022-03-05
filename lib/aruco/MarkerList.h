@@ -15,16 +15,12 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 #pragma once
-#include <QExplicitlySharedDataPointer>
+#include "Marker.h"
+#include <QVector>
 
-class MarkerList
-{
+class MarkerList : public QVector<Marker> {
 public:
-    MarkerList();
-    ~MarkerList();
+    explicit MarkerList();
 
-private:
-    struct Data;
-    QExplicitlySharedDataPointer<Data> _d;
+    QByteArray serialize() const;
 };
-

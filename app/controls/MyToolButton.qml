@@ -23,7 +23,7 @@ Button {
     property alias sourceDark: darkImage.source
     property alias sourceLight: lightImage.source
     property int imageMargins: 0
-    property int imageBottomMargin
+    property int imageBottomMargin: 0
     property int buttonDownDistance: 3
     property color backgroundColor: Style.darkerGray
     property bool selected: false

@@ -75,6 +75,49 @@ void Aruco::drawMarkers(QImage& image, const Aruco::Markers& markers) const
     }
 }
 
+void Aruco::drawPolygon(QImage& image, const QPolygonF& polygon, float z)
+{
+    static cv::Vec3d nullVector(0.0f, 0.0f, 0.0f);
+    static const int width = 3;
+    static const cv::Scalar color(255, 255, 0);
+
+    const int count = polygon.size();
+    if (count > 1) {
+        std::vector<cv::Point3f> points;
+        foreach (const QPointF& p, polygon) {
+            points.push_back(cv::Point3f(p.x(), p.y(), z));
+        }
+        std::vector<cv::Point2f> proj;
+        projectPoints(points, nullVector, nullVector, _d->cameraMatrix, _d->distCoeffs, proj);
+        cv::Mat view(image.height(), image.width(), CV_8UC3, (void*)image.bits(), image.bytesPerLine());
+        for (int i = 0; i < count; i++) {
+            cv::line(view, proj[i], proj[(i + 1) % count], color, width);
+        }
+    }
+}
+
+//const Scalar& color = filtered ? Scalar(0, 255, 255) : Scalar(0, 0, 255);
+//const int width = filtered ? 2 : 5;
+//std::vector<Point3f> axesPoints;
+//axesPoints.push_back(Point3f(0, 0, 0));
+//axesPoints.push_back(Point3f(ANNOTATE_AXIS_LENGTH, 0, 0));
+////if (!filtered) {
+//axesPoints.push_back(Point3f(ANNOTATE_CENTER_POINT_SIZE, 0, 0));
+////}
+//std::vector<Point2f> imagePoints;
+//projectPoints(axesPoints, rvec, tvec, cameraMatrix, distCoeffs, imagePoints);
+
+//cv::line(img, imagePoints[0], imagePoints[1], color, width);
+
+////if (!filtered) {
+//Point2f centerSize = (imagePoints[2] - imagePoints[0]);
+//const int FIXEDPOINT_BITS = 8;
+//const int FIXEDPOINT_MULTIPLIER = (1 << FIXEDPOINT_BITS);
+//int radius = static_cast<int>(round(FIXEDPOINT_MULTIPLIER * sqrt(centerSize.x * centerSize.x + centerSize.y * centerSize.y)));
+//Point2i center(round(imagePoints[0].x * FIXEDPOINT_MULTIPLIER), round(imagePoints[0].y * FIXEDPOINT_MULTIPLIER));
+//cv::circle(img, center, radius, color, cv::FILLED, cv::FILLED, FIXEDPOINT_BITS);
+////}
+
 void Aruco::generateMarkerImageFiles(QString path) const
 {
     // TODO

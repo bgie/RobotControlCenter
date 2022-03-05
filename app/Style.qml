@@ -44,4 +44,5 @@ Item {
     readonly property color mediumGray: "#C0C0C0"
     readonly property color lightGray: "#E0E0E0"
     readonly property color white: "#FFFFFF"
+    readonly property color transparant: "#00FFFFFF"
 }

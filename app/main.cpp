@@ -22,6 +22,7 @@
 #include "camera/CameraController.h"
 #include "camera/CameraManager.h"
 #include "game/PythonGameMode.h"
+#include "game/WorldEdge.h"
 #include "joystick/GamePad.h"
 #include "joystick/GamePadManager.h"
 #include "joystick/JoystickManager.h"
@@ -59,6 +60,7 @@ int main(int argc, char *argv[])
     qmlRegisterUncreatableType<RobotCommandPipe>("RobotControlCenter", 1, 0, "RobotCommandPipe", noCreateQml);
     qmlRegisterUncreatableType<RobotCameraPipe>("RobotControlCenter", 1, 0, "RobotCameraPipe", noCreateQml);
     qmlRegisterUncreatableType<PythonGameMode>("RobotControlCenter", 1, 0, "PythonGameMode", noCreateQml);
+    qmlRegisterUncreatableType<WorldEdge>("RobotControlCenter", 1, 0, "WorldEdge", noCreateQml);
 
     AppSettings settings;
 
@@ -105,15 +107,21 @@ int main(int argc, char *argv[])
     pipeController.setRobotPipesPath(settings.robotPipesPath());
     QObject::connect(&pipeController, &PipeController::cameraPipePathChanged, &settings, &AppSettings::setCameraPipePath);
     QObject::connect(&pipeController, &PipeController::robotPipesPathChanged, &settings, &AppSettings::setRobotPipesPath);
-    QObject::connect(&tracker, &SceneTracker::markersChanged, &pipeController, &PipeController::sendCameraMessage, Qt::QueuedConnection);
+    QObject::connect(
+        &tracker, &SceneTracker::frameProcessed, &pipeController, [&]() {
+            pipeController.sendCameraMessage(tracker.markers().serialize());
+        },
+        Qt::QueuedConnection);
     foreach (Robot* r, robotNetwork.robots()) {
         pipeController.addRobot(r);
     }
     QObject::connect(&robotNetwork, &RobotNetwork::robotAdded, &pipeController, &PipeController::addRobot);
     QObject::connect(&robotNetwork, &RobotNetwork::robotRemoved, &pipeController, &PipeController::removeRobot);
 
+    WorldEdge worldEdge;
+
     FactoryMethod settingsControllerFactory([&]() -> QObject* {
-        return new SettingsController(tracker);
+        return new SettingsController(tracker, worldEdge, aruco);
     });
     FactoryMethod pythonGameModeFactory([&]() -> QObject* {
         return new PythonGameMode(pipeController, cameraController, tracker);
@@ -128,6 +136,7 @@ int main(int argc, char *argv[])
     engine.rootContext()->setContextProperty(QStringLiteral("robotNetwork"), &robotNetwork);
     engine.rootContext()->setContextProperty(QStringLiteral("calibrationController"), &calibrationController);
     engine.rootContext()->setContextProperty(QStringLiteral("pipeController"), &pipeController);
+    engine.rootContext()->setContextProperty(QStringLiteral("worldEdge"), &worldEdge);
     engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
     if (engine.rootObjects().isEmpty()) {
         return -1;

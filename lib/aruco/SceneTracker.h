@@ -16,19 +16,15 @@
 */
 #pragma once
 #include "Aruco.h"
-#include "Marker.h"
 #include "MarkerList.h"
-#include <QMap>
-#include <QMutex>
+#include <QImage>
 #include <QObject>
-#include <QVector>
 
 class MarkerTracker;
 
 class SceneTracker : public QObject {
     Q_OBJECT
     Q_PROPERTY(float framesPerSecond READ framesPerSecond WRITE setFramesPerSecond NOTIFY framesPerSecondChanged)
-    Q_PROPERTY(QImage annotatedImage READ annotatedImage NOTIFY frameProcessed)
 
 public:
     explicit SceneTracker(Aruco& aruco, QObject* parent = nullptr);
@@ -39,21 +35,14 @@ public:
 
     void processFrame(QImage image);
 
-    QImage annotatedImage() const;
-    QVector<Marker> markers() const;
+    QImage image() const;
+    MarkerList markers() const;
 
-    QList<QVector3D> points() const;
-    QList<int> ids() const;
-    QByteArray serializedMarkers() const;
-    QVector<QPair<QPointF, QPointF>> markerScreenPoints() const;
+    void annotateImage(QImage& img) const;
 
 signals:
     void framesPerSecondChanged(float framesPerSecond);
     void frameProcessed();
-    void markersChanged(QByteArray serializedMarkers);
-
-private:
-    QByteArray serializedMarkersImpl() const;
 
 private:
     struct Data;

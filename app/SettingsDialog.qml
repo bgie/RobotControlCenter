@@ -329,16 +329,25 @@ MyDialog {
                 Layout.fillWidth: true
 
                 ImageItem {
+                    id: markerImage
                     anchors.fill: parent
                     image: controller.arucoImage
                     visible: hasImage
                 }
 
+                Rectangle {
+                    anchors.fill: markerIdsLabel
+                    color: Style.black
+                    opacity: 0.3
+                }
+
                 MyLabel {
-                    anchors.left: parent.left
-                    anchors.top: parent.top
+                    id: markerIdsLabel
+                    x: markerImage.offset.x + Style.smallMargin
+                    y: markerImage.offset.y + Style.smallMargin
                     font.pixelSize: Style.tinyFontSize
                     text: controller.serializedMarkers
+                    color: Style.white
                 }
             }
         }
@@ -355,6 +364,35 @@ MyDialog {
 
                 columnSpacing: Style.largeMargin
                 rowSpacing: Style.smallMargin
+
+                MyLabel {
+                    text: "Edge Points"
+                    Layout.preferredWidth: 160
+                }
+                Row {
+                    Layout.leftMargin: Style.mediumMargin
+                    spacing: Style.smallMargin
+                    MyLabel {
+                        height: resetWorldEdgeButton.height
+                        verticalAlignment: Qt.AlignVCenter
+                        text: worldEdge.count
+                    }
+                    MyButton {
+                        id: resetWorldEdgeButton
+                        text: "Reset"
+                        backgroundColor: Style.darkGray
+                        visible: worldEdge.count > 0
+                        onClicked: worldEdge.reset()
+                    }
+                }
+                MyLabel {
+                    text: "Z height"
+                    Layout.preferredWidth: 80
+                }
+                MyLabel {
+                    Layout.leftMargin: Style.mediumMargin
+                    text: worldEdge.z.toFixed(1)
+                }
 
                 MyLabel {
                     text: "Camera"
@@ -384,16 +422,27 @@ MyDialog {
                 Layout.fillWidth: true
 
                 ImageItem {
+                    id: worldImage
                     anchors.fill: parent
                     image: controller.arucoImage
                     visible: hasImage
                 }
 
-                MyLabel {
-                    anchors.left: parent.left
-                    anchors.top: parent.top
-                    font.pixelSize: Style.tinyFontSize
-                    text: controller.serializedMarkers
+                Repeater {
+                    model: controller.markerScreenPoints
+
+                    delegate:  MyToolButton {
+                        x: (worldImage.zoom * modelData.screenX) + worldImage.offset.x - 24
+                        y: (worldImage.zoom * modelData.screenY) + worldImage.offset.y - 24
+                        width: 48
+                        height: 48
+                        imageMargins: 0
+                        radius: 32
+                        sourceDark: "/img/plus-black.png"
+                        sourceLight: "/img/plus-yellow.png"
+
+                        onClicked: controller.addPointToWorldEdge(modelData.x, modelData.y, modelData.z)
+                    }
                 }
             }
         }

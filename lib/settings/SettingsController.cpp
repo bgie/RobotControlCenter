@@ -15,16 +15,22 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 #include "SettingsController.h"
+#include "aruco/Aruco.h"
 #include "aruco/Plane3d.h"
 #include "aruco/SceneTracker.h"
+#include "game/WorldEdge.h"
+#include <QDebug>
 #include <QTimer>
+#include <QVariantMap>
 #include <math.h>
 
 #define REFRESH_MARKERINFO_INTERVAL_MSEC 500
 
 struct SettingsController::Data {
-    Data(SceneTracker& tracker)
+    Data(SceneTracker& tracker, WorldEdge& worldEdge, Aruco& aruco)
         : tracker(tracker)
+        , worldEdge(worldEdge)
+        , aruco(aruco)
         , hasPlane(false)
         , planeAlpha(0.0f)
         , planeBeta(0.0f)
@@ -32,17 +38,20 @@ struct SettingsController::Data {
     }
 
     SceneTracker& tracker;
+    WorldEdge& worldEdge;
+    Aruco& aruco;
     QImage image;
     bool hasPlane;
     float planeAlpha;
     float planeBeta;
     QString markerIds;
+    QVariantList markerPoints;
     QString serializedMarkers;
 };
 
-SettingsController::SettingsController(SceneTracker& tracker, QObject* parent)
+SettingsController::SettingsController(SceneTracker& tracker, WorldEdge& worldEdge, Aruco& aruco, QObject* parent)
     : QObject(parent)
-    , _d(new Data(tracker))
+    , _d(new Data(tracker, worldEdge, aruco))
 {
     QObject::connect(&tracker, &SceneTracker::frameProcessed, this, &SettingsController::updateArucoImage);
 
@@ -80,9 +89,19 @@ QString SettingsController::markerIds() const
     return _d->markerIds;
 }
 
+QVariantList SettingsController::markerScreenPoints() const
+{
+    return _d->markerPoints;
+}
+
 QString SettingsController::serializedMarkers() const
 {
     return _d->serializedMarkers;
+}
+
+void SettingsController::addPointToWorldEdge(float x, float y, float z)
+{
+    _d->worldEdge.addPoint(x, y, z);
 }
 
 void SettingsController::setArucoImage(QImage newImage)
@@ -97,12 +116,31 @@ void SettingsController::setArucoImage(QImage newImage)
 
 void SettingsController::updateArucoImage()
 {
-    setArucoImage(_d->tracker.annotatedImage());
+    QImage img = _d->tracker.image();
+    _d->aruco.drawPolygon(img, _d->worldEdge.points(), _d->worldEdge.z());
+    _d->tracker.annotateImage(img);
+    setArucoImage(img);
 }
 
 void SettingsController::updateMarkerInfo()
 {
-    auto points = _d->tracker.points();
+    MarkerList markerList = _d->tracker.markers();
+    QList<QVector3D> points;
+    _d->markerPoints.clear();
+    QList<int> ids;
+    foreach (const Marker& m, markerList) {
+        if (m.isDetectedFiltered()) {
+            ids << m.id();
+            points << m.filteredPos();
+            _d->markerPoints << QVariantMap({ { QStringLiteral("screenX"), m.screenPos().x() },
+                { QStringLiteral("screenY"), m.screenPos().y() },
+                { QStringLiteral("x"), m.filteredPos().x() },
+                { QStringLiteral("y"), m.filteredPos().y() },
+                { QStringLiteral("z"), m.filteredPos().z() } });
+        }
+    }
+    emit markerScreenPointsChanged();
+
     auto plane = Plane3d::fitToPoints(points, &_d->hasPlane);
     if (_d->hasPlane) {
         _d->planeAlpha = plane.xAngle() * (180 / M_PI);
@@ -110,7 +148,6 @@ void SettingsController::updateMarkerInfo()
     }
     emit planeChanged();
 
-    auto ids = _d->tracker.ids();
     qSort(ids);
     QStringList idStrings;
     foreach (int id, ids) {
@@ -118,7 +155,7 @@ void SettingsController::updateMarkerInfo()
     }
     setMarkerIds(idStrings.empty() ? QStringLiteral("-") : QStringLiteral("ids: %1").arg(idStrings.join(QStringLiteral(", "))));
 
-    setSerializedMarkers(_d->tracker.serializedMarkers().replace(';', '\n'));
+    setSerializedMarkers(markerList.serialize().replace(';', '\n').trimmed());
 }
 
 void SettingsController::setMarkerIds(QString newIds)

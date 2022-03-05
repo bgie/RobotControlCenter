@@ -23,6 +23,8 @@
 ImageItem::ImageItem(QQuickItem* parent)
     : QQuickItem(parent)
     , _imageChanged(true)
+    , _zoom(1.0f)
+    , _offset(0.0f, 0.0f)
 {
     setFlag(QQuickItem::ItemHasContents, true);
 }
@@ -51,15 +53,18 @@ QSGNode* ImageItem::updatePaintNode(QSGNode* oldNode, QQuickItem::UpdatePaintNod
 
         node->markDirty(QSGNode::DirtyForceUpdate);
         _imageChanged = false;
+        _offset = origin;
     }
     return node;
 }
 
 void ImageItem::geometryChanged(const QRectF& newGeometry, const QRectF& oldGeometry)
 {
+    QQuickItem::geometryChanged(newGeometry, oldGeometry);
+
     _imageChanged = true;
     update();
-    QQuickItem::geometryChanged(newGeometry, oldGeometry);
+    updateTransform();
 }
 
 QImage ImageItem::image() const
@@ -72,6 +77,16 @@ bool ImageItem::hasImage() const
     return !_image.isNull();
 }
 
+float ImageItem::zoom() const
+{
+    return _zoom;
+}
+
+QPointF ImageItem::offset() const
+{
+    return _offset;
+}
+
 void ImageItem::setImage(QImage image)
 {
     if (_image == image)
@@ -80,5 +95,15 @@ void ImageItem::setImage(QImage image)
     _image = image;
     _imageChanged = true;
     update();
+    updateTransform();
     emit imageChanged(_image);
+}
+
+void ImageItem::updateTransform()
+{
+    QSizeF boundRect = this->size();
+    QSizeF fittingRect = QSizeF(_image.size()).scaled(boundRect, Qt::KeepAspectRatio);
+    _zoom = fittingRect.width() / _image.size().width();
+    _offset = QPointF((boundRect.width() - fittingRect.width()) / 2, (boundRect.height() - fittingRect.height()) / 2);
+    emit transformChanged();
 }

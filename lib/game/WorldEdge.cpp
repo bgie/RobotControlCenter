@@ -20,7 +20,13 @@
 #include <math.h>
 
 struct WorldEdge::Data {
+    Data()
+        : z(0.0f)
+    {
+    }
+
     QPolygonF points;
+    float z;
 };
 
 WorldEdge::WorldEdge(QObject* parent)
@@ -33,13 +39,9 @@ WorldEdge::~WorldEdge()
 {
 }
 
-QVariantList WorldEdge::pointsVariantList() const
+int WorldEdge::count() const
 {
-    QVariantList result;
-    foreach (const QPointF& p, _d->points) {
-        result << p;
-    }
-    return result;
+    return _d->points.size();
 }
 
 QPolygonF WorldEdge::points() const
@@ -57,13 +59,16 @@ void WorldEdge::setPoints(QPolygonF newPoints)
     emit pointsChanged();
 }
 
-void WorldEdge::addPoint(QPointF pos)
+void WorldEdge::addPoint(float x, float y, float z)
 {
-    if (_d->points.contains(pos))
+    if (_d->points.contains(QPointF(x, y)))
         return;
 
-    _d->points.append(pos);
+    _d->points.append(QPointF(x, y));
     sortPoints(_d->points);
+
+    setZ(((_d->z * (_d->points.size() - 1)) + z) / _d->points.size()); // average all the z values
+
     emit pointsChanged();
 }
 
@@ -92,6 +97,27 @@ QRectF WorldEdge::boundsWithMargin(float ratio) const
     QRectF result = _d->points.boundingRect();
     QSizeF margin = result.size() * ratio;
     return result.adjusted(-margin.width(), -margin.height(), +margin.width(), +margin.height());
+}
+
+float WorldEdge::z() const
+{
+    return _d->z;
+}
+
+void WorldEdge::setZ(float newValue)
+{
+    if (qFuzzyIsNull(_d->z - newValue))
+        return;
+
+    _d->z = newValue;
+    emit zChanged(newValue);
+}
+
+void WorldEdge::reset()
+{
+    _d->points.clear();
+    setZ(0.0f);
+    emit pointsChanged();
 }
 
 void WorldEdge::sortPoints(QPolygonF& points)
