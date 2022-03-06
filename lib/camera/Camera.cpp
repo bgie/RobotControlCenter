@@ -150,8 +150,16 @@ QStringList Camera::videoFormats() const
     return result;
 }
 
+int Camera::videoFormatIndex() const
+{
+    return _d->videoFormatIndex;
+}
+
 void Camera::setVideoFormatIndex(int i)
 {
+    if (_d->videoFormatIndex == i)
+        return;
+
     _d->videoFormatIndex = i;
 
     if (canStream()) {
@@ -160,24 +168,49 @@ void Camera::setVideoFormatIndex(int i)
     } else {
         setFramesPerSecond(0.0f);
     }
+    emit videoFormatIndexChanged(_d->videoFormatIndex);
+    emit canStreamChanged(canStream());
+}
+
+float Camera::framesPerSecond() const
+{
+    return _d->framesPerSecond;
+}
+
+int Camera::exposure() const
+{
+    return _d->exposure;
 }
 
 void Camera::setExposure(int val)
 {
+    if (_d->exposure == val)
+        return;
+
     _d->exposure = val;
 
     if (_d->reader) {
         updateExposure();
     }
+    emit exposureChanged(_d->exposure);
+}
+
+int Camera::gain() const
+{
+    return _d->gain;
 }
 
 void Camera::setGain(int val)
 {
+    if (_d->gain == val)
+        return;
+
     _d->gain = val;
 
     if (_d->reader) {
         updateGain();
     }
+    emit gainChanged(_d->gain);
 }
 
 bool Camera::canStream() const
@@ -244,6 +277,7 @@ void Camera::startStream()
 
         _d->reader.reset(new CameraReader(_d->fd, format.size));
         connect(_d->reader.data(), &CameraReader::frameRead, this, &Camera::frameRead, Qt::DirectConnection);
+        emit isStreamingChanged(true);
     }
 }
 
@@ -251,17 +285,13 @@ void Camera::stopStream()
 {
     if (!_d->reader.isNull()) {
         _d->reader.reset();
+        emit isStreamingChanged(false);
     }
 }
 
-float Camera::framesPerSecond() const
+bool Camera::isStreaming() const
 {
-    return _d->framesPerSecond;
-}
-
-bool Camera::isValidDevice(QString deviceName)
-{
-    return QFile::exists(deviceName);
+    return _d->reader;
 }
 
 void Camera::updateExposure()

@@ -21,32 +21,46 @@
 
 class Camera : public QObject {
     Q_OBJECT
+    Q_PROPERTY(QString deviceName READ deviceName CONSTANT)
+    Q_PROPERTY(QStringList videoFormats READ videoFormats NOTIFY videoFormatsChanged)
+    Q_PROPERTY(int videoFormatIndex READ videoFormatIndex WRITE setVideoFormatIndex NOTIFY videoFormatIndexChanged)
     Q_PROPERTY(float framesPerSecond READ framesPerSecond NOTIFY framesPerSecondChanged)
+    Q_PROPERTY(int exposure READ exposure WRITE setExposure NOTIFY exposureChanged)
+    Q_PROPERTY(int gain READ gain WRITE setGain NOTIFY gainChanged)
+    Q_PROPERTY(bool canStream READ canStream NOTIFY canStreamChanged)
+    Q_PROPERTY(bool isStreaming READ isStreaming NOTIFY isStreamingChanged)
 
 public:
     explicit Camera(QString deviceName, QObject *parent = nullptr);
     virtual ~Camera();
 
     QString deviceName() const;
-   
-    QStringList videoFormats() const;
-    void setVideoFormatIndex(int i);
 
+    QStringList videoFormats() const;
+    int videoFormatIndex() const;
+    void setVideoFormatIndex(int i);
+    float framesPerSecond() const;
+
+    int exposure() const;
     void setExposure(int val);
+    int gain() const;
     void setGain(int val);
 
     bool canStream() const;
-
     void startStream();
     void stopStream();
-
-    float framesPerSecond() const;
-
-    static bool isValidDevice(QString deviceName);
+    bool isStreaming() const;
 
 signals:
-    void frameRead(const QImage image);
+    void videoFormatsChanged(QStringList list);
+    void videoFormatIndexChanged(int index);
     void framesPerSecondChanged(float value);
+    void exposureChanged(int val);
+    void gainChanged(int val);
+    void canStreamChanged(bool val);
+    void isStreamingChanged(bool val);
+
+    void frameRead(const QImage image);
 
 private:
     void updateExposure();

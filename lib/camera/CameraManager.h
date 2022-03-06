@@ -18,15 +18,20 @@
 #include <QObject>
 
 class QFileSystemWatcher;
+class Camera;
+class AppSettings;
 
 class CameraManager : public QObject {
     Q_OBJECT
     Q_PROPERTY(QStringList availableDevices READ availableDevices NOTIFY availableDevicesChanged)
 
 public:
-    explicit CameraManager(QObject* parent = nullptr);
+    explicit CameraManager(AppSettings& settings, QObject* parent = nullptr);
 
     QStringList availableDevices() const;
+
+    Camera* createCamera(QString deviceName) const;
+    bool isValidDevice(QString deviceName) const;
 
 signals:
     void availableDevicesChanged(QStringList list);
@@ -37,6 +42,7 @@ private:
     void updateAvailableDevices();
 
 private:
+    AppSettings& _settings;
     QStringList _availableDevices;
     QFileSystemWatcher& _watcher;
 };

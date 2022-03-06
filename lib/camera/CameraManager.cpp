@@ -15,6 +15,8 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 #include "CameraManager.h"
+#include "Camera.h"
+#include "settings/AppSettings.h"
 #include <QDir>
 #include <QFileSystemWatcher>
 #include <QSet>
@@ -22,8 +24,9 @@
 const QDir devPath = QDir(QStringLiteral("/dev/"));
 const QStringList videoDevices = QStringList() << QStringLiteral("video*");
 
-CameraManager::CameraManager(QObject* parent)
+CameraManager::CameraManager(AppSettings& settings, QObject* parent)
     : QObject(parent)
+    , _settings(settings)
     , _watcher(*new QFileSystemWatcher(this))
 {
     _watcher.addPath(devPath.path());
@@ -34,6 +37,23 @@ CameraManager::CameraManager(QObject* parent)
 QStringList CameraManager::availableDevices() const
 {
     return _availableDevices;
+}
+
+Camera* CameraManager::createCamera(QString deviceName) const
+{
+    auto result = new Camera(deviceName);
+    result->setVideoFormatIndex(_settings.videoFormatIndex(deviceName));
+    result->setExposure(_settings.exposure(deviceName));
+    result->setGain(_settings.gain(deviceName));
+    connect(result, &Camera::gainChanged, this, [=](int newValue) { _settings.setGain(deviceName, newValue); });
+    connect(result, &Camera::exposureChanged, this, [=](int newValue) { _settings.setExposure(deviceName, newValue); });
+    connect(result, &Camera::videoFormatIndexChanged, this, [=](int newIndex) { _settings.setVideoFormatIndex(deviceName, newIndex); });
+    return result;
+}
+
+bool CameraManager::isValidDevice(QString deviceName) const
+{
+    return _availableDevices.contains(deviceName);
 }
 
 void CameraManager::updateAvailableDevices()

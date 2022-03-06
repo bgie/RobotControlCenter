@@ -16,6 +16,7 @@
 */
 #include "AppSettings.h"
 #include <QSettings>
+#include <QVariantMap>
 
 namespace {
 const QString VIDEODEVICE_KEY(QStringLiteral("VideoDevice"));
@@ -27,15 +28,19 @@ const QString CAMERA_PIPE_PATH_KEY(QStringLiteral("CameraPipePath"));
 const QString ROBOT_PIPES_PATH_KEY(QStringLiteral("RobotPipesPath"));
 const QString ROBOT_2_MARKER_KEY(QStringLiteral("Robot2Marker"));
 const QString WORLD_EDGE_KEY(QStringLiteral("WorldEdge"));
+
+const int DEFAULT_VIDEO_FORMAT_INDEX = -1;
+const int DEFAULT_EXPOSURE = 100;
+const int DEFAULT_GAIN = 255;
 }
 
 AppSettings::AppSettings(QObject *parent) : QObject(parent)
 {
     QSettings settings;
     _cameraDevice = settings.value(VIDEODEVICE_KEY, QStringLiteral("/dev/video0")).toString();
-    _exposure = settings.value(EXPOSURE_KEY, 100).toInt();
-    _gain = settings.value(GAIN_KEY, 255).toInt();
-    _videoFormatIndex = settings.value(VIDEOFORMATINDEX_KEY, -1).toInt();
+    _exposure = settings.value(EXPOSURE_KEY).toMap();
+    _gain = settings.value(GAIN_KEY).toMap();
+    _videoFormatIndex = settings.value(VIDEOFORMATINDEX_KEY).toMap();
     _calibrationFile = settings.value(CALIBRATIONFILE_KEY, QStringLiteral("CameraCalibration.json")).toString();
     _cameraPipePath = settings.value(CAMERA_PIPE_PATH_KEY, QStringLiteral("/robots/camera")).toString();
     _robotPipesPath = settings.value(ROBOT_PIPES_PATH_KEY, QStringLiteral("/robots")).toString();
@@ -54,19 +59,19 @@ QString AppSettings::cameraDevice() const
     return _cameraDevice;
 }
 
-int AppSettings::exposure() const
+int AppSettings::exposure(QString cameraDevice) const
 {
-    return _exposure;
+    return _exposure.value(cameraDevice, DEFAULT_EXPOSURE).toInt();
 }
 
-int AppSettings::gain() const
+int AppSettings::gain(QString cameraDevice) const
 {
-    return _gain;
+    return _gain.value(cameraDevice, DEFAULT_GAIN).toInt();
 }
 
-int AppSettings::videoFormatIndex() const
+int AppSettings::videoFormatIndex(QString cameraDevice) const
 {
-    return _videoFormatIndex;
+    return _videoFormatIndex.value(cameraDevice, DEFAULT_VIDEO_FORMAT_INDEX).toInt();
 }
 
 QString AppSettings::calibrationFile() const
@@ -105,34 +110,34 @@ void AppSettings::setCameraDevice(QString cameraDevice)
     settings.setValue(VIDEODEVICE_KEY, _cameraDevice);
 }
 
-void AppSettings::setExposure(int exposure)
+void AppSettings::setExposure(QString cameraDevice, int exposure)
 {
-    if (_exposure == exposure)
+    if (_exposure.value(cameraDevice, DEFAULT_EXPOSURE).toInt() == exposure)
         return;
 
-    _exposure = exposure;
+    _exposure[cameraDevice] = exposure;
 
     QSettings settings;
     settings.setValue(EXPOSURE_KEY, _exposure);
 }
 
-void AppSettings::setGain(int gain)
+void AppSettings::setGain(QString cameraDevice, int gain)
 {
-    if (_gain == gain)
+    if (_gain.value(cameraDevice, DEFAULT_GAIN).toInt() == gain)
         return;
 
-    _gain = gain;
+    _gain[cameraDevice] = gain;
 
     QSettings settings;
     settings.setValue(GAIN_KEY, _gain);
 }
 
-void AppSettings::setVideoFormatIndex(int videoFormatIndex)
+void AppSettings::setVideoFormatIndex(QString cameraDevice, int videoFormatIndex)
 {
-    if (_videoFormatIndex == videoFormatIndex)
+    if (_videoFormatIndex.value(cameraDevice, DEFAULT_VIDEO_FORMAT_INDEX).toInt() == videoFormatIndex)
         return;
 
-    _videoFormatIndex = videoFormatIndex;
+    _videoFormatIndex[cameraDevice] = videoFormatIndex;
 
     QSettings settings;
     settings.setValue(VIDEOFORMATINDEX_KEY, _videoFormatIndex);

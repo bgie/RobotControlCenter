@@ -16,15 +16,12 @@
 */
 #include "CameraController.h"
 #include "Camera.h"
+#include "CameraManager.h"
 
-CameraController::CameraController(QObject* parent)
+CameraController::CameraController(CameraManager& manager, QObject* parent)
     : QObject(parent)
+    , _cameraManager(manager)
     , _connectPossible(false)
-    , _currentVideoFormatIndex(-1)
-    , _exposure(0)
-    , _gain(0)
-    , _canCameraStream(false)
-    , _isCameraStreaming(false)
 {
 }
 
@@ -37,79 +34,19 @@ QString CameraController::videoDevice() const
     return _videoDevice;
 }
 
-void CameraController::connect()
-{
-    if (_connectPossible && (_camera.isNull() || _camera->deviceName() != _videoDevice)) {
-        _camera.reset(new Camera(_videoDevice));
-        QObject::connect(_camera.data(), &Camera::frameRead, this, &CameraController::frameReadAsync, Qt::DirectConnection);
-        QObject::connect(_camera.data(), &Camera::frameRead, this, &CameraController::setImage, Qt::QueuedConnection);
-        QObject::connect(_camera.data(), &Camera::framesPerSecondChanged, this, &CameraController::framesPerSecondChanged);
-
-        auto formats = _camera->videoFormats();
-        setVideoFormats(formats);
-        setCurrentVideoFormatIndex(-1);
-        _camera->setExposure(_exposure);
-        _camera->setGain(_gain);
-
-        emit framesPerSecondChanged(_camera->framesPerSecond());
-    }
-}
-
-void CameraController::startCameraStream()
-{
-    if (_canCameraStream && !_camera.isNull() && !_isCameraStreaming) {
-        _camera->startStream();
-        setIsCameraStreaming(true);
-    }
-}
-
-void CameraController::stopCameraStream()
-{
-    if (_isCameraStreaming) {
-        _camera->stopStream();
-        setImage(QImage());
-        setIsCameraStreaming(false);
-    }
-}
-
 bool CameraController::connectPossible() const
 {
     return _connectPossible;
 }
 
-QStringList CameraController::videoFormats() const
+Camera* CameraController::camera() const
 {
-    return _videoFormats;
-}
-
-int CameraController::currentVideoFormatIndex() const
-{
-    return _currentVideoFormatIndex;
-}
-
-int CameraController::exposure() const
-{
-    return _exposure;
-}
-
-int CameraController::gain() const
-{
-    return _gain;
-}
-
-bool CameraController::canCameraStream() const
-{
-    return _canCameraStream;
-}
-
-bool CameraController::isCameraStreaming() const
-{
-    return _isCameraStreaming;
+    return _camera.data();
 }
 
 float CameraController::framesPerSecond() const
 {
-    return _camera.isNull() ? 0.0f : _camera->framesPerSecond();
+    return _camera ? _camera->framesPerSecond() : 0;
 }
 
 QImage CameraController::image() const
@@ -117,22 +54,54 @@ QImage CameraController::image() const
     return _image;
 }
 
+bool CameraController::canStart() const
+{
+    return _camera && !_camera->isStreaming();
+}
+
+bool CameraController::isStreaming() const
+{
+    return _camera && _camera->isStreaming();
+}
+
+void CameraController::startCameraStream() const
+{
+    if (_camera) {
+        _camera->startStream();
+    }
+}
+
+void CameraController::stopCameraStream() const
+{
+    if (_camera) {
+        _camera->stopStream();
+    }
+}
+
 void CameraController::setVideoDevice(QString videoDevice)
 {
     if (_videoDevice == videoDevice)
         return;
 
-    stopCameraStream();
-
     _videoDevice = videoDevice;
 
-    setConnectPossible(Camera::isValidDevice(_videoDevice));
-
-    emit videoDeviceChanged(_videoDevice);
+    setConnectPossible(_cameraManager.isValidDevice(_videoDevice));
 
     if (_connectPossible) {
-        connect();
+        _camera.reset(_cameraManager.createCamera(_videoDevice));
+        connect(_camera.data(), &Camera::frameRead, this, &CameraController::setImage, Qt::QueuedConnection);
+        connect(_camera.data(), &Camera::frameRead, this, &CameraController::frameReadAsync, Qt::DirectConnection);
+        connect(_camera.data(), &Camera::framesPerSecondChanged, this, &CameraController::framesPerSecondChanged);
+        connect(_camera.data(), &Camera::isStreamingChanged, this, &CameraController::canStartChanged);
+        connect(_camera.data(), &Camera::isStreamingChanged, this, &CameraController::isStreamingChanged);
+    } else {
+        _camera.reset();
     }
+    emit cameraChanged(_camera.data());
+    emit videoDeviceChanged(_videoDevice);
+    emit framesPerSecondChanged(framesPerSecond());
+    emit canStartChanged();
+    emit isStreamingChanged();
 }
 
 void CameraController::setConnectPossible(bool connectPossible)
@@ -144,48 +113,6 @@ void CameraController::setConnectPossible(bool connectPossible)
     emit connectPossibleChanged(_connectPossible);
 }
 
-void CameraController::setVideoFormats(QStringList videoFormats)
-{
-    if (_videoFormats == videoFormats)
-        return;
-
-    _videoFormats = videoFormats;
-    emit videoFormatsChanged(_videoFormats);
-}
-
-void CameraController::setCurrentVideoFormatIndex(int currentVideoFormatIndex)
-{
-    if (_currentVideoFormatIndex != currentVideoFormatIndex) {
-        _currentVideoFormatIndex = currentVideoFormatIndex;
-
-        if (!_camera.isNull()) {
-            _camera->setVideoFormatIndex(_currentVideoFormatIndex);
-        }
-
-        emit currentVideoFormatIndexChanged(_currentVideoFormatIndex);
-    }
-
-    setCanCameraStream(_camera.isNull() ? false : _camera->canStream());
-}
-
-void CameraController::setCanCameraStream(bool canCameraStream)
-{
-    if (_canCameraStream == canCameraStream)
-        return;
-
-    _canCameraStream = canCameraStream;
-    emit canCameraStreamChanged(_canCameraStream);
-}
-
-void CameraController::setIsCameraStreaming(bool isCameraStreaming)
-{
-    if (_isCameraStreaming == isCameraStreaming)
-        return;
-
-    _isCameraStreaming = isCameraStreaming;
-    emit isCameraStreamingChanged(_isCameraStreaming);
-}
-
 void CameraController::setImage(QImage image)
 {
     if (_image == image)
@@ -193,32 +120,4 @@ void CameraController::setImage(QImage image)
 
     _image = image;
     emit imageChanged(image);
-}
-
-void CameraController::setExposure(int value)
-{
-    if (_exposure == value)
-        return;
-
-    _exposure = value;
-
-    if (_camera) {
-        _camera->setExposure(_exposure);
-    }
-
-    emit exposureChanged(_exposure);
-}
-
-void CameraController::setGain(int value)
-{
-    if (_gain == value)
-        return;
-
-    _gain = value;
-
-    if (_camera) {
-        _camera->setGain(_gain);
-    }
-
-    emit gainChanged(_gain);
 }

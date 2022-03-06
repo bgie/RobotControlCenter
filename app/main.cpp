@@ -14,11 +14,11 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-#include "AppSettings.h"
 #include "ImageItem.h"
 #include "aruco/Aruco.h"
 #include "aruco/CalibrationController.h"
 #include "aruco/SceneTracker.h"
+#include "camera/Camera.h"
 #include "camera/CameraController.h"
 #include "camera/CameraManager.h"
 #include "game/PythonGameMode.h"
@@ -32,6 +32,7 @@
 #include "pipe/PipeController.h"
 #include "pipe/RobotCameraPipe.h"
 #include "pipe/RobotCommandPipe.h"
+#include "settings/AppSettings.h"
 #include "settings/SettingsController.h"
 #include "util/FactoryMethod.h"
 #include <QGuiApplication>
@@ -51,6 +52,7 @@ int main(int argc, char *argv[])
 
     qmlRegisterSingletonType(QUrl("qrc:/Style.qml"), "RobotControlCenter", 1, 0, "Style");
     qmlRegisterType<ImageItem>("RobotControlCenter", 1, 0, "ImageItem");
+    qmlRegisterUncreatableType<Camera>("RobotControlCenter", 1, 0, "Camera", noCreateQml);
     qmlRegisterUncreatableType<SettingsController>("RobotControlCenter", 1, 0, "SettingsController", noCreateQml);
     qmlRegisterUncreatableType<GamePadManager>("RobotControlCenter", 1, 0, "GamePadManager", noCreateQml);
     qmlRegisterUncreatableType<GamePad>("RobotControlCenter", 1, 0, "GamePad", noCreateQml);
@@ -73,16 +75,10 @@ int main(int argc, char *argv[])
     QObject::connect(&idleTimer, &QTimer::timeout, &loop, &SDL2EventLoop::processEvents);
     idleTimer.start(0);
 
-    CameraManager cameraManager;
-    CameraController cameraController;
+    CameraManager cameraManager(settings);
+    CameraController cameraController(cameraManager);
     cameraController.setVideoDevice(settings.cameraDevice());
-    cameraController.setGain(settings.gain());
-    cameraController.setExposure(settings.exposure());
-    cameraController.setCurrentVideoFormatIndex(settings.videoFormatIndex());
     QObject::connect(&cameraController, &CameraController::videoDeviceChanged, &settings, &AppSettings::setCameraDevice);
-    QObject::connect(&cameraController, &CameraController::gainChanged, &settings, &AppSettings::setGain);
-    QObject::connect(&cameraController, &CameraController::exposureChanged, &settings, &AppSettings::setExposure);
-    QObject::connect(&cameraController, &CameraController::currentVideoFormatIndexChanged, &settings, &AppSettings::setVideoFormatIndex);
 
     CalibrationController calibrationController;
     Aruco aruco;

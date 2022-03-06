@@ -156,12 +156,12 @@ MyDialog {
                     text: "Format"
                 }
                 MyComboBox {
-                    enabled: !cameraController.isCameraStreaming
-                    model: cameraController.videoFormats
+                    enabled: !cameraController.camera.isStreaming
+                    model: cameraController.camera.videoFormats
                     Layout.preferredWidth: 600
                     Layout.leftMargin: Style.mediumMargin
-                    currentIndex: cameraController.currentVideoFormatIndex
-                    onCurrentIndexChanged: cameraController.setCurrentVideoFormatIndex(currentIndex)
+                    currentIndex: cameraController.camera.videoFormatIndex
+                    onCurrentIndexChanged: cameraController.camera.videoFormatIndex = currentIndex
                 }
                 MyLabel {
                     text: "Gain"
@@ -169,8 +169,8 @@ MyDialog {
                 MyTextEdit {
                     Layout.leftMargin: Style.mediumMargin
                     Layout.preferredWidth: 60
-                    text: cameraController.gain
-                    onTextChanged: cameraController.gain = parseInt(text)
+                    text: cameraController.camera.gain
+                    onTextChanged: cameraController.camera.gain = parseInt(text)
                 }
                 MyLabel {
                     text: "Exposure"
@@ -178,8 +178,8 @@ MyDialog {
                 MyTextEdit {
                     Layout.leftMargin: Style.mediumMargin
                     Layout.preferredWidth: 60
-                    text: cameraController.exposure
-                    onTextChanged: cameraController.exposure = parseInt(text)
+                    text: cameraController.camera.exposure
+                    onTextChanged: cameraController.camera.exposure = parseInt(text)
                 }
 
                 MyLabel {
@@ -191,14 +191,14 @@ MyDialog {
                         id: startCameraButton
                         text: "Start"
                         backgroundColor: Style.darkGray
-                        enabled: cameraController.canCameraStream && !cameraController.isCameraStreaming
-                        visible: !cameraController.isCameraStreaming
+                        enabled: cameraController.canStart
+                        visible: !cameraController.isStreaming
                         onClicked: cameraController.startCameraStream()
                     }
                     MyButton {
                         text: "Stop"
                         backgroundColor: Style.darkGray
-                        visible: cameraController.isCameraStreaming
+                        visible: cameraController.isStreaming
                         onClicked: cameraController.stopCameraStream()
                         width: startCameraButton.width
                     }
@@ -268,14 +268,14 @@ MyDialog {
                         id: startMarkerCameraButton
                         text: "Start"
                         backgroundColor: Style.darkGray
-                        enabled: cameraController.canCameraStream && !cameraController.isCameraStreaming
-                        visible: !cameraController.isCameraStreaming
+                        enabled: cameraController.canStart
+                        visible: !cameraController.isStreaming
                         onClicked: cameraController.startCameraStream()
                     }
                     MyButton {
                         text: "Stop"
                         backgroundColor: Style.darkGray
-                        visible: cameraController.isCameraStreaming
+                        visible: cameraController.isStreaming
                         onClicked: cameraController.stopCameraStream()
                         width: startMarkerCameraButton.width
                     }
@@ -403,14 +403,14 @@ MyDialog {
                         id: startWorldCameraButton
                         text: "Start"
                         backgroundColor: Style.darkGray
-                        enabled: cameraController.canCameraStream && !cameraController.isCameraStreaming
-                        visible: !cameraController.isCameraStreaming
+                        enabled: cameraController.canStart
+                        visible: !cameraController.isStreaming
                         onClicked: cameraController.startCameraStream()
                     }
                     MyButton {
                         text: "Stop"
                         backgroundColor: Style.darkGray
-                        visible: cameraController.isCameraStreaming
+                        visible: cameraController.isStreaming
                         onClicked: cameraController.stopCameraStream()
                         width: startWorldCameraButton.width
                     }

@@ -18,75 +18,56 @@
 #include <QImage>
 #include <QObject>
 
+class CameraManager;
 class Camera;
 
 class CameraController : public QObject {
     Q_OBJECT
     Q_PROPERTY(QString videoDevice READ videoDevice WRITE setVideoDevice NOTIFY videoDeviceChanged)
     Q_PROPERTY(bool connectPossible READ connectPossible NOTIFY connectPossibleChanged)
-    Q_PROPERTY(QStringList videoFormats READ videoFormats NOTIFY videoFormatsChanged)
-    Q_PROPERTY(int currentVideoFormatIndex READ currentVideoFormatIndex WRITE setCurrentVideoFormatIndex NOTIFY currentVideoFormatIndexChanged)
-    Q_PROPERTY(int exposure READ exposure WRITE setExposure NOTIFY exposureChanged)
-    Q_PROPERTY(int gain READ gain WRITE setGain NOTIFY gainChanged)
-    Q_PROPERTY(bool canCameraStream READ canCameraStream NOTIFY canCameraStreamChanged)
-    Q_PROPERTY(bool isCameraStreaming READ isCameraStreaming NOTIFY isCameraStreamingChanged)
     Q_PROPERTY(QImage image READ image NOTIFY imageChanged)
+    Q_PROPERTY(Camera* camera READ camera NOTIFY cameraChanged)
     Q_PROPERTY(float framesPerSecond READ framesPerSecond NOTIFY framesPerSecondChanged)
+    Q_PROPERTY(bool canStart READ canStart NOTIFY canStartChanged)
+    Q_PROPERTY(bool isStreaming READ isStreaming NOTIFY isStreamingChanged)
 
 public:
-    explicit CameraController(QObject* parent = nullptr);
+    explicit CameraController(CameraManager& manager, QObject* parent = nullptr);
     virtual ~CameraController();
 
     QString videoDevice() const;
     bool connectPossible() const;
-    QStringList videoFormats() const;
-    int currentVideoFormatIndex() const;
-    int exposure() const;
-    int gain() const;
-    Q_INVOKABLE void connect();
-    bool canCameraStream() const;
-    Q_INVOKABLE void startCameraStream();
-    Q_INVOKABLE void stopCameraStream();
-    bool isCameraStreaming() const;
+    Camera* camera() const;
     float framesPerSecond() const;
 
     QImage image() const;
 
+    bool canStart() const;
+    bool isStreaming() const;
+    Q_INVOKABLE void startCameraStream() const;
+    Q_INVOKABLE void stopCameraStream() const;
+
 public slots:
     void setVideoDevice(QString videoDevice);
-    void setVideoFormats(QStringList videoFormats);
-    void setCurrentVideoFormatIndex(int currentVideoFormatIndex);
-    void setExposure(int value);
-    void setGain(int value);
 
 signals:
     void videoDeviceChanged(QString videoDevice);
     void connectPossibleChanged(bool connectPossible);
-    void videoFormatsChanged(QStringList videoFormats);
-    void currentVideoFormatIndexChanged(int currentVideoFormatIndex);
-    void exposureChanged(int exposure);
-    void gainChanged(int value);
-    void canCameraStreamChanged(bool canCameraStream);
-    void isCameraStreamingChanged(bool isCameraStreaming);
-    void frameReadAsync(QImage image);
+    void cameraChanged(Camera* camera);
     void imageChanged(QImage image);
-    void framesPerSecondChanged(float newValue);
+    void frameReadAsync(const QImage image);
+    void framesPerSecondChanged(float value);
+    void canStartChanged();
+    void isStreamingChanged();
 
 private slots:
     void setConnectPossible(bool connectPossible);
-    void setCanCameraStream(bool canCameraStream);
-    void setIsCameraStreaming(bool isCameraStreaming);
     void setImage(QImage image);
 
 private:
+    CameraManager& _cameraManager;
     QString _videoDevice;
     bool _connectPossible;
     QScopedPointer<Camera> _camera;
-    QStringList _videoFormats;
-    int _currentVideoFormatIndex;
-    int _exposure;
-    int _gain;
-    bool _canCameraStream;
-    bool _isCameraStreaming;
     QImage _image;
 };

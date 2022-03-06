@@ -26,9 +26,9 @@ public:
     explicit AppSettings(QObject* parent = nullptr);
 
     QString cameraDevice() const;
-    int exposure() const;
-    int gain() const;
-    int videoFormatIndex() const;
+    int exposure(QString cameraDevice) const;
+    int gain(QString cameraDevice) const;
+    int videoFormatIndex(QString cameraDevice) const;
     QString calibrationFile() const;
     QString cameraPipePath() const;
     QString robotPipesPath() const;
@@ -37,9 +37,9 @@ public:
 
 public slots:
     void setCameraDevice(QString cameraDevice);
-    void setExposure(int exposure);
-    void setGain(int gain);
-    void setVideoFormatIndex(int videoFormatIndex);
+    void setExposure(QString cameraDevice, int exposure);
+    void setGain(QString cameraDevice, int gain);
+    void setVideoFormatIndex(QString cameraDevice, int videoFormatIndex);
     void setCalibrationFile(QString calibrationFile);
     void setCameraPipePath(QString newPath);
     void setRobotPipesPath(QString newPath);
@@ -48,9 +48,9 @@ public slots:
 
 private:
     QString _cameraDevice;
-    int _exposure;
-    int _gain;
-    int _videoFormatIndex;
+    QMap<QString, QVariant> _exposure;
+    QMap<QString, QVariant> _gain;
+    QMap<QString, QVariant> _videoFormatIndex;
     QString _calibrationFile;
     QString _cameraPipePath;
     QString _robotPipesPath;

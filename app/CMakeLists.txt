@@ -19,7 +19,6 @@ cmake_minimum_required(VERSION 3.14)
 add_executable(RobotCC
   main.cpp
   ImageItem.cpp
-  AppSettings.cpp
   qml.qrc
 )
 
