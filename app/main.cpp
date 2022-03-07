@@ -21,6 +21,8 @@
 #include "camera/Camera.h"
 #include "camera/CameraController.h"
 #include "camera/CameraManager.h"
+#include "camera/MultiCameraManager.h"
+#include "camera/ReplayCamManager.h"
 #include "game/PythonGameMode.h"
 #include "game/WorldEdge.h"
 #include "joystick/GamePad.h"
@@ -52,7 +54,7 @@ int main(int argc, char *argv[])
 
     qmlRegisterSingletonType(QUrl("qrc:/Style.qml"), "RobotControlCenter", 1, 0, "Style");
     qmlRegisterType<ImageItem>("RobotControlCenter", 1, 0, "ImageItem");
-    qmlRegisterUncreatableType<Camera>("RobotControlCenter", 1, 0, "Camera", noCreateQml);
+    qmlRegisterUncreatableType<ICamera>("RobotControlCenter", 1, 0, "ICamera", noCreateQml);
     qmlRegisterUncreatableType<SettingsController>("RobotControlCenter", 1, 0, "SettingsController", noCreateQml);
     qmlRegisterUncreatableType<GamePadManager>("RobotControlCenter", 1, 0, "GamePadManager", noCreateQml);
     qmlRegisterUncreatableType<GamePad>("RobotControlCenter", 1, 0, "GamePad", noCreateQml);
@@ -76,7 +78,11 @@ int main(int argc, char *argv[])
     idleTimer.start(0);
 
     CameraManager cameraManager(settings);
-    CameraController cameraController(cameraManager);
+    ReplayCamManager replayCamManager(settings);
+    MultiCameraManager multiCameraManager;
+    multiCameraManager.addManager(cameraManager);
+    multiCameraManager.addManager(replayCamManager);
+    CameraController cameraController(multiCameraManager);
     cameraController.setVideoDevice(settings.cameraDevice());
     QObject::connect(&cameraController, &CameraController::videoDeviceChanged, &settings, &AppSettings::setCameraDevice);
 
@@ -127,7 +133,7 @@ int main(int argc, char *argv[])
     engine.rootContext()->setContextProperty(QStringLiteral("settingsControllerFactory"), &settingsControllerFactory);
     engine.rootContext()->setContextProperty(QStringLiteral("pythonGameModeFactory"), &pythonGameModeFactory);
     engine.rootContext()->setContextProperty(QStringLiteral("gamePadManager"), &gamePadManger);
-    engine.rootContext()->setContextProperty(QStringLiteral("cameraManager"), &cameraManager);
+    engine.rootContext()->setContextProperty(QStringLiteral("cameraManager"), &multiCameraManager);
     engine.rootContext()->setContextProperty(QStringLiteral("cameraController"), &cameraController);
     engine.rootContext()->setContextProperty(QStringLiteral("robotNetwork"), &robotNetwork);
     engine.rootContext()->setContextProperty(QStringLiteral("calibrationController"), &calibrationController);

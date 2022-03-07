@@ -16,25 +16,19 @@
 */
 #pragma once
 #include "ICameraManager.h"
+#include <QList>
 
-class QFileSystemWatcher;
-class AppSettings;
-
-class CameraManager : public ICameraManager {
+class MultiCameraManager : public ICameraManager {
     Q_OBJECT
-
 public:
-    explicit CameraManager(AppSettings& settings, QObject* parent = nullptr);
+    explicit MultiCameraManager(QObject* parent = nullptr);
+
+    void addManager(ICameraManager& manager);
 
     QStringList availableDevices() const override;
     ICamera* createCamera(QString deviceName) const override;
     bool isValidDevice(QString deviceName) const override;
 
 private:
-    void updateAvailableDevices();
-
-private:
-    AppSettings& _settings;
-    QStringList _availableDevices;
-    QFileSystemWatcher& _watcher;
+    QList<ICameraManager*> _managers;
 };

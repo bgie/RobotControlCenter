@@ -34,6 +34,9 @@ public:
     QString robotPipesPath() const;
     QMap<QByteArray, int> robot2Marker() const;
     QPolygonF worldEdge() const;
+    QString replayVideosPath() const;
+    QString replayVideo() const;
+    float replayFramesPerSecond() const;
 
 public slots:
     void setCameraDevice(QString cameraDevice);
@@ -45,6 +48,9 @@ public slots:
     void setRobotPipesPath(QString newPath);
     void setRobot2Marker(QMap<QByteArray, int> values);
     void setWorldEdge(QPolygonF newEdge);
+    void setReplayVideosPath(QString newPath);
+    void setReplayVideo(QString newVideo);
+    void setReplayFramesPerSecond(float newFps);
 
 private:
     QString _cameraDevice;
@@ -56,4 +62,7 @@ private:
     QString _robotPipesPath;
     QMap<QByteArray, int> _robot2Marker;
     QPolygonF _worldEdge;
+    QString _replayVideosPath;
+    QString _replayVideo;
+    float _replayFps;
 };

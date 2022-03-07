@@ -33,9 +33,14 @@ add_library(lib
   joystick/Joystick.cpp
   joystick/GamePad.cpp
   joystick/GamePadManager.cpp
+  camera/ICamera.cpp
   camera/Camera.cpp
   camera/CameraReader.cpp
+  camera/ICameraManager.cpp
+  camera/MultiCameraManager.cpp
   camera/CameraManager.cpp
+  camera/ReplayCamManager.cpp
+  camera/ReplayCam.cpp
   camera/CameraController.cpp
   settings/SettingsController.cpp
   settings/AppSettings.cpp

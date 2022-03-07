@@ -15,6 +15,7 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 #include "AppSettings.h"
+#include <QDir>
 #include <QSettings>
 #include <QVariantMap>
 
@@ -28,6 +29,9 @@ const QString CAMERA_PIPE_PATH_KEY(QStringLiteral("CameraPipePath"));
 const QString ROBOT_PIPES_PATH_KEY(QStringLiteral("RobotPipesPath"));
 const QString ROBOT_2_MARKER_KEY(QStringLiteral("Robot2Marker"));
 const QString WORLD_EDGE_KEY(QStringLiteral("WorldEdge"));
+const QString REPLAY_VIDEOS_PATH_KEY(QStringLiteral("ReplayVideosPath"));
+const QString REPLAY_VIDEO_KEY(QStringLiteral("ReplayVideo"));
+const QString REPLAY_FPS_KEY(QStringLiteral("ReplayFPS"));
 
 const int DEFAULT_VIDEO_FORMAT_INDEX = -1;
 const int DEFAULT_EXPOSURE = 100;
@@ -41,7 +45,7 @@ AppSettings::AppSettings(QObject *parent) : QObject(parent)
     _exposure = settings.value(EXPOSURE_KEY).toMap();
     _gain = settings.value(GAIN_KEY).toMap();
     _videoFormatIndex = settings.value(VIDEOFORMATINDEX_KEY).toMap();
-    _calibrationFile = settings.value(CALIBRATIONFILE_KEY, QStringLiteral("CameraCalibration.json")).toString();
+    _calibrationFile = settings.value(CALIBRATIONFILE_KEY, QDir::home().absoluteFilePath(QStringLiteral("CameraCalibration.json"))).toString();
     _cameraPipePath = settings.value(CAMERA_PIPE_PATH_KEY, QStringLiteral("/robots/camera")).toString();
     _robotPipesPath = settings.value(ROBOT_PIPES_PATH_KEY, QStringLiteral("/robots")).toString();
     auto r2m = settings.value(ROBOT_2_MARKER_KEY).toMap();
@@ -52,6 +56,9 @@ AppSettings::AppSettings(QObject *parent) : QObject(parent)
     foreach (auto p, edge) {
         _worldEdge << p.toPointF();
     }
+    _replayVideosPath = settings.value(REPLAY_VIDEOS_PATH_KEY, QDir::homePath()).toString();
+    _replayVideo = settings.value(REPLAY_VIDEO_KEY, QString()).toString();
+    _replayFps = settings.value(REPLAY_FPS_KEY, 30.0f).toFloat();
 }
 
 QString AppSettings::cameraDevice() const
@@ -97,6 +104,21 @@ QMap<QByteArray, int> AppSettings::robot2Marker() const
 QPolygonF AppSettings::worldEdge() const
 {
     return _worldEdge;
+}
+
+QString AppSettings::replayVideosPath() const
+{
+    return _replayVideosPath;
+}
+
+QString AppSettings::replayVideo() const
+{
+    return _replayVideo;
+}
+
+float AppSettings::replayFramesPerSecond() const
+{
+    return _replayFps;
 }
 
 void AppSettings::setCameraDevice(QString cameraDevice)
@@ -203,4 +225,37 @@ void AppSettings::setWorldEdge(QPolygonF newEdge)
         points << p;
     }
     settings.setValue(WORLD_EDGE_KEY, points);
+}
+
+void AppSettings::setReplayVideosPath(QString newPath)
+{
+    if (_replayVideosPath == newPath)
+        return;
+
+    _replayVideosPath = newPath;
+
+    QSettings settings;
+    settings.setValue(REPLAY_VIDEOS_PATH_KEY, _replayVideosPath);
+}
+
+void AppSettings::setReplayVideo(QString newVideo)
+{
+    if (_replayVideo == newVideo)
+        return;
+
+    _replayVideo = newVideo;
+
+    QSettings settings;
+    settings.setValue(REPLAY_VIDEO_KEY, _replayVideo);
+}
+
+void AppSettings::setReplayFramesPerSecond(float newFps)
+{
+    if (qFuzzyIsNull(_replayFps - newFps))
+        return;
+
+    _replayFps = newFps;
+
+    QSettings settings;
+    settings.setValue(REPLAY_FPS_KEY, _replayFps);
 }

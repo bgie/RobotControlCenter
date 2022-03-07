@@ -14,27 +14,9 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-#pragma once
 #include "ICameraManager.h"
 
-class QFileSystemWatcher;
-class AppSettings;
-
-class CameraManager : public ICameraManager {
-    Q_OBJECT
-
-public:
-    explicit CameraManager(AppSettings& settings, QObject* parent = nullptr);
-
-    QStringList availableDevices() const override;
-    ICamera* createCamera(QString deviceName) const override;
-    bool isValidDevice(QString deviceName) const override;
-
-private:
-    void updateAvailableDevices();
-
-private:
-    AppSettings& _settings;
-    QStringList _availableDevices;
-    QFileSystemWatcher& _watcher;
-};
+ICameraManager::ICameraManager(QObject* parent)
+    : QObject(parent)
+{
+}

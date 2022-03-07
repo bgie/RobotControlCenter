@@ -15,26 +15,23 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 #pragma once
-#include "ICameraManager.h"
+#include <QObject>
 
-class QFileSystemWatcher;
-class AppSettings;
+class ICamera;
 
-class CameraManager : public ICameraManager {
+class ICameraManager : public QObject {
     Q_OBJECT
+    Q_PROPERTY(QStringList availableDevices READ availableDevices NOTIFY availableDevicesChanged)
 
 public:
-    explicit CameraManager(AppSettings& settings, QObject* parent = nullptr);
+    explicit ICameraManager(QObject* parent = nullptr);
 
-    QStringList availableDevices() const override;
-    ICamera* createCamera(QString deviceName) const override;
-    bool isValidDevice(QString deviceName) const override;
+    virtual QStringList availableDevices() const = 0;
+    virtual ICamera* createCamera(QString deviceName) const = 0;
+    virtual bool isValidDevice(QString deviceName) const = 0;
 
-private:
-    void updateAvailableDevices();
-
-private:
-    AppSettings& _settings;
-    QStringList _availableDevices;
-    QFileSystemWatcher& _watcher;
+signals:
+    void availableDevicesChanged();
+    void availableDeviceAdded(QString deviceName);
+    void availableDeviceRemoved(QString deviceName);
 };

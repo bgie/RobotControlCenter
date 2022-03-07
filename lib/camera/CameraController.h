@@ -18,26 +18,26 @@
 #include <QImage>
 #include <QObject>
 
-class CameraManager;
-class Camera;
+class ICameraManager;
+class ICamera;
 
 class CameraController : public QObject {
     Q_OBJECT
     Q_PROPERTY(QString videoDevice READ videoDevice WRITE setVideoDevice NOTIFY videoDeviceChanged)
     Q_PROPERTY(bool connectPossible READ connectPossible NOTIFY connectPossibleChanged)
     Q_PROPERTY(QImage image READ image NOTIFY imageChanged)
-    Q_PROPERTY(Camera* camera READ camera NOTIFY cameraChanged)
+    Q_PROPERTY(ICamera* camera READ camera NOTIFY cameraChanged)
     Q_PROPERTY(float framesPerSecond READ framesPerSecond NOTIFY framesPerSecondChanged)
     Q_PROPERTY(bool canStart READ canStart NOTIFY canStartChanged)
     Q_PROPERTY(bool isStreaming READ isStreaming NOTIFY isStreamingChanged)
 
 public:
-    explicit CameraController(CameraManager& manager, QObject* parent = nullptr);
+    explicit CameraController(ICameraManager& manager, QObject* parent = nullptr);
     virtual ~CameraController();
 
     QString videoDevice() const;
     bool connectPossible() const;
-    Camera* camera() const;
+    ICamera* camera() const;
     float framesPerSecond() const;
 
     QImage image() const;
@@ -53,7 +53,7 @@ public slots:
 signals:
     void videoDeviceChanged(QString videoDevice);
     void connectPossibleChanged(bool connectPossible);
-    void cameraChanged(Camera* camera);
+    void cameraChanged(ICamera* camera);
     void imageChanged(QImage image);
     void frameReadAsync(const QImage image);
     void framesPerSecondChanged(float value);
@@ -65,9 +65,9 @@ private slots:
     void setImage(QImage image);
 
 private:
-    CameraManager& _cameraManager;
+    ICameraManager& _cameraManager;
     QString _videoDevice;
     bool _connectPossible;
-    QScopedPointer<Camera> _camera;
+    QScopedPointer<ICamera> _camera;
     QImage _image;
 };

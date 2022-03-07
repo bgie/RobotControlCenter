@@ -31,6 +31,7 @@ MyDialog {
     signal exitClicked
 
     property SettingsController controller: settingsControllerFactory.create()
+    property ICamera camera: cameraController.camera
 
     onCloseClicked: exitClicked()
 
@@ -47,6 +48,27 @@ MyDialog {
             navigationBar: navigationBar
             sourceLight: "img/camera-white.png"
             sourceDark: "img/camera-black.png"
+        }
+
+        Row {
+            Layout.leftMargin: Style.mediumMargin
+            MyButton {
+                text: "Start"
+                backgroundColor: Style.darkGray
+                radius: 0
+                enabled: cameraController.canStart
+                visible: !cameraController.isStreaming
+                onClicked: cameraController.startCameraStream()
+                width: cameraButton.width
+            }
+            MyButton {
+                text: "Stop"
+                backgroundColor: Style.darkGray
+                radius: 0
+                visible: cameraController.isStreaming
+                onClicked: cameraController.stopCameraStream()
+                width: cameraButton.width
+            }
         }
 
         MyNavigationButton {
@@ -145,65 +167,112 @@ MyDialog {
                 }
             }
 
-            GridLayout {
-                rows: 2
-                flow: GridLayout.TopToBottom
+            Loader {
                 Layout.margins: Style.largeMargin
-                columnSpacing: Style.largeMargin
-                rowSpacing: Style.smallMargin
 
-                MyLabel {
-                    text: "Format"
-                }
-                MyComboBox {
-                    enabled: !cameraController.camera.isStreaming
-                    model: cameraController.camera.videoFormats
-                    Layout.preferredWidth: 600
-                    Layout.leftMargin: Style.mediumMargin
-                    currentIndex: cameraController.camera.videoFormatIndex
-                    onCurrentIndexChanged: cameraController.camera.videoFormatIndex = currentIndex
-                }
-                MyLabel {
-                    text: "Gain"
-                }
-                MyTextEdit {
-                    Layout.leftMargin: Style.mediumMargin
-                    Layout.preferredWidth: 60
-                    text: cameraController.camera.gain
-                    onTextChanged: cameraController.camera.gain = parseInt(text)
-                }
-                MyLabel {
-                    text: "Exposure"
-                }
-                MyTextEdit {
-                    Layout.leftMargin: Style.mediumMargin
-                    Layout.preferredWidth: 60
-                    text: cameraController.camera.exposure
-                    onTextChanged: cameraController.camera.exposure = parseInt(text)
-                }
+                active: camera && camera.className == "Camera"
+                visible: active
+                sourceComponent: GridLayout {
+                    rows: 2
+                    flow: GridLayout.TopToBottom
+                    columnSpacing: Style.largeMargin
+                    rowSpacing: Style.smallMargin
 
-                MyLabel {
-                    text: "Streaming"
-                }
-                Row {
-                    Layout.leftMargin: Style.mediumMargin
-                    MyButton {
-                        id: startCameraButton
-                        text: "Start"
-                        backgroundColor: Style.darkGray
-                        enabled: cameraController.canStart
-                        visible: !cameraController.isStreaming
-                        onClicked: cameraController.startCameraStream()
+                    MyLabel {
+                        text: "Format"
                     }
-                    MyButton {
-                        text: "Stop"
-                        backgroundColor: Style.darkGray
-                        visible: cameraController.isStreaming
-                        onClicked: cameraController.stopCameraStream()
-                        width: startCameraButton.width
+                    MyComboBox {
+                        enabled: !camera.isStreaming
+                        model: camera.videoFormats
+                        Layout.preferredWidth: 600
+                        Layout.leftMargin: Style.mediumMargin
+                        currentIndex: camera.videoFormatIndex
+                        onCurrentIndexChanged: camera.videoFormatIndex = currentIndex
+                    }
+                    MyLabel {
+                        text: "Gain"
+                    }
+                    MyTextEdit {
+                        Layout.leftMargin: Style.mediumMargin
+                        Layout.preferredWidth: 80
+                        text: camera.gain
+                        onTextChanged: camera.gain = parseInt(text)
+                    }
+                    MyLabel {
+                        text: "Exposure"
+                    }
+                    MyTextEdit {
+                        Layout.leftMargin: Style.mediumMargin
+                        Layout.preferredWidth: 80
+                        text: camera.exposure
+                        onTextChanged: camera.exposure = parseInt(text)
                     }
                 }
             }
+
+            Loader {
+                Layout.margins: Style.largeMargin
+
+                active: camera && camera.className == "ReplayCam"
+                visible: active
+                sourceComponent: GridLayout {
+                    rows: 2
+                    flow: GridLayout.TopToBottom
+                    columnSpacing: Style.largeMargin
+                    rowSpacing: Style.smallMargin
+
+                    MyLabel {
+                        text: "Path"
+                    }
+                    Row {
+                        Layout.leftMargin: Style.mediumMargin
+                        spacing: Style.mediumMargin
+                        MyTextEdit {
+                            id: videosPath
+                            width: 700
+                            text: camera.videosPath
+                            onTextChanged: camera.videosPath = text
+                        }
+                        Image {
+                            width: 32
+                            height: videosPath.height
+                            fillMode: Image.PreserveAspectFit
+                            source: "/img/error-red.png"
+                            visible: !camera.videosPathValid
+                        }
+                        Image {
+                            width: 32
+                            height: videosPath.height
+                            fillMode: Image.PreserveAspectFit
+                            source: "/img/checkmark-white.png"
+                            visible: camera.videosPathValid
+                        }
+                    }
+
+                    MyLabel {
+                        text: "Videos"
+                    }
+                    MyComboBox {
+                        enabled: camera.videosPathValid
+                        model: camera.videos
+                        Layout.preferredWidth: 250
+                        Layout.leftMargin: Style.mediumMargin
+                        currentIndex: camera.videoIndex
+                        onCurrentIndexChanged: camera.videoIndex = currentIndex
+                    }
+
+                    MyLabel {
+                        text: "FPS"
+                    }
+                    MyTextEdit {
+                        Layout.leftMargin: Style.mediumMargin
+                        Layout.preferredWidth: 60
+                        text: camera.framesPerSecond
+                        onTextChanged: camera.framesPerSecond = parseInt(text)
+                    }
+                }
+            }
+
 
             Item {
                 Layout.fillHeight: true
@@ -256,28 +325,6 @@ MyDialog {
                         fillMode: Image.PreserveAspectFit
                         source: "/img/checkmark-white.png"
                         visible: calibrationController.loaded
-                    }
-                }
-
-                MyLabel {
-                    text: "Camera"
-                }
-                Row {
-                    Layout.leftMargin: Style.mediumMargin
-                    MyButton {
-                        id: startMarkerCameraButton
-                        text: "Start"
-                        backgroundColor: Style.darkGray
-                        enabled: cameraController.canStart
-                        visible: !cameraController.isStreaming
-                        onClicked: cameraController.startCameraStream()
-                    }
-                    MyButton {
-                        text: "Stop"
-                        backgroundColor: Style.darkGray
-                        visible: cameraController.isStreaming
-                        onClicked: cameraController.stopCameraStream()
-                        width: startMarkerCameraButton.width
                     }
                 }
             }
@@ -392,28 +439,6 @@ MyDialog {
                 MyLabel {
                     Layout.leftMargin: Style.mediumMargin
                     text: worldEdge.z.toFixed(1)
-                }
-
-                MyLabel {
-                    text: "Camera"
-                }
-                Row {
-                    Layout.leftMargin: Style.mediumMargin
-                    MyButton {
-                        id: startWorldCameraButton
-                        text: "Start"
-                        backgroundColor: Style.darkGray
-                        enabled: cameraController.canStart
-                        visible: !cameraController.isStreaming
-                        onClicked: cameraController.startCameraStream()
-                    }
-                    MyButton {
-                        text: "Stop"
-                        backgroundColor: Style.darkGray
-                        visible: cameraController.isStreaming
-                        onClicked: cameraController.stopCameraStream()
-                        width: startWorldCameraButton.width
-                    }
                 }
             }
 

@@ -25,7 +25,7 @@ const QDir devPath = QDir(QStringLiteral("/dev/"));
 const QStringList videoDevices = QStringList() << QStringLiteral("video*");
 
 CameraManager::CameraManager(AppSettings& settings, QObject* parent)
-    : QObject(parent)
+    : ICameraManager(parent)
     , _settings(settings)
     , _watcher(*new QFileSystemWatcher(this))
 {
@@ -39,7 +39,7 @@ QStringList CameraManager::availableDevices() const
     return _availableDevices;
 }
 
-Camera* CameraManager::createCamera(QString deviceName) const
+ICamera* CameraManager::createCamera(QString deviceName) const
 {
     auto result = new Camera(deviceName);
     result->setVideoFormatIndex(_settings.videoFormatIndex(deviceName));
@@ -78,6 +78,6 @@ void CameraManager::updateAvailableDevices()
         hasChange = true;
     }
     if (hasChange) {
-        emit availableDevicesChanged(_availableDevices);
+        emit availableDevicesChanged();
     }
 }

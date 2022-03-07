@@ -80,7 +80,7 @@ public:
 };
 
 Camera::Camera(QString deviceName, QObject* parent)
-    : QObject(parent)
+    : ICamera(parent)
     , _d(new Data(deviceName))
 {
     _d->fd = open(deviceName.toLatin1().constData(), O_RDWR);
@@ -134,6 +134,11 @@ Camera::~Camera()
 {
     stopStream();
     close(_d->fd);
+}
+
+QString Camera::className() const
+{
+    return QStringLiteral("Camera");
 }
 
 QString Camera::deviceName() const

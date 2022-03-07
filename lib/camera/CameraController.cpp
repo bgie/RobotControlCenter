@@ -15,10 +15,10 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 #include "CameraController.h"
-#include "Camera.h"
-#include "CameraManager.h"
+#include "ICamera.h"
+#include "ICameraManager.h"
 
-CameraController::CameraController(CameraManager& manager, QObject* parent)
+CameraController::CameraController(ICameraManager& manager, QObject* parent)
     : QObject(parent)
     , _cameraManager(manager)
     , _connectPossible(false)
@@ -39,7 +39,7 @@ bool CameraController::connectPossible() const
     return _connectPossible;
 }
 
-Camera* CameraController::camera() const
+ICamera* CameraController::camera() const
 {
     return _camera.data();
 }
@@ -89,11 +89,13 @@ void CameraController::setVideoDevice(QString videoDevice)
 
     if (_connectPossible) {
         _camera.reset(_cameraManager.createCamera(_videoDevice));
-        connect(_camera.data(), &Camera::frameRead, this, &CameraController::setImage, Qt::QueuedConnection);
-        connect(_camera.data(), &Camera::frameRead, this, &CameraController::frameReadAsync, Qt::DirectConnection);
-        connect(_camera.data(), &Camera::framesPerSecondChanged, this, &CameraController::framesPerSecondChanged);
-        connect(_camera.data(), &Camera::isStreamingChanged, this, &CameraController::canStartChanged);
-        connect(_camera.data(), &Camera::isStreamingChanged, this, &CameraController::isStreamingChanged);
+        if (_camera.data()) {
+            connect(_camera.data(), &ICamera::frameRead, this, &CameraController::setImage, Qt::QueuedConnection);
+            connect(_camera.data(), &ICamera::frameRead, this, &CameraController::frameReadAsync, Qt::DirectConnection);
+            connect(_camera.data(), &ICamera::framesPerSecondChanged, this, &CameraController::framesPerSecondChanged);
+            connect(_camera.data(), &ICamera::isStreamingChanged, this, &CameraController::canStartChanged);
+            connect(_camera.data(), &ICamera::isStreamingChanged, this, &CameraController::isStreamingChanged);
+        }
     } else {
         _camera.reset();
     }
