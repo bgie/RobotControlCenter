@@ -44,6 +44,15 @@ MyDialog {
         selectedButton: cameraButton
 
         MyNavigationButton {
+            id: exitButton
+            navigationBar: navigationBar
+            sourceLight: "img/exit-white.png"
+            sourceDark: "img/exit-black.png"
+
+            onClicked: exitClicked()
+        }
+
+        MyNavigationButton {
             id: cameraButton
             navigationBar: navigationBar
             sourceLight: "img/camera-white.png"
@@ -105,17 +114,6 @@ MyDialog {
             sourceLight: "img/pipe-white.png"
             sourceDark: "img/pipe-black.png"
         }
-
-        bottomButtons: [
-            MyNavigationButton {
-                id: exitButton
-                navigationBar: navigationBar
-                sourceLight: "img/exit-white.png"
-                sourceDark: "img/exit-black.png"
-
-                onClicked: exitClicked()
-            }
-        ]
     }
 
     Item {
@@ -515,133 +513,160 @@ MyDialog {
             }
         }
 
-        Column {  // Tanks panel
+        Item {  // Tanks panel
             anchors.fill: parent
             anchors.margins: Style.largeMargin
             visible: tankButton.selected
-            spacing: Style.largeMargin
+            ColumnLayout {
+                anchors.fill: parent
+                spacing: Style.largeMargin
 
-            Row {
-                visible: !robotNetwork.connected
-                spacing: Style.smallMargin
+                Row {
+                    visible: !robotNetwork.connected
+                    spacing: Style.smallMargin
 
-                Image {
-                    width: 48
-                    height: 48
-                    source: "/img/error-red.png"
+                    Image {
+                        width: 48
+                        height: 48
+                        source: "/img/error-red.png"
+                    }
+
+                    MyLabel {
+                        text: "Network connection error\n" + robotNetwork.connectionError
+                    }
                 }
 
                 MyLabel {
-                    text: "Network connection error\n" + robotNetwork.connectionError
+                    text: "No robots connected"
+                    visible: robotManager.count === 0
+                }
+
+                ScrollView {
+                    Layout.fillHeight: true
+                    Layout.fillWidth: true
+                    clip: true
+                    GridLayout {
+                        columns: 2
+                        Repeater {
+                            model: robotManager.robots
+
+                            delegate:  Row {
+                                property Robot robot: modelData
+
+                                spacing: Style.mediumMargin
+
+                                Image {
+                                    width: 96
+                                    height: 96
+                                    fillMode: Image.PreserveAspectFit
+                                    source: "/img/tank-white.png"
+                                }
+
+                                Column {
+                                    spacing: Style.mediumMargin
+
+                                    MyLabel {
+                                        text: "Robot " + robot.id
+                                        font.pixelSize: Style.subHeaderFontSize
+                                    }
+
+                                    Row {
+                                        spacing: Style.smallMargin
+                                        Image {
+                                            width: 32
+                                            height: 32
+                                            fillMode: Image.PreserveAspectFit
+                                            source: "/img/battery-high-white.png"
+                                        }
+                                        MyLabel {
+                                            height: 32
+                                            verticalAlignment: Qt.AlignVCenter
+                                            text: robot.batteryVoltage.toFixed(2) + "V"
+                                        }
+                                        Item {
+                                            width: Style.mediumMargin
+                                            height: 1
+                                        }
+                                        Image {
+                                            width: 32
+                                            height: 32
+                                            fillMode: Image.PreserveAspectFit
+                                            source: "/img/antenna-white.png"
+                                        }
+                                        MyLabel {
+                                            height: 32
+                                            verticalAlignment: Qt.AlignVCenter
+                                            text: robot.url
+                                        }
+                                    }
+
+                                    Row {
+                                        spacing: Style.smallMargin
+                                        MyLabel {
+                                            height: markerIdInput.height
+                                            width: commandLabel.width
+                                            verticalAlignment: Qt.AlignVCenter
+                                            text: "Marker id"
+                                        }
+                                        MyTextEdit {
+                                            id: markerIdInput
+                                            width: 60
+                                            text: robot.markerId
+                                            onTextChanged: robot.markerId = parseInt(text)
+                                        }
+                                    }
+
+                                    Row {
+                                        spacing: Style.smallMargin
+                                        MyLabel {
+                                            id: commandLabel
+                                            height: commandInput.height
+                                            verticalAlignment: Qt.AlignVCenter
+                                            text: "Command"
+                                        }
+                                        MyTextEdit {
+                                            id: commandInput
+                                            width: 300
+
+                                            MyToolButton {
+                                                anchors.right: parent.right
+                                                width: commandInput.height
+                                                height: commandInput.height
+                                                radius: commandInput.height / 2
+                                                sourceLight: "img/help-black.png" // inverted on purpose
+                                                sourceDark: "img/help-white.png"
+                                                backgroundColor: "transparent"
+                                                onClicked: commandsHelpPanel.visible = true
+                                            }
+                                        }
+                                        MyButton {
+                                            text: "Send"
+                                            backgroundColor: Style.darkGray
+                                            enabled: commandInput.text
+                                            onClicked: robot.sendCommand(commandInput.text)
+                                        }
+                                    }
+
+                                    Item {
+                                        height: Style.largeMargin
+                                        width: 1
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
             }
+            MyToolButton {
+                anchors.right: parent.right
+                anchors.top: parent.top
+                anchors.rightMargin: Style.mediumMargin
+                width: 64
+                height: 64
+                sourceLight: "img/plus-white.png"
+                sourceDark: "img/plus-black.png"
 
-            MyLabel {
-                text: "No robots connected"
-                visible: robotNetwork.connected && robotNetwork.count === 0
-            }
-
-            Repeater {
-                model: robotNetwork.robots
-
-                delegate:  Row {
-                    property Robot robot: modelData
-
-                    spacing: Style.mediumMargin
-
-                    Image {
-                        width: 128
-                        height: 110
-                        source: "/img/tank-white.png"
-                    }
-
-                    Column {
-                        spacing: Style.mediumMargin
-
-                        MyLabel {
-                            text: "Robot " + robot.id
-                            font.pixelSize: Style.subHeaderFontSize
-                        }
-
-                        Row {
-                            spacing: Style.smallMargin
-                            Image {
-                                width: 32
-                                height: 32
-                                fillMode: Image.PreserveAspectFit
-                                source: "/img/battery-high-white.png"
-                            }
-                            MyLabel {
-                                height: 32
-                                verticalAlignment: Qt.AlignVCenter
-                                text: robot.batteryVoltage.toFixed(2) + "V"
-                            }
-                            Item {
-                                width: Style.mediumMargin
-                                height: 1
-                            }
-                            Image {
-                                width: 32
-                                height: 32
-                                fillMode: Image.PreserveAspectFit
-                                source: "/img/antenna-white.png"
-                            }
-                            MyLabel {
-                                height: 32
-                                verticalAlignment: Qt.AlignVCenter
-                                text: robot.url
-                            }
-                        }
-
-                        Row {
-                            spacing: Style.smallMargin
-                            MyLabel {
-                                height: markerIdInput.height
-                                width: commandLabel.width
-                                verticalAlignment: Qt.AlignVCenter
-                                text: "Marker id"
-                            }
-                            MyTextEdit {
-                                id: markerIdInput
-                                width: 60
-                                text: robot.markerId
-                                onTextChanged: robot.markerId = parseInt(text)
-                            }
-                        }
-
-                        Row {
-                            spacing: Style.smallMargin
-                            MyLabel {
-                                id: commandLabel
-                                height: commandInput.height
-                                verticalAlignment: Qt.AlignVCenter
-                                text: "Command"
-                            }
-                            MyTextEdit {
-                                id: commandInput
-                                width: 400
-                            }
-                            MyButton {
-                                text: "Send"
-                                backgroundColor: Style.darkGray
-                                enabled: commandInput.text
-                                onClicked: robot.sendCommand(commandInput.text)
-                            }
-                            MyToolButton {
-                                width: commandInput.height
-                                height: commandInput.height
-                                sourceLight: "img/help-white.png"
-                                sourceDark: "img/help-black.png"
-                                onClicked: commandsHelpPanel.visible = true
-                            }
-                        }
-
-                        Item {
-                            height: Style.largeMargin
-                            width: 1
-                        }
-                    }
-                }
+                onClicked: fakeRobotManager.addFakeRobot()
             }
         }
 

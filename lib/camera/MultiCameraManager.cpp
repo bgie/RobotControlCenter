@@ -21,7 +21,7 @@ MultiCameraManager::MultiCameraManager(QObject* parent)
 {
 }
 
-void MultiCameraManager::addManager(ICameraManager& manager)
+void MultiCameraManager::add(ICameraManager& manager)
 {
     _managers.append(&manager);
     connect(&manager, &ICameraManager::availableDevicesChanged, this, &ICameraManager::availableDevicesChanged);

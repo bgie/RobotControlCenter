@@ -15,46 +15,28 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 #pragma once
-
 #include <QList>
 #include <QMap>
 #include <QObject>
 
 class Robot;
+class IRobotManager;
 
-class RobotNetwork : public QObject {
+class RobotSettings : public QObject {
     Q_OBJECT
-    Q_PROPERTY(bool connected READ connected NOTIFY connectedChanged)
-    Q_PROPERTY(QString connectionError READ connectionError NOTIFY connectedChanged)
-    Q_PROPERTY(QList<QObject*> robots READ robotQObjects NOTIFY robotsChanged)
-    Q_PROPERTY(int count READ count NOTIFY robotsChanged)
 public:
-    explicit RobotNetwork(QObject* parent = nullptr);
-    virtual ~RobotNetwork();
-
-    bool connected() const;
-    QString connectionError() const;
-
-    QList<Robot*> robots() const;
-    QList<QObject*> robotQObjects() const;
-    int count() const;
+    explicit RobotSettings(IRobotManager& network, QObject* parent = nullptr);
+    virtual ~RobotSettings();
 
     QMap<QByteArray, int> robot2Marker() const;
     void setRobot2Marker(QMap<QByteArray, int> values);
 
 signals:
-    void connectedChanged(bool connected);
-    void robotAdded(Robot* r);
-    void robotRemoved(Robot* r);
-    void robotsChanged();
     void robot2MarkerChanged(QMap<QByteArray, int> values);
 
 private:
-    void setConnected(bool connected, QString errorString);
+    void onRobotAdded(Robot* r);
     void onRobotMarkerIdChanged(int newId);
-
-    void readListenerSocket();
-    void discoverRobots();
 
 private:
     struct Data;

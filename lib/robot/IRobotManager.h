@@ -14,43 +14,27 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-#include "GameScene.h"
-#include "WorldEdge.h"
-#include "aruco/MarkerList.h"
+#pragma once
+#include <QList>
+#include <QObject>
 
-struct GameScene::Data {
-    WorldEdge edge;
-    MarkerList markers;
+class Robot;
+
+class IRobotManager : public QObject {
+    Q_OBJECT
+    Q_PROPERTY(QList<QObject*> robots READ robotQObjects NOTIFY robotsChanged)
+    Q_PROPERTY(int count READ count NOTIFY robotsChanged)
+public:
+    explicit IRobotManager(QObject* parent = nullptr);
+
+    virtual Robot* robot(QByteArray id) const = 0;
+    virtual QList<Robot*> robots() const = 0;
+
+    QList<QObject*> robotQObjects() const;
+    virtual int count() const = 0;
+
+signals:
+    void robotAdded(Robot* r);
+    void robotRemoved(Robot* r);
+    void robotsChanged();
 };
-
-GameScene::GameScene(QObject* parent)
-    : QObject(parent)
-    , _d(new Data())
-{
-    connect(&_d->edge, &WorldEdge::pointsChanged, this, &GameScene::boundsChanged);
-}
-
-GameScene::~GameScene()
-{
-}
-
-QRectF GameScene::bounds() const
-{
-    return _d->edge.bounds();
-}
-
-WorldEdge& GameScene::worldEdge() const
-{
-    return _d->edge;
-}
-
-const MarkerList& GameScene::markers() const
-{
-    return _d->markers;
-}
-
-void GameScene::setMarkers(const MarkerList& markers)
-{
-    _d->markers = markers;
-    emit markersChanged();
-}

@@ -14,43 +14,19 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-#include "GameScene.h"
-#include "WorldEdge.h"
-#include "aruco/MarkerList.h"
+#include "IRobotManager.h"
+#include "Robot.h"
 
-struct GameScene::Data {
-    WorldEdge edge;
-    MarkerList markers;
-};
-
-GameScene::GameScene(QObject* parent)
+IRobotManager::IRobotManager(QObject* parent)
     : QObject(parent)
-    , _d(new Data())
-{
-    connect(&_d->edge, &WorldEdge::pointsChanged, this, &GameScene::boundsChanged);
-}
-
-GameScene::~GameScene()
 {
 }
 
-QRectF GameScene::bounds() const
+QList<QObject*> IRobotManager::robotQObjects() const
 {
-    return _d->edge.bounds();
-}
-
-WorldEdge& GameScene::worldEdge() const
-{
-    return _d->edge;
-}
-
-const MarkerList& GameScene::markers() const
-{
-    return _d->markers;
-}
-
-void GameScene::setMarkers(const MarkerList& markers)
-{
-    _d->markers = markers;
-    emit markersChanged();
+    QList<QObject*> result;
+    foreach (auto r, robots()) {
+        result << r;
+    }
+    return result;
 }

@@ -27,9 +27,18 @@ Item {
         }
     }
 
-    MyToolButton {
+    ImageItem {
         anchors.left: parent.left
         anchors.bottom: parent.bottom
+        anchors.margins: Style.windowMargins
+        image: cameraController.image
+        width: 320
+        height: 200
+    }
+
+    MyToolButton {
+        anchors.left: parent.left
+        anchors.top: parent.top
         anchors.margins: Style.windowMargins
         sourceLight: "img/exit-white.png"
         sourceDark: "img/exit-black.png"

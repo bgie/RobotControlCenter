@@ -107,8 +107,8 @@ Window {
         }
         MyStatusIcon {
             source: "/img/tank-white.png"
-            subText: robotNetwork.count
-            showSubIcon: robotNetwork.count === 0
+            subText: robotManager.count
+            showSubIcon: robotManager.count === 0
         }
     }
 

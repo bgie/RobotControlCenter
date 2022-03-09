@@ -16,7 +16,7 @@
 */
 #include "RobotCommandPipe.h"
 #include "NonBlockingReceiverPipe.h"
-#include "network/Robot.h"
+#include "robot/Robot.h"
 #include <QDir>
 
 RobotCommandPipe::RobotCommandPipe(QString path, Robot* robot, QObject* parent)

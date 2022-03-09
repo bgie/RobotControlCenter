@@ -15,7 +15,7 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 #include "RobotCameraPipe.h"
-#include "network/Robot.h"
+#include "robot/Robot.h"
 #include <QDir>
 
 RobotCameraPipe::RobotCameraPipe(QString path, Robot* robot, QObject* parent)

@@ -64,6 +64,8 @@ QString Robot::idString() const
 
 QString Robot::url() const
 {
+    if (_d->address.isNull())
+        return QStringLiteral("-");
     return QStringLiteral("%1:%2").arg(_d->address.toString()).arg(_d->port);
 }
 
@@ -118,6 +120,9 @@ void Robot::setBatteryVoltage(float newVoltage)
 
 bool Robot::sendCommand(QByteArray command)
 {
+    if (_d->address.isNull())
+        return false;
+
     const qint64 bytesSent = _d->sendSocket.writeDatagram(command, _d->address, _d->port);
     const bool sendOk = (bytesSent == command.size());
     return sendOk;

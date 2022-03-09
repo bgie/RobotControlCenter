@@ -31,11 +31,14 @@
 #include "joystick/GamePadManager.h"
 #include "joystick/JoystickManager.h"
 #include "joystick/SDL2EventLoop.h"
-#include "network/Robot.h"
-#include "network/RobotNetwork.h"
 #include "pipe/PipeController.h"
 #include "pipe/RobotCameraPipe.h"
 #include "pipe/RobotCommandPipe.h"
+#include "robot/FakeRobotManager.h"
+#include "robot/MultiRobotManager.h"
+#include "robot/Robot.h"
+#include "robot/RobotNetwork.h"
+#include "robot/RobotSettings.h"
 #include "settings/AppSettings.h"
 #include "settings/SettingsController.h"
 #include "util/FactoryMethod.h"
@@ -84,8 +87,8 @@ int main(int argc, char *argv[])
     CameraManager cameraManager(settings);
     ReplayCamManager replayCamManager(settings);
     MultiCameraManager multiCameraManager;
-    multiCameraManager.addManager(cameraManager);
-    multiCameraManager.addManager(replayCamManager);
+    multiCameraManager.add(cameraManager);
+    multiCameraManager.add(replayCamManager);
     CameraController cameraController(multiCameraManager);
     cameraController.setVideoDevice(settings.cameraDevice());
     QObject::connect(&cameraController, &CameraController::videoDeviceChanged, &settings, &AppSettings::setCameraDevice);
@@ -105,8 +108,13 @@ int main(int argc, char *argv[])
     tracker.setFramesPerSecond(cameraController.framesPerSecond());
 
     RobotNetwork robotNetwork;
-    robotNetwork.setRobot2Marker(settings.robot2Marker());
-    QObject::connect(&robotNetwork, &RobotNetwork::robot2MarkerChanged, &settings, &AppSettings::setRobot2Marker);
+    MultiRobotManager multiRobotManager;
+    multiRobotManager.add(robotNetwork);
+    FakeRobotManager fakeRobotManager;
+    multiRobotManager.add(fakeRobotManager);
+    RobotSettings robotSettings(multiRobotManager);
+    robotSettings.setRobot2Marker(settings.robot2Marker());
+    QObject::connect(&robotSettings, &RobotSettings::robot2MarkerChanged, &settings, &AppSettings::setRobot2Marker);
 
     PipeController pipeController;
     pipeController.setCameraPipePath(settings.cameraPipePath());
@@ -118,17 +126,22 @@ int main(int argc, char *argv[])
             pipeController.sendCameraMessage(tracker.markers().serialize());
         },
         Qt::QueuedConnection);
-    foreach (Robot* r, robotNetwork.robots()) {
+    foreach (Robot* r, multiRobotManager.robots()) {
         pipeController.addRobot(r);
     }
-    QObject::connect(&robotNetwork, &RobotNetwork::robotAdded, &pipeController, &PipeController::addRobot);
-    QObject::connect(&robotNetwork, &RobotNetwork::robotRemoved, &pipeController, &PipeController::removeRobot);
+    QObject::connect(&multiRobotManager, &IRobotManager::robotAdded, &pipeController, &PipeController::addRobot);
+    QObject::connect(&multiRobotManager, &IRobotManager::robotRemoved, &pipeController, &PipeController::removeRobot);
 
     GameScene gameScene;
     gameScene.worldEdge().setPoints(settings.worldEdge());
     gameScene.worldEdge().setZ(settings.worldZ());
     QObject::connect(&gameScene.worldEdge(), &WorldEdge::pointsChanged, &settings, &AppSettings::setWorldEdge);
     QObject::connect(&gameScene.worldEdge(), &WorldEdge::zChanged, &settings, &AppSettings::setWorldZ);
+    QObject::connect(
+        &tracker, &SceneTracker::frameProcessed, &gameScene, [&]() {
+            gameScene.setMarkers(tracker.markers());
+        },
+        Qt::QueuedConnection);
 
     FactoryMethod settingsControllerFactory([&]() -> QObject* {
         return new SettingsController(tracker, gameScene.worldEdge(), aruco);
@@ -144,6 +157,8 @@ int main(int argc, char *argv[])
     engine.rootContext()->setContextProperty(QStringLiteral("cameraManager"), &multiCameraManager);
     engine.rootContext()->setContextProperty(QStringLiteral("cameraController"), &cameraController);
     engine.rootContext()->setContextProperty(QStringLiteral("robotNetwork"), &robotNetwork);
+    engine.rootContext()->setContextProperty(QStringLiteral("robotManager"), &multiRobotManager);
+    engine.rootContext()->setContextProperty(QStringLiteral("fakeRobotManager"), &fakeRobotManager);
     engine.rootContext()->setContextProperty(QStringLiteral("calibrationController"), &calibrationController);
     engine.rootContext()->setContextProperty(QStringLiteral("pipeController"), &pipeController);
     engine.rootContext()->setContextProperty(QStringLiteral("gameScene"), &gameScene);

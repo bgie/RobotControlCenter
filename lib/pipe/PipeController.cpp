@@ -18,7 +18,7 @@
 #include "NonBlockingSenderPipe.h"
 #include "RobotCameraPipe.h"
 #include "RobotCommandPipe.h"
-#include "network/Robot.h"
+#include "robot/Robot.h"
 #include <QList>
 #include <QTimer>
 

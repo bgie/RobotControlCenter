@@ -19,6 +19,7 @@
 #include <QRectF>
 
 class WorldEdge;
+class MarkerList;
 
 class GameScene : public QObject {
     Q_OBJECT
@@ -31,8 +32,12 @@ public:
     QRectF bounds() const;
     WorldEdge& worldEdge() const;
 
+    const MarkerList& markers() const;
+    void setMarkers(const MarkerList& markers);
+
 signals:
     void boundsChanged();
+    void markersChanged();
 
 private:
     struct Data;

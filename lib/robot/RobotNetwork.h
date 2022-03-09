@@ -15,20 +15,33 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 #pragma once
-#include "ICameraManager.h"
-#include <QList>
+#include "IRobotManager.h"
 
-class MultiCameraManager : public ICameraManager {
+class RobotNetwork : public IRobotManager {
     Q_OBJECT
+    Q_PROPERTY(bool connected READ connected NOTIFY connectedChanged)
+    Q_PROPERTY(QString connectionError READ connectionError NOTIFY connectedChanged)
 public:
-    explicit MultiCameraManager(QObject* parent = nullptr);
+    explicit RobotNetwork(QObject* parent = nullptr);
+    virtual ~RobotNetwork();
 
-    void add(ICameraManager& manager);
+    bool connected() const;
+    QString connectionError() const;
 
-    QStringList availableDevices() const override;
-    ICamera* createCamera(QString deviceName) const override;
-    bool isValidDevice(QString deviceName) const override;
+    virtual Robot* robot(QByteArray id) const override;
+    virtual QList<Robot*> robots() const override;
+    virtual int count() const override;
+
+signals:
+    void connectedChanged(bool connected);
 
 private:
-    QList<ICameraManager*> _managers;
+    void setConnected(bool connected, QString errorString);
+
+    void readListenerSocket();
+    void discoverRobots();
+
+private:
+    struct Data;
+    QScopedPointer<Data> _d;
 };

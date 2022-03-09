@@ -45,8 +45,12 @@ add_library(lib
   camera/CameraController.cpp
   settings/SettingsController.cpp
   settings/AppSettings.cpp
-  network/RobotNetwork.cpp
-  network/Robot.cpp
+  robot/IRobotManager.cpp
+  robot/RobotNetwork.cpp
+  robot/MultiRobotManager.cpp
+  robot/FakeRobotManager.cpp
+  robot/RobotSettings.cpp
+  robot/Robot.cpp
   pipe/NonBlockingPipe.cpp
   pipe/NonBlockingSenderPipe.cpp
   pipe/NonBlockingReceiverPipe.cpp
