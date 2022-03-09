@@ -20,21 +20,23 @@
 #include "pipe/PipeController.h"
 
 struct PythonGameMode::Data {
-    Data(PipeController& pipes, CameraController& camera, SceneTracker& tracker)
+    Data(PipeController& pipes, CameraController& camera, SceneTracker& tracker, GameScene& gameScene)
         : pipes(pipes)
         , camera(camera)
         , tracker(tracker)
+        , gameScene(gameScene)
     {
     }
 
     PipeController& pipes;
     CameraController& camera;
     SceneTracker& tracker;
+    GameScene& gameScene;
 };
 
-PythonGameMode::PythonGameMode(PipeController& pipes, CameraController& camera, SceneTracker& tracker, QObject* parent)
+PythonGameMode::PythonGameMode(PipeController& pipes, CameraController& camera, SceneTracker& tracker, GameScene& gameScene, QObject* parent)
     : QObject(parent)
-    , _d(new Data(pipes, camera, tracker))
+    , _d(new Data(pipes, camera, tracker, gameScene))
 {
     connect(&tracker, &SceneTracker::frameProcessed, this, &PythonGameMode::onTrackerCameraFrameProcessed);
 

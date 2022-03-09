@@ -29,6 +29,7 @@ const QString CAMERA_PIPE_PATH_KEY(QStringLiteral("CameraPipePath"));
 const QString ROBOT_PIPES_PATH_KEY(QStringLiteral("RobotPipesPath"));
 const QString ROBOT_2_MARKER_KEY(QStringLiteral("Robot2Marker"));
 const QString WORLD_EDGE_KEY(QStringLiteral("WorldEdge"));
+const QString WORLD_Z_KEY(QStringLiteral("WorldZ"));
 const QString REPLAY_VIDEOS_PATH_KEY(QStringLiteral("ReplayVideosPath"));
 const QString REPLAY_VIDEO_KEY(QStringLiteral("ReplayVideo"));
 const QString REPLAY_FPS_KEY(QStringLiteral("ReplayFPS"));
@@ -56,6 +57,7 @@ AppSettings::AppSettings(QObject *parent) : QObject(parent)
     foreach (auto p, edge) {
         _worldEdge << p.toPointF();
     }
+    _worldZ = settings.value(WORLD_Z_KEY, 0.0f).toFloat();
     _replayVideosPath = settings.value(REPLAY_VIDEOS_PATH_KEY, QDir::homePath()).toString();
     _replayVideo = settings.value(REPLAY_VIDEO_KEY, QString()).toString();
     _replayFps = settings.value(REPLAY_FPS_KEY, 30.0f).toFloat();
@@ -104,6 +106,11 @@ QMap<QByteArray, int> AppSettings::robot2Marker() const
 QPolygonF AppSettings::worldEdge() const
 {
     return _worldEdge;
+}
+
+float AppSettings::worldZ() const
+{
+    return _worldZ;
 }
 
 QString AppSettings::replayVideosPath() const
@@ -225,6 +232,17 @@ void AppSettings::setWorldEdge(QPolygonF newEdge)
         points << p;
     }
     settings.setValue(WORLD_EDGE_KEY, points);
+}
+
+void AppSettings::setWorldZ(float newZ)
+{
+    if (qFuzzyIsNull(_worldZ - newZ))
+        return;
+
+    _worldZ = newZ;
+
+    QSettings settings;
+    settings.setValue(WORLD_Z_KEY, _worldZ);
 }
 
 void AppSettings::setReplayVideosPath(QString newPath)

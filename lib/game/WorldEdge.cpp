@@ -56,7 +56,7 @@ void WorldEdge::setPoints(QPolygonF newPoints)
         return;
 
     _d->points = newPoints;
-    emit pointsChanged();
+    emit pointsChanged(_d->points);
 }
 
 void WorldEdge::addPoint(float x, float y, float z)
@@ -69,14 +69,14 @@ void WorldEdge::addPoint(float x, float y, float z)
 
     setZ(((_d->z * (_d->points.size() - 1)) + z) / _d->points.size()); // average all the z values
 
-    emit pointsChanged();
+    emit pointsChanged(_d->points);
 }
 
 bool WorldEdge::removeAt(int index)
 {
     if (index >= 0 && index < _d->points.size()) {
         _d->points.removeAt(index);
-        emit pointsChanged();
+        emit pointsChanged(_d->points);
         return true;
     }
     return false;
@@ -117,7 +117,7 @@ void WorldEdge::reset()
 {
     _d->points.clear();
     setZ(0.0f);
-    emit pointsChanged();
+    emit pointsChanged(_d->points);
 }
 
 void WorldEdge::sortPoints(QPolygonF& points)

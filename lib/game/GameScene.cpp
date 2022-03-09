@@ -14,28 +14,30 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-#pragma once
-#include <QObject>
+#include "GameScene.h"
+#include "WorldEdge.h"
 
-class PipeController;
-class CameraController;
-class SceneTracker;
-class GameScene;
-
-class PythonGameMode : public QObject
-{
-     Q_OBJECT
-public:
-    PythonGameMode(PipeController& pipes, CameraController& camera, SceneTracker& tracker, GameScene& gameScene, QObject* parent = nullptr);
-    virtual ~PythonGameMode() override;
-
-signals:
-
-private:
-    void onTrackerCameraFrameProcessed();
-
-private:
-    struct Data;
-    QScopedPointer<Data> _d;
+struct GameScene::Data {
+    WorldEdge edge;
 };
 
+GameScene::GameScene(QObject* parent)
+    : QObject(parent)
+    , _d(new Data())
+{
+    connect(&_d->edge, &WorldEdge::pointsChanged, this, &GameScene::boundsChanged);
+}
+
+GameScene::~GameScene()
+{
+}
+
+QRectF GameScene::bounds() const
+{
+    return _d->edge.bounds();
+}
+
+WorldEdge& GameScene::worldEdge() const
+{
+    return _d->edge;
+}

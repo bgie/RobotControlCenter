@@ -71,6 +71,7 @@ void SceneTracker::processFrame(QImage image)
 
     QMutexLocker lock(&_d->mutex);
     const float msecsPerFrame = 1000.0f / _d->framesPerSecond;
+
     QSet<int> foundIds;
     for (size_t i = 0; i < markers.ids.size(); ++i) {
         const int id = markers.ids.at(i);

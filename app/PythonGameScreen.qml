@@ -17,16 +17,20 @@ Item {
             text: "Python programming mode"
             font.pixelSize: Style.headerFontSize
         }
-        Item {
+        GameSceneItem {
             Layout.fillHeight: true
             Layout.fillWidth: true
+            Layout.topMargin: 20
+            Layout.bottomMargin: 60
+
+            scene: gameScene
         }
     }
 
     MyToolButton {
         anchors.left: parent.left
         anchors.bottom: parent.bottom
-        anchors.margins: Style.mediumMargin
+        anchors.margins: Style.windowMargins
         sourceLight: "img/exit-white.png"
         sourceDark: "img/exit-black.png"
 

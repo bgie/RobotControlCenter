@@ -41,6 +41,7 @@ add_library(lib
   camera/CameraManager.cpp
   camera/ReplayCamManager.cpp
   camera/ReplayCam.cpp
+  camera/ReplayThread.cpp
   camera/CameraController.cpp
   settings/SettingsController.cpp
   settings/AppSettings.cpp
@@ -55,6 +56,7 @@ add_library(lib
   util/FactoryMethod.cpp
   game/WorldEdge.cpp
   game/PythonGameMode.cpp
+  game/GameScene.cpp
 )
 
 target_include_directories(lib PUBLIC .)

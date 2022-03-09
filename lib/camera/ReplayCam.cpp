@@ -15,6 +15,7 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 #include "ReplayCam.h"
+#include "ReplayThread.h"
 #include <QDir>
 
 struct ReplayCam::Data {
@@ -28,6 +29,7 @@ struct ReplayCam::Data {
     QString videosPath;
     QStringList videos;
     int videoIndex;
+    QScopedPointer<ReplayThread> reader;
 };
 
 ReplayCam::ReplayCam(QObject* parent)
@@ -53,20 +55,30 @@ float ReplayCam::framesPerSecond() const
 
 bool ReplayCam::canStream() const
 {
-    return false;
+    return _d->reader.isNull() && _d->videoIndex >= 0 && _d->videoIndex < _d->videos.size();
 }
 
 void ReplayCam::startStream()
 {
+    if (_d->reader.isNull() && canStream()) {
+        _d->reader.reset(new ReplayThread(QDir(_d->videosPath).filePath(video())));
+        _d->reader->setFramesPerSecond(_d->framesPerSecond);
+        connect(_d->reader.data(), &ReplayThread::frameRead, this, &ICamera::frameRead, Qt::DirectConnection);
+        emit isStreamingChanged(true);
+    }
 }
 
 void ReplayCam::stopStream()
 {
+    if (!_d->reader.isNull()) {
+        _d->reader.reset();
+        emit isStreamingChanged(false);
+    }
 }
 
 bool ReplayCam::isStreaming() const
 {
-    return false;
+    return _d->reader;
 }
 
 void ReplayCam::setFramesPerSecond(float newValue)
@@ -75,6 +87,10 @@ void ReplayCam::setFramesPerSecond(float newValue)
         return;
 
     _d->framesPerSecond = newValue;
+
+    if (_d->reader) {
+        _d->reader->setFramesPerSecond(_d->framesPerSecond);
+    }
     emit framesPerSecondChanged(_d->framesPerSecond);
 }
 

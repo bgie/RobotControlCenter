@@ -15,27 +15,28 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 #pragma once
-#include <QObject>
+#include <QQuickPaintedItem>
 
-class PipeController;
-class CameraController;
-class SceneTracker;
 class GameScene;
 
-class PythonGameMode : public QObject
-{
-     Q_OBJECT
+class GameSceneItem : public QQuickPaintedItem {
+    Q_OBJECT
+    Q_PROPERTY(GameScene* scene READ scene WRITE setScene NOTIFY sceneChanged)
+
 public:
-    PythonGameMode(PipeController& pipes, CameraController& camera, SceneTracker& tracker, GameScene& gameScene, QObject* parent = nullptr);
-    virtual ~PythonGameMode() override;
+    explicit GameSceneItem(QQuickItem* parent = nullptr);
+
+    virtual void paint(QPainter* painter) override;
+
+    GameScene* scene() const;
+    void setScene(GameScene* scene);
 
 signals:
+    void sceneChanged(GameScene* scene);
 
 private:
-    void onTrackerCameraFrameProcessed();
+    void onSceneChanged();
 
 private:
-    struct Data;
-    QScopedPointer<Data> _d;
+    GameScene* _scene;
 };
-

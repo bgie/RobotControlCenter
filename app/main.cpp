@@ -14,6 +14,7 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
+#include "GameSceneItem.h"
 #include "ImageItem.h"
 #include "aruco/Aruco.h"
 #include "aruco/CalibrationController.h"
@@ -23,6 +24,7 @@
 #include "camera/CameraManager.h"
 #include "camera/MultiCameraManager.h"
 #include "camera/ReplayCamManager.h"
+#include "game/GameScene.h"
 #include "game/PythonGameMode.h"
 #include "game/WorldEdge.h"
 #include "joystick/GamePad.h"
@@ -54,6 +56,8 @@ int main(int argc, char *argv[])
 
     qmlRegisterSingletonType(QUrl("qrc:/Style.qml"), "RobotControlCenter", 1, 0, "Style");
     qmlRegisterType<ImageItem>("RobotControlCenter", 1, 0, "ImageItem");
+    qmlRegisterType<GameSceneItem>("RobotControlCenter", 1, 0, "GameSceneItem");
+    qmlRegisterUncreatableType<GameScene>("RobotControlCenter", 1, 0, "GameScene", noCreateQml);
     qmlRegisterUncreatableType<ICamera>("RobotControlCenter", 1, 0, "ICamera", noCreateQml);
     qmlRegisterUncreatableType<SettingsController>("RobotControlCenter", 1, 0, "SettingsController", noCreateQml);
     qmlRegisterUncreatableType<GamePadManager>("RobotControlCenter", 1, 0, "GamePadManager", noCreateQml);
@@ -75,7 +79,7 @@ int main(int argc, char *argv[])
 
     QTimer idleTimer;
     QObject::connect(&idleTimer, &QTimer::timeout, &loop, &SDL2EventLoop::processEvents);
-    idleTimer.start(0);
+    idleTimer.start(1);
 
     CameraManager cameraManager(settings);
     ReplayCamManager replayCamManager(settings);
@@ -120,13 +124,17 @@ int main(int argc, char *argv[])
     QObject::connect(&robotNetwork, &RobotNetwork::robotAdded, &pipeController, &PipeController::addRobot);
     QObject::connect(&robotNetwork, &RobotNetwork::robotRemoved, &pipeController, &PipeController::removeRobot);
 
-    WorldEdge worldEdge;
+    GameScene gameScene;
+    gameScene.worldEdge().setPoints(settings.worldEdge());
+    gameScene.worldEdge().setZ(settings.worldZ());
+    QObject::connect(&gameScene.worldEdge(), &WorldEdge::pointsChanged, &settings, &AppSettings::setWorldEdge);
+    QObject::connect(&gameScene.worldEdge(), &WorldEdge::zChanged, &settings, &AppSettings::setWorldZ);
 
     FactoryMethod settingsControllerFactory([&]() -> QObject* {
-        return new SettingsController(tracker, worldEdge, aruco);
+        return new SettingsController(tracker, gameScene.worldEdge(), aruco);
     });
     FactoryMethod pythonGameModeFactory([&]() -> QObject* {
-        return new PythonGameMode(pipeController, cameraController, tracker);
+        return new PythonGameMode(pipeController, cameraController, tracker, gameScene);
     });
 
     QQmlApplicationEngine engine;
@@ -138,7 +146,8 @@ int main(int argc, char *argv[])
     engine.rootContext()->setContextProperty(QStringLiteral("robotNetwork"), &robotNetwork);
     engine.rootContext()->setContextProperty(QStringLiteral("calibrationController"), &calibrationController);
     engine.rootContext()->setContextProperty(QStringLiteral("pipeController"), &pipeController);
-    engine.rootContext()->setContextProperty(QStringLiteral("worldEdge"), &worldEdge);
+    engine.rootContext()->setContextProperty(QStringLiteral("gameScene"), &gameScene);
+    engine.rootContext()->setContextProperty(QStringLiteral("worldEdge"), &gameScene.worldEdge());
     engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
     if (engine.rootObjects().isEmpty()) {
         return -1;

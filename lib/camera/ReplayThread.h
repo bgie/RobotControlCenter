@@ -15,27 +15,25 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 #pragma once
-#include <QObject>
+#include <QImage>
+#include <QThread>
 
-class PipeController;
-class CameraController;
-class SceneTracker;
-class GameScene;
-
-class PythonGameMode : public QObject
-{
-     Q_OBJECT
+class ReplayThread : public QThread {
+    Q_OBJECT
 public:
-    PythonGameMode(PipeController& pipes, CameraController& camera, SceneTracker& tracker, GameScene& gameScene, QObject* parent = nullptr);
-    virtual ~PythonGameMode() override;
+    explicit ReplayThread(QString path, QObject* parent = nullptr);
+    virtual ~ReplayThread();
+
+    void setFramesPerSecond(float framesPerSecond);
 
 signals:
+    void frameRead(const QImage img);
+
+protected:
+    virtual void run() override;
 
 private:
-    void onTrackerCameraFrameProcessed();
-
-private:
-    struct Data;
-    QScopedPointer<Data> _d;
+    const QString _path;
+    volatile bool _stopReading;
+    float _framesPerSecond;
 };
-
