@@ -1,0 +1,22 @@
+TODO NOW:
+- render markers and robots differently in python game mode (wrap Marker in MarkerSceneItem class)
+- change color of markers outside world bounds
+- implement safetly shutdown when outside world bound (attach AI to robot that can filter the commands from the pipe)
+- create basic tutorial jupyter notebook: drive toward a waypoint
+- add settings for kalman filter parameters + marker size
+- finalize hardware: markers on tanks, batteries, sticks and balloons
+- DEMO
+
+LATER:
+- add battery level checks + safety
+- make transport case
+- add world edge sensing (sumo wrestling circle arena? distance/angle to center?)
+- add enemy AI's
+- add audio
+- link gamepads to jupyter notebook
+- use most recent standalone Aruco library for better tracking performance
+- add esp32 camera module
+- print eyes + attachement
+- print grippers + attachement
+- print flyswatter + attachement
+- print catapult + attachement
