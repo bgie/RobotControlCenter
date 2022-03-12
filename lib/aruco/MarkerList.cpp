@@ -23,6 +23,16 @@ MarkerList::MarkerList()
 {
 }
 
+int MarkerList::find(int id) const
+{
+    for (int i = 0; i < size(); ++i) {
+        if (at(i).id() == id) {
+            return i;
+        }
+    }
+    return -1;
+}
+
 QByteArray MarkerList::serialize() const
 {
     QBuffer buffer;

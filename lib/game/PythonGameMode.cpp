@@ -18,6 +18,13 @@
 #include "aruco/SceneTracker.h"
 #include "camera/CameraController.h"
 #include "pipe/PipeController.h"
+#include "pipe/RobotCameraPipe.h"
+#include "robot/Robot.h"
+#include <QBuffer>
+#include <QTextStream>
+#include <QTransform>
+#include <QVector2D>
+#include <math.h>
 
 struct PythonGameMode::Data {
     Data(PipeController& pipes, CameraController& camera, SceneTracker& tracker, GameScene& gameScene)
@@ -50,4 +57,46 @@ PythonGameMode::~PythonGameMode()
 
 void PythonGameMode::onTrackerCameraFrameProcessed()
 {
+    MarkerList markers = _d->tracker.markers();
+    foreach (auto pipe, _d->pipes.robotCameraPipes()) {
+        QBuffer buffer;
+        buffer.open(QIODevice::WriteOnly);
+        QTextStream out(&buffer);
+
+        auto robot = pipe->robot();
+        out << "bat:" << robot->batteryPercentage();
+
+        if (robot->hasMarkerId()) {
+            const int robotMarkerId = robot->markerId();
+            const int markerIndex = markers.find(robotMarkerId);
+            if (markerIndex >= 0) {
+
+                auto robotMarker = markers.at(markerIndex);
+                if (robotMarker.isDetectedFiltered()) {
+                    out << " x:" << static_cast<int>(qRound(robotMarker.filteredPos().x()))
+                        << " y:" << static_cast<int>(qRound(robotMarker.filteredPos().y()));
+
+                    QTransform povTransform;
+                    povTransform.rotateRadians(-robotMarker.filteredAngle());
+                    povTransform.translate(-robotMarker.filteredPos().x(), -robotMarker.filteredPos().y());
+
+                    for (auto it = markers.cbegin(); it != markers.cend(); ++it) {
+                        if (it->id() != robotMarkerId && it->isDetectedFiltered()) {
+                            QVector2D pos(povTransform.map(it->filteredPos().toPointF()));
+                            float angle = atan2(pos.y(), pos.x()) * 180 / M_PI;
+
+                            out << ";id:" << it->id()
+                                << " d:" << static_cast<int>(qRound(pos.length()))
+                                << " a:" << static_cast<int>(qRound(angle));
+                        }
+                    }
+                } else {
+                    out << " x:? y:?";
+                }
+            }
+        }
+        out << "\n";
+        out.flush();
+        pipe->send(buffer.buffer());
+    }
 }

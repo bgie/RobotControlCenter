@@ -91,7 +91,12 @@ bool PipeController::robotsConnected() const
     return !_d->robotCommandPipes.empty();
 }
 
-QList<QObject*> PipeController::robotCommandPipes() const
+QList<RobotCommandPipe*> PipeController::robotCommandPipes() const
+{
+    return _d->robotCommandPipes;
+}
+
+QList<QObject*> PipeController::robotCommandPipesQObject() const
 {
     QList<QObject*> result;
     foreach (auto robot, _d->robotCommandPipes) {
@@ -100,7 +105,12 @@ QList<QObject*> PipeController::robotCommandPipes() const
     return result;
 }
 
-QList<QObject*> PipeController::robotCameraPipes() const
+QList<RobotCameraPipe*> PipeController::robotCameraPipes() const
+{
+    return _d->robotCameraPipes;
+}
+
+QList<QObject*> PipeController::robotCameraPipesQObject() const
 {
     QList<QObject*> result;
     foreach (auto robot, _d->robotCameraPipes) {

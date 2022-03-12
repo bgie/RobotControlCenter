@@ -74,6 +74,12 @@ float Robot::batteryVoltage() const
     return _d->batteryVoltage;
 }
 
+int Robot::batteryPercentage() const
+{
+    // TODO implement this, depends on hardware
+    return 100;
+}
+
 bool Robot::hasMarkerId() const
 {
     return _d->markerId >= 0;

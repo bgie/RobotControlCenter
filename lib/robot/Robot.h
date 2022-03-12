@@ -34,6 +34,7 @@ public:
     QString url() const;
 
     float batteryVoltage() const;
+    int batteryPercentage() const;
 
     bool hasMarkerId() const;
     int markerId() const;

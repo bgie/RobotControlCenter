@@ -22,5 +22,6 @@ class MarkerList : public QVector<Marker> {
 public:
     explicit MarkerList();
 
+    int find(int id) const;
     QByteArray serialize() const;
 };
