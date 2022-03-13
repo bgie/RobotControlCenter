@@ -137,11 +137,6 @@ int main(int argc, char *argv[])
     gameScene.worldEdge().setZ(settings.worldZ());
     QObject::connect(&gameScene.worldEdge(), &WorldEdge::pointsChanged, &settings, &AppSettings::setWorldEdge);
     QObject::connect(&gameScene.worldEdge(), &WorldEdge::zChanged, &settings, &AppSettings::setWorldZ);
-    QObject::connect(
-        &tracker, &SceneTracker::frameProcessed, &gameScene, [&]() {
-            gameScene.setMarkers(tracker.markers());
-        },
-        Qt::QueuedConnection);
 
     FactoryMethod settingsControllerFactory([&]() -> QObject* {
         return new SettingsController(tracker, gameScene.worldEdge(), aruco);

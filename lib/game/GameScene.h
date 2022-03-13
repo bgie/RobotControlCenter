@@ -17,9 +17,10 @@
 #pragma once
 #include <QObject>
 #include <QRectF>
+#include <QVector>
 
 class WorldEdge;
-class MarkerList;
+class MarkerSceneItem;
 
 class GameScene : public QObject {
     Q_OBJECT
@@ -32,8 +33,8 @@ public:
     QRectF bounds() const;
     WorldEdge& worldEdge() const;
 
-    const MarkerList& markers() const;
-    void setMarkers(const MarkerList& markers);
+    const QVector<MarkerSceneItem>& markers() const;
+    void setMarkers(const QVector<MarkerSceneItem>& markers);
 
 signals:
     void boundsChanged();

@@ -15,8 +15,8 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 #include "GameSceneItem.h"
-#include "aruco/MarkerList.h"
 #include "game/GameScene.h"
+#include "game/MarkerSceneItem.h"
 #include "game/WorldEdge.h"
 #include <QPainter>
 #include <math.h>
@@ -24,17 +24,22 @@
 const int WORLD_EDGE_POINT_SIZE = 10;
 const int WORLD_EDGE_LINE_WIDTH = 5;
 const QColor WORLD_EDGE_COLOR = QColor(Qt::yellow);
-const int MARKER_CIRCLE_SIZE = 26;
-const QColor MARKER_CIRCLE_LINE_COLOR(Qt::darkGreen);
+const int MARKER_CIRCLE_SIZE = 20;
+const QColor MARKER_CIRCLE_LINE_COLOR(Qt::darkGray);
 const int MARKER_CIRCLE_LINE_WIDTH = 3;
-const QColor MARKER_CIRCLE_FILL_COLOR(Qt::white);
-const int MARKER_ANGLE_SIZE = 80;
-const int MARKER_ANGLE_DEGREES = 60;
-const QColor MARKER_ANGLE_FILL_COLOR("#70707070");
+const QColor MARKER_CIRCLE_FILL_COLOR(Qt::lightGray);
 const int MARKER_UNFILTERED_CIRCLE_SIZE = 5;
 const QColor MARKER_UNFILTERED_POS_COLOR("#7000FF00");
 const int MARKER_ID_FONT_SIZE = 24;
 const QColor MARKER_ID_COLOR(Qt::black);
+
+const int ROBOT_CIRCLE_SIZE = 26;
+const QColor ROBOT_CIRCLE_LINE_COLOR(Qt::darkGreen);
+const QColor ROBOT_CIRCLE_LINE_COLOR_ERROR(Qt::red);
+const QColor ROBOT_CIRCLE_FILL_COLOR(Qt::white);
+const int ROBOT_ANGLE_SIZE = 70;
+const int ROBOT_ANGLE_DEGREES = 60;
+const QColor ROBOT_ANGLE_FILL_COLOR("#70707070");
 
 GameSceneItem::GameSceneItem(QQuickItem* parent)
     : QQuickPaintedItem(parent)
@@ -72,26 +77,34 @@ void GameSceneItem::paint(QPainter* painter)
         painter->setFont(font);
 
         foreach (const auto& m, _scene->markers()) {
-            if (m.isDetectedFiltered()) {
-                QPointF screenPoint = (m.filteredPos().toPointF() * scale) + offset;
-                int angle = static_cast<int>(qRound(-m.filteredAngle() * 180 * 16 / M_PI));
-                painter->setPen(Qt::NoPen);
-                painter->setBrush(QBrush(MARKER_ANGLE_FILL_COLOR));
-                QRectF pieRect(screenPoint.x() - MARKER_ANGLE_SIZE, screenPoint.y() - MARKER_ANGLE_SIZE, 2 * MARKER_ANGLE_SIZE, 2 * MARKER_ANGLE_SIZE);
-                painter->drawPie(pieRect, angle - (MARKER_ANGLE_DEGREES * 8), MARKER_ANGLE_DEGREES * 16);
+            const QPointF screenPoint = (m.filteredPos() * scale) + offset;
+            const int angle = static_cast<int>(qRound(-m.filteredAngle() * 180 * 16 / M_PI));
+            const QRectF pieRect(screenPoint.x() - ROBOT_ANGLE_SIZE, screenPoint.y() - ROBOT_ANGLE_SIZE, 2 * ROBOT_ANGLE_SIZE, 2 * ROBOT_ANGLE_SIZE);
 
+            if (m.isRobot()) {
+                painter->setPen(Qt::NoPen);
+                painter->setBrush(QBrush(ROBOT_ANGLE_FILL_COLOR));
+                painter->drawPie(pieRect, angle - (ROBOT_ANGLE_DEGREES * 8), ROBOT_ANGLE_DEGREES * 16);
+            }
+
+            if (m.isRobot()) {
+                painter->setPen(QPen(m.isOutsideWorld() ? ROBOT_CIRCLE_LINE_COLOR_ERROR : ROBOT_CIRCLE_LINE_COLOR, MARKER_CIRCLE_LINE_WIDTH));
+                painter->setBrush(QBrush(ROBOT_CIRCLE_FILL_COLOR));
+                painter->drawEllipse(screenPoint, ROBOT_CIRCLE_SIZE, ROBOT_CIRCLE_SIZE);
+            } else {
                 painter->setPen(QPen(MARKER_CIRCLE_LINE_COLOR, MARKER_CIRCLE_LINE_WIDTH));
                 painter->setBrush(QBrush(MARKER_CIRCLE_FILL_COLOR));
                 painter->drawEllipse(screenPoint, MARKER_CIRCLE_SIZE, MARKER_CIRCLE_SIZE);
-
-                painter->setPen(MARKER_ID_COLOR);
-                painter->drawText(pieRect, Qt::AlignCenter, QString::number(m.id()));
             }
+
+            painter->setPen(MARKER_ID_COLOR);
+            painter->drawText(pieRect, Qt::AlignCenter, m.id());
+
             if (m.isDetected()) {
-                QPointF screenPoint = (m.pos().toPointF() * scale) + offset;
+                const QPointF unfilteredScreenPoint = (m.unfilteredPos() * scale) + offset;
                 painter->setPen(Qt::NoPen);
                 painter->setBrush(QBrush(MARKER_UNFILTERED_POS_COLOR));
-                painter->drawEllipse(screenPoint, MARKER_UNFILTERED_CIRCLE_SIZE, MARKER_UNFILTERED_CIRCLE_SIZE);
+                painter->drawEllipse(unfilteredScreenPoint, MARKER_UNFILTERED_CIRCLE_SIZE, MARKER_UNFILTERED_CIRCLE_SIZE);
             }
         }
     }

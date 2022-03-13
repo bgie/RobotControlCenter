@@ -22,7 +22,7 @@
 
 struct MarkerTracker::Data {
     Data()
-        : posFilter(KalmanTracker3D::movingRobotParams())
+        : posFilter(KalmanTracker3D::staticMarkerParams())
         , angleFilter(KalmanTracker1D::movingRobotParams())
     {
     }

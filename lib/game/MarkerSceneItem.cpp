@@ -14,43 +14,5 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-#include "GameScene.h"
 #include "MarkerSceneItem.h"
-#include "WorldEdge.h"
 
-struct GameScene::Data {
-    WorldEdge edge;
-    QVector<MarkerSceneItem> markers;
-};
-
-GameScene::GameScene(QObject* parent)
-    : QObject(parent)
-    , _d(new Data())
-{
-    connect(&_d->edge, &WorldEdge::pointsChanged, this, &GameScene::boundsChanged);
-}
-
-GameScene::~GameScene()
-{
-}
-
-QRectF GameScene::bounds() const
-{
-    return _d->edge.bounds();
-}
-
-WorldEdge& GameScene::worldEdge() const
-{
-    return _d->edge;
-}
-
-const QVector<MarkerSceneItem>& GameScene::markers() const
-{
-    return _d->markers;
-}
-
-void GameScene::setMarkers(const QVector<MarkerSceneItem>& markers)
-{
-    _d->markers = markers;
-    emit markersChanged();
-}

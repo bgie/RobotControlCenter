@@ -61,6 +61,7 @@ add_library(lib
   game/WorldEdge.cpp
   game/PythonGameMode.cpp
   game/GameScene.cpp
+  game/MarkerSceneItem.cpp
 )
 
 target_include_directories(lib PUBLIC .)

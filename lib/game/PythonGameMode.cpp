@@ -15,6 +15,9 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 #include "PythonGameMode.h"
+#include "GameScene.h"
+#include "MarkerSceneItem.h"
+#include "WorldEdge.h"
 #include "aruco/SceneTracker.h"
 #include "camera/CameraController.h"
 #include "pipe/PipeController.h"
@@ -45,7 +48,7 @@ PythonGameMode::PythonGameMode(PipeController& pipes, CameraController& camera, 
     : QObject(parent)
     , _d(new Data(pipes, camera, tracker, gameScene))
 {
-    connect(&tracker, &SceneTracker::frameProcessed, this, &PythonGameMode::onTrackerCameraFrameProcessed);
+    connect(&tracker, &SceneTracker::frameProcessed, this, &PythonGameMode::onTrackerCameraFrameProcessed, Qt::QueuedConnection);
 
     _d->camera.startCameraStream();
 }
@@ -57,8 +60,32 @@ PythonGameMode::~PythonGameMode()
 
 void PythonGameMode::onTrackerCameraFrameProcessed()
 {
-    MarkerList markers = _d->tracker.markers();
-    foreach (auto pipe, _d->pipes.robotCameraPipes()) {
+    const MarkerList markers = _d->tracker.markers();
+    const QList<RobotCameraPipe*> cameraPipes = _d->pipes.robotCameraPipes();
+    QVector<MarkerSceneItem> sceneItems;
+
+    foreach (const auto& marker, markers) {
+        if (marker.isDetectedFiltered()) {
+            bool isRobot = false;
+            foreach (auto pipe, cameraPipes) {
+                if (pipe->robot()->markerId() == marker.id()) {
+                    isRobot = true;
+                }
+            }
+            bool isOutsideWorld = !_d->gameScene.worldEdge().isInside(marker.filteredPos().toPointF());
+            sceneItems << MarkerSceneItem(
+                QString::number(marker.id()),
+                marker.isDetected(),
+                marker.pos().toPointF(),
+                marker.filteredPos().toPointF(),
+                marker.filteredAngle(),
+                isRobot,
+                isOutsideWorld);
+        }
+    }
+    _d->gameScene.setMarkers(sceneItems);
+
+    foreach (auto pipe, cameraPipes) {
         QBuffer buffer;
         buffer.open(QIODevice::WriteOnly);
         QTextStream out(&buffer);
