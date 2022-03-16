@@ -18,6 +18,9 @@
 #include <QHostAddress>
 #include <QObject>
 
+class MarkerList;
+class IAgent;
+
 class Robot : public QObject {
     Q_OBJECT
     Q_PROPERTY(QString id READ idString CONSTANT)
@@ -45,6 +48,13 @@ public:
 
     Q_INVOKABLE void sendCommand(QString command);
     bool sendCommand(QByteArray command);
+
+    static const QByteArray FULLSTOP_COMMAND;
+
+    void processMarkers(const MarkerList& markers);
+    void processUserCommand(QByteArray command);
+    void setAgent(IAgent* agent); // takes ownership
+    IAgent* agent() const;
 
 signals:
     void batteryVoltageChanged();

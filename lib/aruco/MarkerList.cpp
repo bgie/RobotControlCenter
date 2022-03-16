@@ -23,7 +23,7 @@ MarkerList::MarkerList()
 {
 }
 
-int MarkerList::find(int id) const
+int MarkerList::indexOf(int id) const
 {
     for (int i = 0; i < size(); ++i) {
         if (at(i).id() == id) {

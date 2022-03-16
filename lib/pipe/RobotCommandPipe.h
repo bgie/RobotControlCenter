@@ -31,7 +31,7 @@ public:
     static QString generatePath(QString basePath, QByteArray id);
 
 private:
-    void sendCommand(QByteArray command);
+    void onCommandReceived(QByteArray command);
 
 private:
     Robot* const _robot;

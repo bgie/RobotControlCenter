@@ -18,10 +18,12 @@
 #include "GameScene.h"
 #include "MarkerSceneItem.h"
 #include "WorldEdge.h"
+#include "ai/PythonAgent.h"
 #include "aruco/SceneTracker.h"
 #include "camera/CameraController.h"
 #include "pipe/PipeController.h"
 #include "pipe/RobotCameraPipe.h"
+#include "robot/IRobotManager.h"
 #include "robot/Robot.h"
 #include <QBuffer>
 #include <QTextStream>
@@ -30,25 +32,31 @@
 #include <math.h>
 
 struct PythonGameMode::Data {
-    Data(PipeController& pipes, CameraController& camera, SceneTracker& tracker, GameScene& gameScene)
-        : pipes(pipes)
+    Data(IRobotManager& robots, PipeController& pipes, CameraController& camera, SceneTracker& tracker, GameScene& gameScene)
+        : robots(robots)
+        , pipes(pipes)
         , camera(camera)
         , tracker(tracker)
         , gameScene(gameScene)
     {
     }
 
+    IRobotManager& robots;
     PipeController& pipes;
     CameraController& camera;
     SceneTracker& tracker;
     GameScene& gameScene;
 };
 
-PythonGameMode::PythonGameMode(PipeController& pipes, CameraController& camera, SceneTracker& tracker, GameScene& gameScene, QObject* parent)
+PythonGameMode::PythonGameMode(IRobotManager& robots, PipeController& pipes, CameraController& camera, SceneTracker& tracker, GameScene& gameScene, QObject* parent)
     : QObject(parent)
-    , _d(new Data(pipes, camera, tracker, gameScene))
+    , _d(new Data(robots, pipes, camera, tracker, gameScene))
 {
     connect(&tracker, &SceneTracker::frameProcessed, this, &PythonGameMode::onTrackerCameraFrameProcessed, Qt::QueuedConnection);
+    connect(&robots, &IRobotManager::robotAdded, this, &PythonGameMode::onRobotAdded);
+    foreach (auto r, robots.robots()) {
+        onRobotAdded(r);
+    }
 
     _d->camera.startCameraStream();
 }
@@ -56,35 +64,52 @@ PythonGameMode::PythonGameMode(PipeController& pipes, CameraController& camera, 
 PythonGameMode::~PythonGameMode()
 {
     _d->camera.stopCameraStream();
+    foreach (auto robot, _d->robots.robots()) {
+        robot->setAgent(nullptr);
+    }
+}
+
+void PythonGameMode::onRobotAdded(Robot* robot)
+{
+    robot->setAgent(new PythonAgent(*robot, _d->gameScene.worldEdge()));
 }
 
 void PythonGameMode::onTrackerCameraFrameProcessed()
 {
     const MarkerList markers = _d->tracker.markers();
     const QList<RobotCameraPipe*> cameraPipes = _d->pipes.robotCameraPipes();
-    QVector<MarkerSceneItem> sceneItems;
 
+    // run robot agents
+    foreach (auto robot, _d->robots.robots()) {
+        robot->processMarkers(markers);
+    }
+
+    // draw scene
+    QVector<MarkerSceneItem> sceneItems;
     foreach (const auto& marker, markers) {
         if (marker.isDetectedFiltered()) {
-            bool isRobot = false;
+            Robot* robot = nullptr;
             foreach (auto pipe, cameraPipes) {
-                if (pipe->robot()->markerId() == marker.id()) {
-                    isRobot = true;
+                if (pipe->robot()->markerId() == marker.id() && pipe->robot()->agent()) {
+                    robot = pipe->robot();
                 }
             }
-            bool isOutsideWorld = !_d->gameScene.worldEdge().isInside(marker.filteredPos().toPointF());
+            bool isOutsideWorld = robot
+                ? !static_cast<PythonAgent*>(robot->agent())->insideWorld()
+                : !_d->gameScene.worldEdge().isInside(marker.filteredPos().toPointF());
             sceneItems << MarkerSceneItem(
                 QString::number(marker.id()),
                 marker.isDetected(),
                 marker.pos().toPointF(),
                 marker.filteredPos().toPointF(),
                 marker.filteredAngle(),
-                isRobot,
+                robot,
                 isOutsideWorld);
         }
     }
     _d->gameScene.setMarkers(sceneItems);
 
+    // send tracker info to every robot camera pipe
     foreach (auto pipe, cameraPipes) {
         QBuffer buffer;
         buffer.open(QIODevice::WriteOnly);
@@ -95,7 +120,7 @@ void PythonGameMode::onTrackerCameraFrameProcessed()
 
         if (robot->hasMarkerId()) {
             const int robotMarkerId = robot->markerId();
-            const int markerIndex = markers.find(robotMarkerId);
+            const int markerIndex = markers.indexOf(robotMarkerId);
             if (markerIndex >= 0) {
 
                 auto robotMarker = markers.at(markerIndex);

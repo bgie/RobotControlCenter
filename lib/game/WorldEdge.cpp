@@ -84,7 +84,7 @@ bool WorldEdge::removeAt(int index)
 
 bool WorldEdge::isInside(QPointF pos) const
 {
-    return _d->points.containsPoint(pos, Qt::OddEvenFill);
+    return _d->points.size() >= 3 && _d->points.containsPoint(pos, Qt::OddEvenFill);
 }
 
 QRectF WorldEdge::bounds() const

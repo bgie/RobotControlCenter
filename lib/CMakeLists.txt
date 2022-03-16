@@ -24,6 +24,8 @@ add_library(lib
   aruco/Plane3d.cpp
   aruco/MarkerList.cpp
   aruco/Marker.cpp
+  ai/IAgent.cpp
+  ai/PythonAgent.cpp
   kalman/RotationCounter.cpp
   kalman/KalmanTracker1D.cpp
   kalman/KalmanTracker3D.cpp

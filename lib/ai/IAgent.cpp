@@ -14,14 +14,15 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-#pragma once
-#include "Marker.h"
-#include <QVector>
+#include "IAgent.h"
+#include "aruco/MarkerList.h"
+#include "robot/Robot.h"
 
-class MarkerList : public QVector<Marker> {
-public:
-    explicit MarkerList();
+IAgent::IAgent(Robot& robot)
+    : _robot(robot)
+{
+}
 
-    int indexOf(int id) const;
-    QByteArray serialize() const;
-};
+IAgent::~IAgent()
+{
+}

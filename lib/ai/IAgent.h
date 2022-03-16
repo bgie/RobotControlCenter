@@ -15,13 +15,19 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 #pragma once
-#include "Marker.h"
-#include <QVector>
+#include <QByteArray>
 
-class MarkerList : public QVector<Marker> {
+class Robot;
+class MarkerList;
+
+class IAgent {
 public:
-    explicit MarkerList();
+    explicit IAgent(Robot& robot);
+    virtual ~IAgent();
 
-    int indexOf(int id) const;
-    QByteArray serialize() const;
+    virtual void processMarkers(const MarkerList&) = 0;
+    virtual void processUserCommand(QByteArray command) = 0;
+
+protected:
+    Robot& _robot;
 };

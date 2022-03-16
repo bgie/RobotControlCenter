@@ -1,5 +1,4 @@
 TODO NOW:
-- implement safetly shutdown when outside world bound (attach AI to robot that can filter the commands from the pipe)
 - create basic tutorial jupyter notebook: drive toward a waypoint
 - finalize hardware: markers on tanks, batteries, sticks and balloons
 - DEMO

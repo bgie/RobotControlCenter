@@ -17,21 +17,22 @@
 #pragma once
 #include <QObject>
 
+class IRobotManager;
 class PipeController;
 class CameraController;
 class SceneTracker;
 class GameScene;
+class Robot;
 
 class PythonGameMode : public QObject
 {
      Q_OBJECT
 public:
-    PythonGameMode(PipeController& pipes, CameraController& camera, SceneTracker& tracker, GameScene& gameScene, QObject* parent = nullptr);
+    PythonGameMode(IRobotManager& robots, PipeController& pipes, CameraController& camera, SceneTracker& tracker, GameScene& gameScene, QObject* parent = nullptr);
     virtual ~PythonGameMode() override;
 
-signals:
-
 private:
+    void onRobotAdded(Robot* r);
     void onTrackerCameraFrameProcessed();
 
 private:

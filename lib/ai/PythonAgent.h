@@ -15,13 +15,23 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 #pragma once
-#include "Marker.h"
-#include <QVector>
+#include "IAgent.h"
 
-class MarkerList : public QVector<Marker> {
+class WorldEdge;
+
+class PythonAgent : public IAgent
+{
 public:
-    explicit MarkerList();
+    PythonAgent(Robot& robot, WorldEdge& worldEdge);
+    virtual ~PythonAgent() override;
 
-    int indexOf(int id) const;
-    QByteArray serialize() const;
+    virtual void processMarkers(const MarkerList& markers) override;
+    virtual void processUserCommand(QByteArray command) override;
+
+    bool insideWorld() const;
+
+private:
+    WorldEdge& _worldEdge;
+    bool _insideWorld;
 };
+

@@ -23,7 +23,7 @@ RobotCommandPipe::RobotCommandPipe(QString path, Robot* robot, QObject* parent)
     : NonBlockingReceiverPipe(path, parent)
     , _robot(robot)
 {
-    connect(this, &NonBlockingReceiverPipe::received, this, &RobotCommandPipe::sendCommand);
+    connect(this, &NonBlockingReceiverPipe::received, this, &RobotCommandPipe::onCommandReceived);
 }
 
 RobotCommandPipe::~RobotCommandPipe()
@@ -40,7 +40,7 @@ QString RobotCommandPipe::generatePath(QString basePath, QByteArray id)
     return QDir(basePath).absoluteFilePath(QStringLiteral("robot-%1-cmd").arg(QString::fromLatin1(id)));
 }
 
-void RobotCommandPipe::sendCommand(QByteArray command)
+void RobotCommandPipe::onCommandReceived(QByteArray command)
 {
-    _robot->sendCommand(command.trimmed().toUpper());
+    _robot->processUserCommand(command.trimmed().toUpper());
 }

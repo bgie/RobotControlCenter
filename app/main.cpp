@@ -142,7 +142,7 @@ int main(int argc, char *argv[])
         return new SettingsController(tracker, gameScene.worldEdge(), aruco);
     });
     FactoryMethod pythonGameModeFactory([&]() -> QObject* {
-        return new PythonGameMode(pipeController, cameraController, tracker, gameScene);
+        return new PythonGameMode(multiRobotManager, pipeController, cameraController, tracker, gameScene);
     });
 
     QQmlApplicationEngine engine;

@@ -15,13 +15,17 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 #include "Robot.h"
+#include "ai/IAgent.h"
 #include <QDebug>
 #include <QElapsedTimer>
 #include <QNetworkDatagram>
+#include <QPointer>
 #include <QTimer>
 #include <QUdpSocket>
 
 #define TIMEOUT_INTERVAL_MSEC 2000
+
+const QByteArray Robot::FULLSTOP_COMMAND(QByteArrayLiteral("MOTOR 0 0"));
 
 struct Robot::Data {
     Data(QByteArray id, QHostAddress address, int port)
@@ -40,6 +44,7 @@ struct Robot::Data {
     int markerId;
     QElapsedTimer lastDiscoveryTime;
     QUdpSocket sendSocket;
+    QScopedPointer<IAgent> agent;
 };
 
 Robot::Robot(QByteArray id, QHostAddress address, int port, QObject* parent)
@@ -132,4 +137,28 @@ bool Robot::sendCommand(QByteArray command)
     const qint64 bytesSent = _d->sendSocket.writeDatagram(command, _d->address, _d->port);
     const bool sendOk = (bytesSent == command.size());
     return sendOk;
+}
+
+void Robot::processMarkers(const MarkerList& markers)
+{
+    if (_d->agent) {
+        _d->agent->processMarkers(markers);
+    }
+}
+
+void Robot::processUserCommand(QByteArray command)
+{
+    if (_d->agent) {
+        _d->agent->processUserCommand(command);
+    }
+}
+
+void Robot::setAgent(IAgent* agent)
+{
+    _d->agent.reset(agent);
+}
+
+IAgent* Robot::agent() const
+{
+    return _d->agent.data();
 }
