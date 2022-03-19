@@ -126,7 +126,8 @@ void PythonGameMode::onTrackerCameraFrameProcessed()
                 auto robotMarker = markers.at(markerIndex);
                 if (robotMarker.isDetectedFiltered()) {
                     out << " x:" << static_cast<int>(qRound(robotMarker.filteredPos().x()))
-                        << " y:" << static_cast<int>(qRound(robotMarker.filteredPos().y()));
+                        << " y:" << static_cast<int>(qRound(robotMarker.filteredPos().y()))
+                        << " a:" << static_cast<int>(qRound(robotMarker.filteredAngle() * 180 / M_PI));
 
                     QTransform povTransform;
                     povTransform.rotateRadians(-robotMarker.filteredAngle());
