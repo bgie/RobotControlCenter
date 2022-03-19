@@ -55,7 +55,7 @@ int FakeRobotManager::count() const
 
 void FakeRobotManager::addFakeRobot()
 {
-    Robot* r = new Robot(QStringLiteral("{Fake%1}").arg(_d->nextRobotIndex++).toLatin1(), QHostAddress(), 0, this);
+    Robot* r = new Robot(QStringLiteral("{fake%1}").arg(_d->nextRobotIndex++).toLatin1(), QHostAddress(), 0, this);
     _d->robots[r->id()] = r;
     emit robotAdded(r);
     emit robotsChanged();
