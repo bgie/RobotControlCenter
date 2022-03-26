@@ -4,3 +4,6 @@ class Command(object):
 
     def close(self):
         self._pipe.close()
+
+    def send(self, command: str):
+        self._pipe.write(command + '\n')

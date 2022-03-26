@@ -27,6 +27,7 @@ class Robot : public QObject {
     Q_PROPERTY(QString url READ url CONSTANT)
     Q_PROPERTY(float batteryVoltage READ batteryVoltage NOTIFY batteryVoltageChanged)
     Q_PROPERTY(int markerId READ markerId WRITE setMarkerId NOTIFY markerIdChanged)
+    Q_PROPERTY(QByteArray lastCommand READ lastCommand NOTIFY lastCommandChanged)
 
 public:
     Robot(QByteArray id, QHostAddress address, int port, QObject* parent = nullptr);
@@ -56,9 +57,12 @@ public:
     void setAgent(IAgent* agent); // takes ownership
     IAgent* agent() const;
 
+    QByteArray lastCommand() const;
+
 signals:
     void batteryVoltageChanged();
     void markerIdChanged(int newId);
+    void lastCommandChanged();
 
 private:
     void setBatteryVoltage(float newVoltage);    

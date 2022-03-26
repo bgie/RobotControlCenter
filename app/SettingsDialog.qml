@@ -513,7 +513,7 @@ MyDialog {
             }
         }
 
-        Item {  // Tanks panel
+        Item {  // Robots panel
             anchors.fill: parent
             anchors.margins: Style.largeMargin
             visible: tankButton.selected
@@ -645,6 +645,11 @@ MyDialog {
                                             enabled: commandInput.text
                                             onClicked: robot.sendCommand(commandInput.text)
                                         }
+                                    }
+
+                                    MyLabel {
+                                        id: lastCommand
+                                        text: robot.lastCommand
                                     }
 
                                     Item {

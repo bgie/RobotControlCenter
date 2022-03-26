@@ -35,7 +35,7 @@ Aruco::Aruco(QObject* parent)
     _d->dictionary = getPredefinedDictionary(cv::aruco::DICT_4X4_50);
     _d->parameters = cv::aruco::DetectorParameters::create();
     _d->parameters->cornerRefinementMethod = cv::aruco::CORNER_REFINE_SUBPIX;
-    _d->markerLengthInMm = 32.0f;
+    _d->markerLengthInMm = 41.0f;
 }
 
 Aruco::~Aruco()

@@ -42,6 +42,7 @@ struct Robot::Data {
     const int port;
     float batteryVoltage;
     int markerId;
+    QByteArray lastCommand;
     QElapsedTimer lastDiscoveryTime;
     QUdpSocket sendSocket;
     QScopedPointer<IAgent> agent;
@@ -136,6 +137,10 @@ bool Robot::sendCommand(QByteArray command)
 
     const qint64 bytesSent = _d->sendSocket.writeDatagram(command, _d->address, _d->port);
     const bool sendOk = (bytesSent == command.size());
+    if (sendOk) {
+        _d->lastCommand = command;
+        emit lastCommandChanged();
+    }
     return sendOk;
 }
 
@@ -161,4 +166,9 @@ void Robot::setAgent(IAgent* agent)
 IAgent* Robot::agent() const
 {
     return _d->agent.data();
+}
+
+QByteArray Robot::lastCommand() const
+{
+    return _d->lastCommand;
 }

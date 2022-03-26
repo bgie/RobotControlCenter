@@ -17,6 +17,7 @@
 #include "RobotCommandPipe.h"
 #include "NonBlockingReceiverPipe.h"
 #include "robot/Robot.h"
+#include <QDebug>
 #include <QDir>
 
 RobotCommandPipe::RobotCommandPipe(QString path, Robot* robot, QObject* parent)
@@ -42,5 +43,6 @@ QString RobotCommandPipe::generatePath(QString basePath, QByteArray id)
 
 void RobotCommandPipe::onCommandReceived(QByteArray command)
 {
+    qDebug() << _robot->id() << command;
     _robot->processUserCommand(command.trimmed().toUpper());
 }
