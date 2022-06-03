@@ -80,14 +80,21 @@ void SceneTracker::processFrame(QImage image)
         if (!_d->markerTrackers.contains(id)) {
             _d->markerTrackers[id] = new MarkerTracker();
         }
-        QPointF screenPos(0, 0);
-        for (const cv::Point2f& corner : markers.corners.at(i)) {
-            screenPos += QPointF(corner.x, corner.y);
-        }
-        screenPos /= markers.corners.at(i).size();
+        //        QPointF screenPos(0, 0);
+        //        for (const cv::Point2f& corner : markers.corners.at(i)) {
+        //            screenPos += QPointF(corner.x, corner.y);
+        //        }
+        //        screenPos /= markers.corners.at(i).size();
         const auto& tvec = markers.tvecs.at(i);
-        const float angle = _d->aruco.calc2dAngle(markers.rvecs.at(i), tvec);
-        _d->markerTrackers[id]->setPositionRotation(screenPos, QVector3D(tvec[0], tvec[1], tvec[2]), angle, msecsPerFrame);
+        const auto& rvec = markers.rvecs.at(i);
+        const float angle = _d->aruco.calc2dAngle(rvec, tvec);
+        const double dist = 107;
+        const cv::Vec3d offset(
+            tvec[0] + cos(angle) * dist,
+            tvec[1] + sin(angle) * dist,
+            tvec[2]);
+        const auto screenPos = _d->aruco.projectPoint(rvec, offset);
+        _d->markerTrackers[id]->setPositionRotation(QPointF(screenPos.x, screenPos.y), QVector3D(offset[0], offset[1], offset[2]), angle, msecsPerFrame);
     }
     MarkerList markerList;
     markerList.reserve(_d->markerTrackers.size());

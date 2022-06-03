@@ -41,6 +41,7 @@ public:
     void setCameraMatrix(const cv::Mat& cameraMatrix, const cv::Mat& distCoeffs);
     Markers detectMarkers(QImage image) const;
     float calc2dAngle(const cv::Vec3d& rvec, const cv::Vec3d& tvec) const;
+    cv::Point2f projectPoint(const cv::Vec3d& rvec, const cv::Vec3d& tvec) const;
     void drawMarkers(QImage& image, const Markers& markers) const;
     void drawPolygon(QImage& image, const QPolygonF& polygon, float z);
 

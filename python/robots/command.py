@@ -7,3 +7,4 @@ class Command(object):
 
     def send(self, command: str):
         self._pipe.write(command + '\n')
+        self._pipe.flush()

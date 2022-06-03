@@ -139,7 +139,10 @@ int main(int argc, char *argv[])
     QObject::connect(&gameScene.worldEdge(), &WorldEdge::zChanged, &settings, &AppSettings::setWorldZ);
 
     FactoryMethod settingsControllerFactory([&]() -> QObject* {
-        return new SettingsController(tracker, gameScene.worldEdge(), aruco);
+        auto result = new SettingsController(tracker, gameScene.worldEdge(), aruco);
+        result->setScreenRotation(gameScene.screenRotation());
+        QObject::connect(result, &SettingsController::screenRotationChanged, &gameScene, &GameScene::setScreenRotation);
+        return result;
     });
     FactoryMethod pythonGameModeFactory([&]() -> QObject* {
         return new PythonGameMode(multiRobotManager, pipeController, cameraController, tracker, gameScene);

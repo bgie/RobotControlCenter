@@ -19,8 +19,14 @@
 #include "WorldEdge.h"
 
 struct GameScene::Data {
+    Data()
+        : screenRotation(0)
+    {
+    }
+
     WorldEdge edge;
     QVector<MarkerSceneItem> markers;
+    int screenRotation;
 };
 
 GameScene::GameScene(QObject* parent)
@@ -53,4 +59,18 @@ void GameScene::setMarkers(const QVector<MarkerSceneItem>& markers)
 {
     _d->markers = markers;
     emit markersChanged();
+}
+
+int GameScene::screenRotation() const
+{
+    return _d->screenRotation;
+}
+
+void GameScene::setScreenRotation(int screenRotation)
+{
+    if (_d->screenRotation == screenRotation)
+        return;
+
+    _d->screenRotation = screenRotation;
+    emit screenRotationChanged();
 }

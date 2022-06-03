@@ -33,6 +33,7 @@ class SettingsController : public QObject {
     Q_PROPERTY(QString markerIds READ markerIds NOTIFY markerIdsChanged)
     Q_PROPERTY(QVariantList markerScreenPoints READ markerScreenPoints NOTIFY markerScreenPointsChanged)
     Q_PROPERTY(QString serializedMarkers READ serializedMarkers NOTIFY serializedMarkersChanged)
+    Q_PROPERTY(int screenRotation READ screenRotation WRITE setScreenRotation NOTIFY screenRotationChanged)
 
 public:
     SettingsController(SceneTracker& tracker, WorldEdge& worldEdge, Aruco& aruco, QObject* parent = nullptr);
@@ -50,12 +51,16 @@ public:
 
     Q_INVOKABLE void addPointToWorldEdge(float x, float y, float z);
 
+    int screenRotation() const;
+    void setScreenRotation(int screenRotation);
+
 signals:
     void arucoImageChanged(QImage arucoImage);
     void planeChanged();
     void markerIdsChanged();
     void markerScreenPointsChanged();
     void serializedMarkersChanged();
+    void screenRotationChanged(int value);
 
 private:
     void updateArucoImage();

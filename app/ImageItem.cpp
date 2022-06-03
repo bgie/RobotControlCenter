@@ -89,9 +89,6 @@ QPointF ImageItem::offset() const
 
 void ImageItem::setImage(QImage image)
 {
-    if (_image == image)
-        return;
-
     _image = image;
     _imageChanged = true;
     update();

@@ -67,6 +67,14 @@ float Aruco::calc2dAngle(const cv::Vec3d& rvec, const cv::Vec3d& tvec) const
     return atan2(proj.at(1).y - proj.at(0).y, proj.at(1).x - proj.at(0).x);
 }
 
+cv::Point2f Aruco::projectPoint(const cv::Vec3d& rvec, const cv::Vec3d& tvec) const
+{
+    static std::vector<cv::Point3f> axesPoints({ cv::Point3f(0, 0, 0) });
+    std::vector<cv::Point2f> proj;
+    projectPoints(axesPoints, rvec, tvec, _d->cameraMatrix, _d->distCoeffs, proj);
+    return proj.at(0);
+}
+
 void Aruco::drawMarkers(QImage& image, const Aruco::Markers& markers) const
 {
     if (!image.size().isEmpty()) {

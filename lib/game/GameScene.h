@@ -25,6 +25,7 @@ class MarkerSceneItem;
 class GameScene : public QObject {
     Q_OBJECT
     Q_PROPERTY(QRectF bounds READ bounds NOTIFY boundsChanged)
+    Q_PROPERTY(int screenRotation READ screenRotation WRITE setScreenRotation NOTIFY screenRotationChanged)
 
 public:
     explicit GameScene(QObject* parent = nullptr);
@@ -36,9 +37,15 @@ public:
     const QVector<MarkerSceneItem>& markers() const;
     void setMarkers(const QVector<MarkerSceneItem>& markers);
 
+    int screenRotation() const;
+
+public slots:
+    void setScreenRotation(int screenRotation);
+
 signals:
     void boundsChanged();
     void markersChanged();
+    void screenRotationChanged();
 
 private:
     struct Data;

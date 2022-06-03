@@ -34,6 +34,7 @@ struct SettingsController::Data {
         , hasPlane(false)
         , planeAlpha(0.0f)
         , planeBeta(0.0f)
+        , screenRotation(0)
     {
     }
 
@@ -47,6 +48,7 @@ struct SettingsController::Data {
     QString markerIds;
     QVariantList markerPoints;
     QString serializedMarkers;
+    int screenRotation;
 };
 
 SettingsController::SettingsController(SceneTracker& tracker, WorldEdge& worldEdge, Aruco& aruco, QObject* parent)
@@ -102,6 +104,20 @@ QString SettingsController::serializedMarkers() const
 void SettingsController::addPointToWorldEdge(float x, float y, float z)
 {
     _d->worldEdge.addPoint(x, y, z);
+}
+
+int SettingsController::screenRotation() const
+{
+    return _d->screenRotation;
+}
+
+void SettingsController::setScreenRotation(int screenRotation)
+{
+    if (_d->screenRotation == screenRotation)
+        return;
+
+    _d->screenRotation = screenRotation;
+    emit screenRotationChanged(screenRotation);
 }
 
 void SettingsController::setArucoImage(QImage newImage)

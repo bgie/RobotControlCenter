@@ -6,7 +6,7 @@ from dataclasses import dataclass
 
 
 def extract_robot_info(line: str):
-    m = re.match(r"^bat:(?P<bat>\d+) x:(?P<x>-?\d+) y:(?P<y>-?\d+) a:(?P<a>\d+)", line)
+    m = re.match(r"^bat:(?P<bat>\d+) x:(?P<x>-?\d+) y:(?P<y>-?\d+) a:(?P<a>-?\d+)", line)
     if m:
         return {key: int(value) for (key, value) in m.groupdict().items()}
     return None
@@ -22,7 +22,7 @@ class Point:
 def extract_markers_info(line: str):
     results = {}
     for line_part in line.split(';'):
-        m = re.match(r"id:(?P<id>\d+) d:(?P<d>\d+) a:(?P<a>\d+)", line_part)
+        m = re.match(r"id:(?P<id>\d+) d:(?P<d>\d+) a:(?P<a>-?\d+)", line_part)
         if m:
             point = Point(int(m['id']), int(m['d']), int(m['a']))
             results[point.id] = point

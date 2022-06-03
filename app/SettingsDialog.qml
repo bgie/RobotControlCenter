@@ -24,6 +24,7 @@ import RobotControlCenter 1.0
 import './controls/'
 
 MyDialog {
+    id: main
     dialogWidth: 1400
     dialogHeight: 1000
     title: "Settings"
@@ -335,6 +336,16 @@ MyDialog {
                 rowSpacing: Style.smallMargin
 
                 MyLabel {
+                    text: "Screen Rotation"
+                }
+                MyTextEdit {
+                    Layout.leftMargin: Style.mediumMargin
+                    Layout.preferredWidth: 60
+                    text: controller.screenRotation
+                    onTextChanged: controller.screenRotation = parseInt(text)
+                }
+
+                MyLabel {
                     text: "Reference Plane"
                 }
                 MyLabel {
@@ -378,6 +389,7 @@ MyDialog {
                     anchors.fill: parent
                     image: controller.arucoImage
                     visible: hasImage
+                    rotation: controller.screenRotation
                 }
 
                 Rectangle {
@@ -443,6 +455,7 @@ MyDialog {
             Item {
                 Layout.fillHeight: true
                 Layout.fillWidth: true
+                rotation: controller.screenRotation
 
                 ImageItem {
                     id: worldImage

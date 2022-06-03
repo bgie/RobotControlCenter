@@ -24,6 +24,8 @@ Item {
             Layout.bottomMargin: 60
 
             scene: gameScene
+
+            rotation: gameScene.screenRotation
         }
     }
 
@@ -34,6 +36,8 @@ Item {
         image: cameraController.image
         width: 320
         height: 200
+
+        rotation: gameScene.screenRotation
     }
 
     MyToolButton {
