@@ -1,0 +1,89 @@
+body {
+  background-color: #101010;
+}
+
+.profile-image-pic {
+  height: 200px;
+  width: 200px;
+  object-fit: cover;
+}
+
+.cardbody-color {
+  background-color: #777;
+}
+
+a {
+  text-decoration: none;
+}
+
+.home {  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-rows: 120px 1fr 40px;
+  gap: 0px 0px;
+  grid-auto-flow: row;
+  grid-template-areas:
+    "header"
+    "content"
+    "footer";
+  height: 100vh;
+  width: 100vw;
+}
+
+.header { grid-area: header;
+  display: flex;
+  align-items: center; /* Vertical center alignment */
+  background-color: #444;
+  color: #bbb;
+  gap: 10px;
+  padding: 30px;
+}
+
+.header > #username {
+  margin-left: auto;
+}
+
+.footer { grid-area: footer;
+  display: flex;
+  align-items: center; /* Vertical center alignment */
+  justify-content: center; /* Horizontal center alignment */
+  background-color: #111;
+  color: #222;
+}
+
+.content {  display: grid;
+  grid-template-columns: 1fr 120px 1fr;
+  grid-template-rows: 1fr;
+  gap: 0px 0px;
+  grid-auto-flow: row;
+  grid-template-areas:
+    "script_code script_buttons script_output";
+  grid-area: content;
+  padding-left: 10px;
+  padding-right: 10px;
+}
+
+.script_code { grid-area: script_code; }
+
+.home .content textarea {
+    min-width: 100%;
+    width: 100%;
+    min-height: 100%;
+    height: 100%;
+    resize: none;
+    box-sizing: border-box;
+    font-family: monospace;
+    background-color: #000;
+    color: #aaa;
+    border: 0px;
+    padding: 20px;
+}
+
+.script_buttons { grid-area: script_buttons;
+    background-color: #171717;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 10px;
+}
+
+.script_output { grid-area: script_output; }

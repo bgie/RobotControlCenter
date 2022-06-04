@@ -1,55 +1,66 @@
-<!DOCTYPE html>
-<html>
-  <head>
-    <title>Home</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="static/bootstrap.min.css" rel="stylesheet" media="screen">
-    <script type="text/javascript" src="static/jquery-3.6.0.min.js"></script>
-    <script type="text/javascript" src="static/bootstrap.min.js"></script>
-    <script type="text/javascript" src="static/socket.io.min.js"></script>
-    <script type="text/javascript" charset="utf-8">
-      $(document).ready(function(){
-          var socket = io("{{ namespace }}");
-          socket.on('connect', function(msg) {
-          });
-          socket.on('script_started', function(){
-              $('#script_output').html('')
-              $('#abort_button').removeAttr('disabled')
-          });
-          socket.on('script_output', function(msg){
-              $('#script_output').append(msg)
-          });
-          socket.on('script_finished', function(exit_code){
-              var color = (exit_code==0) ? 'green' : 'red'
-              $('#script_output').append('<font color="' + color + '">The script finished with exit code ' + exit_code + '</font>')
-              $('#run_button').removeAttr('disabled')
-              $('#abort_button').attr('disabled',true);
-          });
-          $('#run_button').on('click', function(e) {
-            e.preventDefault()
-            $(this).attr('disabled',true);
-            socket.emit('run_script', $('#script_textarea').val())
-          });
-          $('#abort_button').on('click', function(e) {
-            e.preventDefault()
-            socket.emit('abort_script')
-          });
-      });
+{% extends "base.html" %}
+{% block scripts %}
+  <script type="text/javascript" src="static/socket.io.min.js"></script>
+  <script type="text/javascript" charset="utf-8">
+    function append_script_output(msg) {
+      var $textarea = $('#script_output');
+      $textarea.append(msg);
+      $textarea.scrollTop($textarea[0].scrollHeight);
+    }
+    $(document).ready(function(){
+        var socket = io("{{ namespace }}");
+        socket.on('connect', function(msg) {
+        });
+        socket.on('script_started', function(){
+            $('#script_output').html('')
+            $('#script_output').focus()
+            $('#abort_button').removeAttr('disabled')
+        });
+        socket.on('script_output', function(msg){
+            append_script_output(msg)
+        });
+        socket.on('script_finished', function(exit_code){
+            append_script_output('\nThe script finished with exit code ' + exit_code)
+            $('#run_button').removeAttr('disabled')
+            $('#abort_button').attr('disabled',true);
+        });
+        $('#run_button').on('click', function(e) {
+          e.preventDefault()
+          $(this).attr('disabled',true);
+          socket.emit('run_script', $('#script_textarea').val())
+        });
+        $('#abort_button').on('click', function(e) {
+          e.preventDefault()
+          socket.emit('abort_script')
+        });
+    });
   </script>
-  </head>
-  <body>
-    <div class="container">
-      <h1>Welcome {{ session['username']|e }} </h1>
-      <a href="{{ url_for('logout')}}">Logout</a>
-
-      <form action="/form/submit" method="GET">
-        <!-- TODO check out https://ace.c9.io/ -->
-        <textarea id=script_textarea rows="25" cols="120" name="script" style="font-family:monospace;" spellcheck="false">{{ script_code }}</textarea>
-        <br/>
-        <button id=run_button type="submit" class='btn btn-default'>Run</button>
-        <button id=abort_button type="submit" class='btn' disabled="true">Abort</button>
-      </form>
-      <pre id='script_output'></pre>
+{% endblock %}
+{% block body %}
+  <div class="home">
+    <div class="header">
+      <h1>Robot Control Terminal:\&gt</h1>
+      <div id="username">Logged in as <strong>{{ session['username']|e }}</strong></div>
+      <div>-</div>
+      <a class="link-orange" href="{{ url_for('logout')}}">Logout</a>
     </div>
-  </body>
-</html>
+    <div class="footer">
+      <span>(C) 2022 Brecht Kuppens</span>
+    </div>
+    <div class="content">
+      <div class="script_buttons">
+        <button id=run_button type="submit" class='btn btn-orange w-100'>Run</button>
+        <button id=abort_button type="submit" class='btn btn-orange w-100' disabled="true">Abort</button>
+      </div>
+
+      <div class="script_code">
+          <!-- TODO check out https://ace.c9.io/ -->
+          <textarea id=script_textarea spellcheck="false">{{ script_code }}</textarea>
+      </div>
+
+      <div class="script_output">
+        <textarea id='script_output' spellcheck="false" readonly></textarea>
+      </div>
+    </div>
+  </div>
+{% endblock %}

@@ -7,13 +7,14 @@ import time
 import os
 from flask import Flask, render_template, redirect, url_for, request, session, escape, Markup
 from flask_socketio import SocketIO
+from pathlib import Path
 
 eventlet.monkey_patch()
 app = Flask(__name__)
 app.secret_key = "FXwvassq5txgHzoFkcYV"
 socketio = SocketIO(app)
 threads = {}
-scripts_path = '/tmp/robotcontrolcenter'
+scripts_path = str(Path.home() / Path('robotcontrolcenter'))
 try:
     os.makedirs(scripts_path, exist_ok=True)
     os.symlink(os.path.abspath('../robots'), scripts_path + '/robots', target_is_directory=True)
@@ -54,13 +55,14 @@ class ScriptThread:
             line = ''
             exiting = False
             while not exiting:
-                exiting = proc.poll() is not None
                 char = proc.stdout.read(1)
+                if char is None or char == '':
+                    exiting = proc.poll() is not None
+                else:
+                    line += char
                 if char == '\n' or exiting:
                     socketio.emit('script_output', escape(line) + Markup('<br/>'), namespace=self.namespace)
                     line = ''
-                elif char is not None and char != '':
-                    line += char
 
                 if self.aborted:
                     if self.kill_timer is None:
@@ -96,8 +98,9 @@ def abort_script():
 @app.route("/")
 @require_authentication
 def home():
-    filename = f"{scripts_path}/{session['username']}.py"
-    script_code = 'print("Hello world!")'
+    user = session['username']
+    filename = f"{scripts_path}/{user}.py"
+    script_code = f'print("Hello {user}!")'
     if os.path.exists(filename):
         with open(filename, "r") as file:
             script_code = file.read()

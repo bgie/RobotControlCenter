@@ -1,21 +1,37 @@
-<html>
-  <head>
-    <title>Login</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="static/bootstrap.min.css" rel="stylesheet" media="screen">
-  </head>
-  <body>
-    <div class="container">
-      <h1>Please login</h1>
-      <br>
-      <form action="" method="post">
-        <input type="text" placeholder="Username" name="username" value="{{
-          request.form.username }}">
-        <input class="btn btn-default" type="submit" value="Login">
-      </form>
-      {% if error %}
-        <p class="error"><strong>Error:</strong> {{ error }}
-      {% endif %}
+{% extends "base.html" %}
+{% block title %}Login - {% endblock %}
+{% block scripts %}
+  <script type="text/javascript" charset="utf-8">
+    $(document).ready(function(){
+      $('#username').focus()
+    });
+  </script>
+{% endblock %}
+{% block body %}
+  <div class="container">
+    <div class="row">
+      <div class="col-md-4 offset-md-4">
+        <div class="card my-5">
+          <form class="card-body cardbody-color p-lg-5" method="post">
+            <h2 class="text-center text-dark">Login</h2>
+            <div class="text-center">
+              <img src="https://cdn.pixabay.com/photo/2016/03/31/19/56/avatar-1295397__340.png" class="img-fluid profile-image-pic img-thumbnail rounded-circle my-3" width="200px" alt="profile">
+            </div>
+            <div class="mb-3">
+              <input type="text" class="form-control" id=username name="username" placeholder="User Name" value="{{ request.form.username }}">
+            </div>
+            <div class="text-center">
+              <button type="submit" class="btn btn-orange px-5 mb-3" type="submit" value="login">Login</button>
+            </div>
+            {% if error %}
+              <div class="alert alert-danger">
+                <strong>Error!</strong> {{ error }}
+              </div>
+            {% endif %}
+          </form>
+        </div>
+      </div>
     </div>
-  </body>
-</html>
+  </div>
+{% endblock %}
+
