@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% block scripts %}
-  <script type="text/javascript" src="static/socket.io.min.js"></script>
+<script type="text/javascript" src="static/socket.io.min.js" xmlns="http://www.w3.org/1999/html"></script>
   <script type="text/javascript" charset="utf-8">
     function append_script_output(msg) {
       var $textarea = $('#script_output');
@@ -40,15 +40,20 @@
   <div class="home">
     <div class="header">
       <h1>Robot Control Terminal:\&gt</h1>
-      <div id="username">Logged in as <strong>{{ session['username']|e }}</strong></div>
-      <div>-</div>
-      <a class="link-orange" href="{{ url_for('logout')}}">Logout</a>
+      <div id="username">
+        Logged in as <strong>{{ session['username']|e }}</strong> - <a href="{{ url_for('logout')}}">Logout</a>
+      </div>
     </div>
     <div class="footer">
       <span>(C) 2022 Brecht Kuppens</span>
     </div>
     <div class="content">
-      <div class="script_buttons">
+      <div class="script_code_header">Code</div>
+      <div class="script_buttons_header"></div>
+      <div class="script_output_header">Output</div>
+      <div class="help_header">Documentation</div>
+
+      <div class="script_buttons"> <!-- Comes first to preserve border around it (buttons would overlap) -->
         <button id=run_button type="submit" class='btn btn-orange w-100'>Run</button>
         <button id=abort_button type="submit" class='btn btn-orange w-100' disabled="true">Abort</button>
       </div>
@@ -60,6 +65,10 @@
 
       <div class="script_output">
         <textarea id='script_output' spellcheck="false" readonly></textarea>
+      </div>
+
+      <div class="help">
+        {% include 'help_nl.html' %}
       </div>
     </div>
   </div>
