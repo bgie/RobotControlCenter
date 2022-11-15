@@ -32,16 +32,18 @@ struct Robot::Data {
         : id(id)
         , address(address)
         , port(port)
-        , batteryVoltage(0.0f)
+        , batteryCharge(0)
         , markerId(-1)
+        , gamepadIndex(0)
     {
     }
 
     const QByteArray id;
     const QHostAddress address;
     const int port;
-    float batteryVoltage;
+    int batteryCharge;
     int markerId;
+    int gamepadIndex;
     QByteArray lastCommand;
     QElapsedTimer lastDiscoveryTime;
     QUdpSocket sendSocket;
@@ -75,15 +77,9 @@ QString Robot::url() const
     return QStringLiteral("%1:%2").arg(_d->address.toString()).arg(_d->port);
 }
 
-float Robot::batteryVoltage() const
+float Robot::batteryCharge() const
 {
-    return _d->batteryVoltage;
-}
-
-int Robot::batteryPercentage() const
-{
-    // TODO implement this, depends on hardware
-    return 100;
+    return _d->batteryCharge;
 }
 
 bool Robot::hasMarkerId() const
@@ -105,10 +101,10 @@ void Robot::setMarkerId(int newId)
     emit markerIdChanged(_d->markerId);
 }
 
-void Robot::discoveryMessageReceived(float batteryVoltage)
+void Robot::discoveryMessageReceived(int batteryCharge)
 {
     _d->lastDiscoveryTime.start();
-    setBatteryVoltage(batteryVoltage);
+    setBatteryVoltage(batteryCharge);
 }
 
 bool Robot::hasConnectionTimedOut() const
@@ -123,32 +119,27 @@ void Robot::sendCommand(QString command)
 
 void Robot::setBatteryVoltage(float newVoltage)
 {
-    if (qFuzzyIsNull(newVoltage - _d->batteryVoltage))
+    if (qFuzzyIsNull(newVoltage - _d->batteryCharge))
         return;
 
-    _d->batteryVoltage = newVoltage;
-    emit batteryVoltageChanged();
+    _d->batteryCharge = newVoltage;
+    emit batteryChargeChanged();
 }
 
 bool Robot::sendCommand(QByteArray command)
 {
-    if (_d->address.isNull())
-        return false;
-
-    const qint64 bytesSent = _d->sendSocket.writeDatagram(command, _d->address, _d->port);
-    const bool sendOk = (bytesSent == command.size());
+    bool sendOk = false;
+    if (!_d->address.isNull()) {
+        const qint64 bytesSent = _d->sendSocket.writeDatagram(command, _d->address, _d->port);
+        sendOk = (bytesSent == command.size());
+    }
     if (sendOk) {
         _d->lastCommand = command;
-        emit lastCommandChanged();
+    } else {
+        _d->lastCommand = QByteArrayLiteral("Failed to send command! - ") + command;
     }
+    emit lastCommandChanged();
     return sendOk;
-}
-
-void Robot::processMarkers(const MarkerList& markers)
-{
-    if (_d->agent) {
-        _d->agent->processMarkers(markers);
-    }
 }
 
 void Robot::processUserCommand(QByteArray command)
@@ -171,4 +162,18 @@ IAgent* Robot::agent() const
 QByteArray Robot::lastCommand() const
 {
     return _d->lastCommand;
+}
+
+void Robot::setGamepadIndex(int gamepadIndex)
+{
+    if (_d->gamepadIndex == gamepadIndex)
+        return;
+
+    _d->gamepadIndex = gamepadIndex;
+    emit gamepadIndexChanged(_d->gamepadIndex);
+}
+
+int Robot::gamepadIndex() const
+{
+    return _d->gamepadIndex;
 }

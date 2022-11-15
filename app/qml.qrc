@@ -51,5 +51,10 @@
         <file>img/plus-white.png</file>
         <file>img/plus-black.png</file>
         <file>img/plus-yellow.png</file>
+        <file>img/battery-low-red.png</file>
+        <file>img/battery-full-white.png</file>
+        <file>img/battery-mid-white.png</file>
+        <file>img/stethoscope-black.png</file>
+        <file>img/stethoscope-white.png</file>
     </qresource>
 </RCC>

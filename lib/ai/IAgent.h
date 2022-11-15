@@ -15,18 +15,22 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 #pragma once
-#include <QByteArray>
+#include <QObject>
 
 class Robot;
 class MarkerList;
 
-class IAgent {
+class IAgent : public QObject {
+    Q_OBJECT
 public:
-    explicit IAgent(Robot& robot);
+    explicit IAgent(Robot& robot, QObject* parent = nullptr);
     virtual ~IAgent();
 
     virtual void processMarkers(const MarkerList&) = 0;
     virtual void processUserCommand(QByteArray command) = 0;
+
+signals:
+    void sendStatusMessage(QByteArray message);
 
 protected:
     Robot& _robot;

@@ -99,6 +99,39 @@ QRectF WorldEdge::boundsWithMargin(float ratio) const
     return result.adjusted(-margin.width(), -margin.height(), +margin.width(), +margin.height());
 }
 
+bool WorldEdge::isDirectionInwards(QPointF pos, float angleRadians)
+{
+    if (_d->points.size() < 3) {
+        return false;
+    }
+    const float DPI = 2 * M_PI;
+    while (angleRadians > M_PI) {
+        angleRadians -= DPI;
+    }
+    while (angleRadians < -M_PI) {
+        angleRadians += DPI;
+    }
+    const int size = _d->points.size();
+    QPointF p = _d->points.last();
+    float angle1 = atan2f(p.y() - pos.y(), p.x() - pos.x());
+    for (int i = 0; i < size; ++i) {
+        p = _d->points.at(i);
+        float angle2 = atan2f(p.y() - pos.y(), p.x() - pos.x());
+
+        float smallest = qMin(angle1, angle2);
+        float largest = qMax(angle1, angle2);
+        if (largest - smallest < M_PI) {
+            if (angleRadians >= smallest && angleRadians <= largest)
+                return true;
+        } else {
+            if (angleRadians <= smallest || angleRadians >= largest)
+                return true;
+        }
+        angle1 = angle2;
+    }
+    return false;
+}
+
 float WorldEdge::z() const
 {
     return _d->z;
@@ -131,7 +164,7 @@ void WorldEdge::sortPoints(QPolygonF& points)
 
         QMap<float, QPointF> angle2point;
         foreach (const QPointF& p, points) {
-            angle2point.insert(atan2(p.y() - center.y(), p.x() - center.x()), p);
+            angle2point.insert(atan2f(p.y() - center.y(), p.x() - center.x()), p);
         }
 
         points = QPolygonF(angle2point.values().toVector());

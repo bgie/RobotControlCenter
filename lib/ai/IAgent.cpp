@@ -18,8 +18,9 @@
 #include "aruco/MarkerList.h"
 #include "robot/Robot.h"
 
-IAgent::IAgent(Robot& robot)
-    : _robot(robot)
+IAgent::IAgent(Robot& robot, QObject* parent)
+    : QObject(parent)
+    , _robot(robot)
 {
 }
 

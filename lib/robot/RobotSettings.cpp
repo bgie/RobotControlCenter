@@ -59,6 +59,18 @@ void RobotSettings::setRobot2Marker(QMap<QByteArray, int> values)
 
 void RobotSettings::onRobotAdded(Robot* r)
 {
+    QSet<int> gamepadIndices;
+    for (Robot* robot : _d->network.robots()) {
+        if (robot != r) {
+            gamepadIndices << robot->gamepadIndex();
+        }
+    }
+    for (int i = 1; i <= gamepadIndices.count() + 1; ++i) {
+        if (!gamepadIndices.contains(i)) {
+            r->setGamepadIndex(i);
+            break;
+        }
+    }
     r->setMarkerId(_d->robot2Marker.value(r->id(), -1));
     connect(r, &Robot::markerIdChanged, this, &RobotSettings::onRobotMarkerIdChanged);
 }

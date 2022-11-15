@@ -22,8 +22,7 @@
 
 #define REGISTER_TESTCLASS(c) const bool dummy = TestFactory::instance().registerTestConstructor([]() -> QObject* { return new c(); })
 
-class TestFactory
-{
+class TestFactory {
 private:
     TestFactory();
 

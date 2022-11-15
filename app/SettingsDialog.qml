@@ -115,6 +115,13 @@ MyDialog {
             sourceLight: "img/pipe-white.png"
             sourceDark: "img/pipe-black.png"
         }
+
+        MyNavigationButton {
+            id: monitorButton
+            navigationBar: navigationBar
+            sourceLight: "img/stethoscope-white.png"
+            sourceDark: "img/stethoscope-black.png"
+        }
     }
 
     Item {
@@ -586,15 +593,44 @@ MyDialog {
                                     Row {
                                         spacing: Style.smallMargin
                                         Image {
+                                            id: lowBatteryIcon
+                                            visible: robot.batteryCharge < 25
+                                            width: 32
+                                            height: 32
+                                            fillMode: Image.PreserveAspectFit
+                                            source: "/img/battery-low-red.png"
+                                            SequentialAnimation on opacity {
+                                                loops: Animation.Infinite
+                                                running: lowBatteryIcon.visible
+                                                OpacityAnimator { from: 0.2; to: 1.0; duration: 150 }
+                                                OpacityAnimator { from: 1.0; to: 0.2; duration: 350 }
+                                            }
+                                        }
+                                        Image {
+                                            visible: robot.batteryCharge >= 25 && robot.batteryCharge < 50
+                                            width: 32
+                                            height: 32
+                                            fillMode: Image.PreserveAspectFit
+                                            source: "/img/battery-mid-white.png"
+                                        }
+                                        Image {
+                                            visible: robot.batteryCharge >= 50 && robot.batteryCharge < 95
                                             width: 32
                                             height: 32
                                             fillMode: Image.PreserveAspectFit
                                             source: "/img/battery-high-white.png"
                                         }
+                                        Image {
+                                            visible: robot.batteryCharge >= 95
+                                            width: 32
+                                            height: 32
+                                            fillMode: Image.PreserveAspectFit
+                                            source: "/img/battery-full-white.png"
+                                        }
                                         MyLabel {
                                             height: 32
                                             verticalAlignment: Qt.AlignVCenter
-                                            text: robot.batteryVoltage.toFixed(2) + "V"
+                                            text: robot.batteryCharge + "%"
                                         }
                                         Item {
                                             width: Style.mediumMargin
@@ -615,8 +651,9 @@ MyDialog {
 
                                     Row {
                                         spacing: Style.smallMargin
+                                        height: markerIdInput.height
                                         MyLabel {
-                                            height: markerIdInput.height
+                                            height: parent.height
                                             width: commandLabel.width
                                             verticalAlignment: Qt.AlignVCenter
                                             text: "Marker id"
@@ -626,6 +663,17 @@ MyDialog {
                                             width: 60
                                             text: robot.markerId
                                             onTextChanged: robot.markerId = parseInt(text)
+                                        }
+                                        MyLabel {
+                                            height: parent.height
+                                            verticalAlignment: Qt.AlignVCenter
+                                            text: "Gamepad index"
+                                        }
+                                        MyTextEdit {
+                                            id: gamePadIndexInput
+                                            width: 60
+                                            text: robot.gamepadIndex
+                                            onTextChanged: robot.gamepadIndex = parseInt(text)
                                         }
                                     }
 
@@ -651,8 +699,10 @@ MyDialog {
                                                 backgroundColor: "transparent"
                                                 onClicked: commandsHelpPanel.visible = true
                                             }
+                                            onAccepted: sendButton.onClicked()
                                         }
                                         MyButton {
+                                            id: sendButton
                                             text: "Send"
                                             backgroundColor: Style.darkGray
                                             enabled: commandInput.text
@@ -694,147 +744,38 @@ MyDialog {
             visible: pipeButton.selected
             spacing: Style.largeMargin
 
-            ColumnLayout {
-                spacing: Style.smallMargin
-
-                MyLabel {
-                    text: "Named pipe for camera marker tracking output"
-                }
-                Row {
-                    Layout.leftMargin: Style.mediumMargin
-                    spacing: Style.mediumMargin
-                    MyTextEdit {
-                        id: cameraPipePath
-                        width: 400
-                        text: pipeController.cameraPipePath
-                        onTextChanged: pipeController.cameraPipePath = text
-                    }
-                    Image {
-                        width: 32
-                        height: cameraPipePath.height
-                        fillMode: Image.PreserveAspectFit
-                        source: "/img/error-red.png"
-                        visible: pipeController.cameraPipeHasError
-                    }
-                    Image {
-                        width: 32
-                        height: cameraPipePath.height
-                        fillMode: Image.PreserveAspectFit
-                        source: "/img/checkmark-white.png"
-                        visible: !pipeController.cameraPipeHasError
-                    }
-                    MyLabel {
-                        height: cameraPipePath.height
-                        verticalAlignment: Qt.AlignVCenter
-                        text: pipeController.cameraPipeErrorString
-                    }
-                }
-            }
-            ColumnLayout {
-                spacing: Style.smallMargin
-
-                MyLabel {
-                    text: "Base path for robot command pipes"
-                }
-                Row {
-                    Layout.leftMargin: Style.mediumMargin
-                    spacing: Style.mediumMargin
-                    MyTextEdit {
-                        id: robotPipesPath
-                        width: 400
-                        text: pipeController.robotPipesPath
-                        onTextChanged: pipeController.robotPipesPath = text
-                    }
-                }
-            }
-
             MyLabel {
                 text: "No robots connected"
-                visible: !pipeController.robotsConnected
+                visible: !robotSocketManager.robotsConnected
             }
 
-            Row {
-                visible: pipeController.robotsConnected
+            ColumnLayout {
+                visible: robotSocketManager.robotsConnected
                 spacing: Style.largeMargin
-                ColumnLayout {
-                    spacing: Style.smallMargin
 
-                    MyLabel {
-                        text: "Command pipes"
-                    }
+                Repeater {
+                    model: robotSocketManager.robotSocket
 
-                    ColumnLayout {
-                        Layout.leftMargin: Style.mediumMargin
+                    delegate:  Row {
+                        property RobotSocket socket: modelData
 
-                        Repeater {
-                            model: pipeController.robotCommandPipes
-
-                            delegate:  Row {
-                                property RobotCommandPipe robot: modelData
-                                spacing: Style.mediumMargin
-                                MyLabel {
-                                    id: robotPipePath
-                                    text: robot.path
-                                }
-                                Image {
-                                    width: robotPipePath.height
-                                    height: robotPipePath.height
-                                    fillMode: Image.PreserveAspectFit
-                                    source: "/img/error-red.png"
-                                    visible: robot.hasError
-                                }
-                                Image {
-                                    width: robotPipePath.height
-                                    height: robotPipePath.height
-                                    fillMode: Image.PreserveAspectFit
-                                    source: "/img/checkmark-white.png"
-                                    visible: !robot.hasError
-                                }
-                                MyLabel {
-                                    text: robot.errorString
-                                }
-                            }
+                        spacing: Style.mediumMargin
+                        Item {
+                            width: Style.mediumMargin
+                            height: 1
                         }
-                    }
-                }
-                ColumnLayout {
-                    spacing: Style.smallMargin
-
-                    MyLabel {
-                        text: "Camera pipes"
-                    }
-
-                    ColumnLayout {
-                        Layout.leftMargin: Style.mediumMargin
-
-                        Repeater {
-                            model: pipeController.robotCameraPipes
-
-                            delegate:  Row {
-                                property RobotCameraPipe robot: modelData
-                                spacing: Style.mediumMargin
-                                MyLabel {
-                                    id: robotCameraPipePath
-                                    text: robot.path
-                                }
-                                Image {
-                                    width: robotCameraPipePath.height
-                                    height: robotCameraPipePath.height
-                                    fillMode: Image.PreserveAspectFit
-                                    source: "/img/error-red.png"
-                                    visible: robot.hasError
-                                }
-                                Image {
-                                    width: robotCameraPipePath.height
-                                    height: robotCameraPipePath.height
-                                    fillMode: Image.PreserveAspectFit
-                                    source: "/img/checkmark-white.png"
-                                    visible: !robot.hasError
-                                }
-                                MyLabel {
-                                    text: robot.errorString
-                                }
-                            }
+                        MyLabel {
+                            id: pipePath
+                            text: socket.path
+                        }
+                        Image {
+                            width: pipePath.height
+                            height: pipePath.height
+                            fillMode: Image.PreserveAspectFit
+                            source: socket.hasError ? "/img/error-red.png" : "/img/checkmark-white.png"
+                        }
+                        MyLabel {
+                            text: socket.errorString
                         }
                     }
                 }
@@ -842,6 +783,38 @@ MyDialog {
             Item {
                 Layout.fillHeight: true
                 Layout.fillWidth: true
+            }
+        }
+
+        ColumnLayout { // Performance monitor panel
+            anchors.fill: parent
+            visible: monitorButton.selected
+            anchors.margins: Style.largeMargin
+            spacing: Style.smallMargin
+
+            MyButton {
+                text: "Update"
+                backgroundColor: Style.darkGray
+                onClicked: performanceLogView.model = performanceMonitor.mostRecentBatch
+            }
+
+            Rectangle {
+                Layout.fillHeight: true
+                Layout.fillWidth: true
+                color: Style.black
+
+                ListView{
+                    id: performanceLogView
+                    anchors.fill: parent
+                    anchors.margins: 16
+                    clip: true
+                    orientation: Qt.Vertical
+
+                    delegate: MyLabel {
+                        text: modelData
+                        font.family: "Freemono"
+                    }
+                }
             }
         }
     }

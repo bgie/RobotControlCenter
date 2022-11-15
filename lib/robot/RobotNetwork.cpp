@@ -109,7 +109,7 @@ void RobotNetwork::readListenerSocket()
         auto parts = datagram.data().split(' ');
         if (parts.size() >= 2) {
             QByteArray id = parts.at(0);
-            float voltage = parts.at(1).toFloat();
+            int batteryCharge = parts.at(1).toInt();
 
             Robot* r = _d->robots[id];
             if (!r) {
@@ -117,7 +117,7 @@ void RobotNetwork::readListenerSocket()
                 _d->robots[id] = r;
                 newRobots << r;
             }
-            r->discoveryMessageReceived(voltage);
+            r->discoveryMessageReceived(batteryCharge);
         }
     }
 

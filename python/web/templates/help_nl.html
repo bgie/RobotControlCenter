@@ -3,21 +3,159 @@
     <li><a href="#python">Python basis</a></li>
     <li><a href="#robot">Robot verbinding</a></li>
     <li><a href="#rijden">Rijden</a></li>
+    <li><a href="#gamepads">Gamepads</a></li>
     <li><a href="#servos">Servos</a></li>
 </ul>
 
 <h2 id="python">Python basis</h2>
-<p>Lorem ipsum dolor sit amet consectetur adipiscing elit eleifend, cursus suspendisse conubia habitasse bibendum egestas nisl laoreet, etiam condimentum sodales primis in penatibus volutpat. Leo aenean praesent cum dui semper magna massa convallis, fermentum nam ipsum rhoncus dictumst augue pulvinar. Pharetra tellus pretium tincidunt praesent diam posuere mollis taciti litora imperdiet, fermentum bibendum ac velit platea magnis hac consequat nunc, parturient lorem amet faucibus nullam torquent vitae potenti id. Phasellus rhoncus magna mattis molestie sed adipiscing, laoreet tristique aenean mollis habitasse venenatis, viverra nisi metus hendrerit sagittis. </p>
-<a href="#inhoud">Terug naar inhoud</a>
+<ul>
+    <li>Naar het uitvoerscherm schrijven:
+        <code>print(<em>string</em>)</code>
+    </li>
+
+    <li>Als-dan
+    <code>if <em>conditie</em>:<br>
+        &nbsp&nbsp  <em>code indien conditie waar</em><br>
+    </code></li>
+
+    <li>Als-dan-anders
+    <code>if <em>conditie</em>:<br>
+        &nbsp&nbsp  <em>code indien conditie waar</em><br>
+    else:<br>
+        &nbsp&nbsp  <em>code indien conditie niet waar</em><br>
+    </code></li>
+
+    <li>Variabele toewijzen
+        <code><em>variable</em> = <em>waarde</em></code>
+        <ul>
+            <li>Een <em>variable</em> is een beetje ruimte in het computergeheugen waar je iets kan opslaan. Je geeft die ruimte een naam, de variabele naam, en je mag die naam zelf kiezen. Een duidelijke naam is wel aangeraden! Een naam moet uit 1 woord bestaan, maar met _ (underscore) kan je woorden aan mekaar plakken.</li>
+            <li>De <em>waarde</em> zijn de gegevens die je in de variabele wil steken. In een variabele kan je verschillende soorten gegevens opslaan. Dit noemen we het <em>type</em> van de gegevens. Zo zijn er bijvoorbeeld getallen of strings, en objecten.</li>
+            <li>Een <em>string</em> is een reeks letters, cijfers of symbolen. Wil je een string maken in je code, dan moet die tussen aanhalingstekens.
+                In python kan je zowel enkele '' of dubbele "" aanhalingstekens gebruiken, maar je mag niet combineren in dezelfde string.
+                Enkele voorbeelden:
+                <code>begroeting = 'hallo'<br>robotnaam = "R2D2"<br>het_beest = '666'.</code>
+                Ook al bestaat een string enkel uit cijfers, het blijft een string als hij tussen aanhalingstekens staat.
+                Wil je er mee rekenen, dat moet je de string omzetten naar een <em>getal</em>.</li>
+            <li>Een <em>getal</em> bestaat enkel uit cijfers en relevante symbolen (minus teken, decimaal teken...), en staat NIET tussen aanhalingstekens zoals een string.
+                Met getallen kan je ook rekenen.
+                Enkele voorbeelden:
+                <code>geld_op_mijn_rekening = 0<br>minuten_per_dag = 60 * 24</code>
+            </li>
+            <li>Een object is een verzameling gegevens waar ook code aan hangt.
+                Als je een object in een variabele steekt, kan je code die bij het object hoort uitvoeren.
+                Dat doe door een . (punt) tussen de variabele naam en de naam van de code functie te zetten.
+                Bijvoorbeeld:
+                <code>mijn_robot.haal_ne_cola()</code>
+            </li>
+        </ul>
+    </li>
+
+    <li id="vertraging">Een vertraging (wachten) kan je inbouwen met het commando:
+        <code>time.sleep(<em>seconden)</em></code>
+        <ul>
+            <li><em>seconden</em> is een getal. Het mag een komma-getal zijn. Merk op: in het Engels wordt een . (punt) gebruikt in plaats van een komma.</li>
+            <li>Dit commando zit in de <em>time</em> bibliotheek. Je moet die inladen. Dat doe je met volgende instructie aan het begin van je programma:
+            <code>import time</code></li>
+        </ul>
+    </li>
+</ul>
+<p class="right"><a href="#inhoud">Terug naar inhoud</a></p>
 
 <h2 id="robot">Robot verbinding</h2>
-<p>Imperdiet montes posuere ultricies tellus ipsum netus, blandit leo lorem ultrices placerat fames, interdum hac mi gravida nibh. Sociosqu posuere consectetur amet senectus interdum sem cum bibendum pharetra magnis, id nulla felis lectus etiam a risus erat penatibus, pellentesque porttitor fames elementum viverra placerat litora eget tortor. Platea aptent bibendum magnis ipsum sem parturient mollis blandit rutrum nulla, taciti et lectus aenean magna lacinia fames malesuada tortor, risus sociosqu fermentum nostra pretium nullam condimentum est vulputate. Augue mus pellentesque elementum mattis interdum, sed ullamcorper sodales tortor auctor, condimentum parturient congue conubia. Proin quam tortor feugiat inceptos litora aenean malesuada commodo laoreet cras ultrices, nibh accumsan sodales risus congue ridiculus conubia vehicula tincidunt natoque. </p>
-<a href="#inhoud">Terug naar inhoud</a>
+<p>Inladen van de bibliotheek om met de robot te verbinden doe je met volgende instructie:</p>
+<code>from robots import *</code>
+<p>Deze import zet je best helemaal vanboven aan het begin van je programma.</p>
+<p>Verbinden met de robot kan met deze code:</p>
+<code>with Robot(<em>naam</em>) as <em>variable</em></code>
+<p>Parameters:
+<ul>
+    <li><em>naam</em> is de naam/nummer van de robot waarmee je wil verbinden. Dit mag een getal zijn of een string.</li>
+    <li><em>variable</em> is een variabele die wordt aangemaakt. Via deze variabele kan je de robot instructies geven.</li>
+</ul>
+</p>
+<p>Voorbeeldcode om met robot 3 te verbinden en hem te laten draaien:</p>
+<code>from robots import *<br><br>
+    with Robot(1) as mijn_robot:<br>
+    &nbsp&nbsp  mijn_robot.turn(70)</code>
+<p class="right"><a href="#inhoud">Terug naar inhoud</a></p>
 
 <h2 id="rijden">Rijden</h2>
-<p>Sodales est conubia mollis sem facilisi volutpat malesuada laoreet cubilia nisl, curae vitae commodo eleifend viverra nunc tristique et. Vulputate iaculis ridiculus sed platea egestas blandit accumsan vehicula bibendum duis dolor, per cum sociosqu diam porta sagittis at sociis nostra potenti praesent quisque, tempor neque facilisis etiam maecenas consectetur ipsum quis vestibulum suspendisse. Proin bibendum tortor libero lectus nostra augue nisl, lacinia ligula a morbi nascetur hac, posuere sit dictumst porta condimentum commodo. Cum urna maecenas cubilia sagittis condimentum vitae torquent dictumst dui conubia sapien sollicitudin nam bibendum, duis iaculis tincidunt posuere per nisi praesent elementum sociosqu dictum ultricies accumsan. Egestas convallis per pretium cubilia cras eleifend dis ut montes mus accumsan suspendisse adipiscing suscipit vulputate lectus, nibh laoreet parturient netus nisl nulla sapien ultrices mollis sodales non hendrerit nisi maecenas. </p>
-<a href="#inhoud">Terug naar inhoud</a>
+<ul>
+    <li>Er zijn verschillende commandos om de motoren aan te sturen. Na zo'n commando gaat het programma onmiddellijk verder met de volgende instructie.
+        Als je wil dat de robot een tijd blijft rijden voor je een ander commando stuurt, gebruikt dan een <a href="#vertraging">vertraging</a> (time.sleep)
+    </li>
+    <li>Het is mogelijk dat de robot bij lage snelheden niet beweegt, maar enkel piept. Gebruik dan een hogere snelheid.</li>
+    <li>Er zit een veiligheid in de software die zorgt dat de robot nooit langer dan meerdere seconden blijft rijden, tenzij je het commando herhaalt.<br></li>
+    <li><em>mijn_robot</em> is telkens de naam van de variabele gebruikt bij het verbinden met de robot. Dit kan een andere naam zijn als je een andere variabele hebt gebruikt bij het verbinden.</li>
+
+    <li>Rechtdoor rijden kan met:
+    <code>mijn_robot.drive(snelheid)</code>
+        <ul>
+            <li><em>snelheid</em> is een percentage van -100 tot 100. Positieve getallen laten de robot naar voor rijden, negatieve naar achter.</li>
+        </ul>
+    </li>
+
+    <li>Ter plekke draaien kan met:
+    <code>mijn_robot.turn(snelheid)</code>
+        <ul>
+            <li><em>snelheid</em> is een percentage van -100 tot 100. Positieve getallen laten de robot met de klok mee draaien, negatieve tegen de klok in.
+            </li>
+        </ul>
+    </li>
+
+    <li>Stoppen kan met:
+    <code>mijn_robot.stop()</code>
+    </li>
+
+    <li>De motoren apart aansturen kan met:
+    <code>mijn_robot.motors(snelheid_links, snelheid_rechts)</code>
+        <ul>
+            <li><em>snelheid_links</em> en <em>snelheid_rechts</em> zijn percentages van -100 tot 100. Positieve getallen laten een motor naar voor rijden, negatieve naar achter.
+                Een flauwe bocht naar links kan je bijvoorbeeld maken door de linkse motor wat trager te zetten dan de rechtse:
+                <code>mijn_robot.motors(50, 100)</code>
+            </li>
+        </ul>
+    </li>
+
+    <li>Draaien met een bepaalde hoek:
+    <code>mijn_robot.turn_by_angle(hoek)</code>
+        <ul>
+            <li><em>hoek</em> is een hoek van -180 tot 180 graden. Positieve hoeken zijn met de klok mee.</li>
+        </ul>
+    </li>
+
+    <li>Draaien tot de robot naar een bepaalde richting kijkt:
+    <code>mijn_robot.turn_to_direction(richting)</code>
+        <ul>
+            <li><em>richting</em> is een hoek van 0 tot 360 graden waar de robot naar moet kijken.
+                <ul>
+                    <li>0 graden is links op het camerabeeld</li>
+                    <li>90 graden is boven op het camerabeeld</li>
+                    <li>180 graden is rechts op het camerabeeld</li>
+                    <li>270 graden is onder op het camerabeeld</li>
+                </ul>
+            </li>
+        </ul>
+    </li>
+</ul>
+<p class="right"><a href="#inhoud">Terug naar inhoud</a></p>
+
+
+<h2 id="gamepads">Gamepads</h2>
+<p>Warning! Under development!</p>
+<p>Als er gamepads zijn aangesloten, worden deze aan de robots gekoppeld volgens nummer.</p>
+<p>Opvragen van de x of y as van de gamepad:</p>
+<code>mijn_robot.gpadx<br>
+mijn_robot.gpady</code>
+<p>Waardes zijn <0, 0 of >0 afhankelijk van de positie van de as.</p>
+<p>De gamepads worden samen met de camera uitgelezen. Om in een lus telkens de huidige waarde op te vragen, kan je volgende code gebruiken:</p>
+<code>while mijn_robot.camera.read():
+    &nbsp&nbspprint("x:", mijn_robot.gpadx)
+    &nbsp&nbspprint("x:", mijn_robot.gpady)
+</code>
+<p class="right"><a href="#inhoud">Terug naar inhoud</a></p>
+
 
 <h2 id="servos">Servos</h2>
-<p>Varius pulvinar nec lacinia quis per aenean tellus augue, bibendum est himenaeos conubia sollicitudin platea adipiscing in sagittis, rhoncus quam pellentesque donec vestibulum vitae tristique. Sagittis molestie ligula nam fermentum per eu a, ultrices sollicitudin aptent quam duis egestas, sodales massa nostra quis faucibus blandit. Habitant varius porta potenti suscipit class natoque nostra ante egestas inceptos tincidunt, litora nunc ut ullamcorper aliquam magnis dignissim torquent lacus dictumst. Sociis morbi lorem litora ornare neque viverra natoque sociosqu quisque, consequat scelerisque nec in id himenaeos ligula donec aliquam, mi urna suscipit ipsum orci enim congue dolor. Tristique orci senectus nullam urna taciti accumsan interdum parturient integer curae cubilia sociis imperdiet, mus nascetur eros non consectetur ad sodales aenean felis nisi quam in. </p>
-<a href="#inhoud">Terug naar inhoud</a>
+<p>Servos zijn tijdelijk niet beschikbaar sinds de zwaardere batterijen in gebruik zijn. Graag een minuut stilte voor onze dierbare servo motor die een te hoge spanning kreeg.</p>
+<p class="right"><a href="#inhoud">Terug naar inhoud</a></p>

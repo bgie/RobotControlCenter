@@ -25,8 +25,9 @@ class Robot : public QObject {
     Q_OBJECT
     Q_PROPERTY(QString id READ idString CONSTANT)
     Q_PROPERTY(QString url READ url CONSTANT)
-    Q_PROPERTY(float batteryVoltage READ batteryVoltage NOTIFY batteryVoltageChanged)
+    Q_PROPERTY(int batteryCharge READ batteryCharge NOTIFY batteryChargeChanged)
     Q_PROPERTY(int markerId READ markerId WRITE setMarkerId NOTIFY markerIdChanged)
+    Q_PROPERTY(int gamepadIndex READ gamepadIndex WRITE setGamepadIndex NOTIFY gamepadIndexChanged)
     Q_PROPERTY(QByteArray lastCommand READ lastCommand NOTIFY lastCommandChanged)
 
 public:
@@ -37,14 +38,15 @@ public:
     QString idString() const;
     QString url() const;
 
-    float batteryVoltage() const;
-    int batteryPercentage() const;
+    float batteryCharge() const;
 
     bool hasMarkerId() const;
     int markerId() const;
     void setMarkerId(int newId = -1);
+    int gamepadIndex() const;
+    void setGamepadIndex(int gamepadIndex);
 
-    void discoveryMessageReceived(float batteryVoltage);
+    void discoveryMessageReceived(int batteryCharge);
     bool hasConnectionTimedOut() const;
 
     Q_INVOKABLE void sendCommand(QString command);
@@ -52,7 +54,6 @@ public:
 
     static const QByteArray FULLSTOP_COMMAND;
 
-    void processMarkers(const MarkerList& markers);
     void processUserCommand(QByteArray command);
     void setAgent(IAgent* agent); // takes ownership
     IAgent* agent() const;
@@ -60,8 +61,9 @@ public:
     QByteArray lastCommand() const;
 
 signals:
-    void batteryVoltageChanged();
+    void batteryChargeChanged();
     void markerIdChanged(int newId);
+    void gamepadIndexChanged(int gamepadIndex);
     void lastCommandChanged();
 
 private:

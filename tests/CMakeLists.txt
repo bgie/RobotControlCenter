@@ -20,6 +20,7 @@ add_executable(tests
   main.cpp
   TestFactory.cpp
   TestSourceCode.cpp
+  TestWorldEdge.cpp
   resources.qrc
 )
 

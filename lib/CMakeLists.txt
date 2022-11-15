@@ -26,6 +26,7 @@ add_library(lib
   aruco/Marker.cpp
   ai/IAgent.cpp
   ai/PythonAgent.cpp
+  ai/AdvancedProcessor.cpp
   kalman/RotationCounter.cpp
   kalman/KalmanTracker1D.cpp
   kalman/KalmanTracker3D.cpp
@@ -53,17 +54,15 @@ add_library(lib
   robot/FakeRobotManager.cpp
   robot/RobotSettings.cpp
   robot/Robot.cpp
-  pipe/NonBlockingPipe.cpp
-  pipe/NonBlockingSenderPipe.cpp
-  pipe/NonBlockingReceiverPipe.cpp
-  pipe/PipeController.cpp
-  pipe/RobotCommandPipe.cpp
-  pipe/RobotCameraPipe.cpp
+  socket/RobotSocketManager.cpp
+  socket/RobotSocket.cpp
   util/FactoryMethod.cpp
   game/WorldEdge.cpp
   game/PythonGameMode.cpp
   game/GameScene.cpp
   game/MarkerSceneItem.cpp
+  performance/PerformanceMonitor.cpp
+  performance/LogPerformance.cpp
 )
 
 target_include_directories(lib PUBLIC .)

@@ -30,8 +30,6 @@ public:
     int gain(QString cameraDevice) const;
     int videoFormatIndex(QString cameraDevice) const;
     QString calibrationFile() const;
-    QString cameraPipePath() const;
-    QString robotPipesPath() const;
     QMap<QByteArray, int> robot2Marker() const;
     QPolygonF worldEdge() const;
     float worldZ() const;
@@ -45,8 +43,6 @@ public slots:
     void setGain(QString cameraDevice, int gain);
     void setVideoFormatIndex(QString cameraDevice, int videoFormatIndex);
     void setCalibrationFile(QString calibrationFile);
-    void setCameraPipePath(QString newPath);
-    void setRobotPipesPath(QString newPath);
     void setRobot2Marker(QMap<QByteArray, int> values);
     void setWorldEdge(QPolygonF newEdge);
     void setWorldZ(float newZ);
@@ -60,8 +56,6 @@ private:
     QMap<QString, QVariant> _gain;
     QMap<QString, QVariant> _videoFormatIndex;
     QString _calibrationFile;
-    QString _cameraPipePath;
-    QString _robotPipesPath;
     QMap<QByteArray, int> _robot2Marker;
     QPolygonF _worldEdge;
     float _worldZ;

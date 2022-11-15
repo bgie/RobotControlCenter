@@ -16,6 +16,7 @@
 */
 #include "SceneTracker.h"
 #include "MarkerTracker.h"
+#include "performance/LogPerformance.h"
 #include <QMap>
 #include <QMutexLocker>
 #include <QSet>
@@ -67,7 +68,12 @@ void SceneTracker::setFramesPerSecond(float newValue)
 
 void SceneTracker::processFrame(QImage image)
 {
+    int frameCounter = image.text(QStringLiteral("index")).toInt();
+    logRelativeTime(frameCounter, QStringLiteral("Received frame for tracking"));
+
     auto markers = _d->aruco.detectMarkers(image);
+
+    logRelativeTime(frameCounter, QStringLiteral("Detected arucu markers"));
 
     QMutexLocker lock(&_d->mutex);
     const float msecsPerFrame = 1000.0f / _d->framesPerSecond;
@@ -122,6 +128,10 @@ void SceneTracker::processFrame(QImage image)
     _d->markerList = markerList;
 
     lock.unlock();
+
+    logRelativeTime(frameCounter, QStringLiteral("Tracked marker"));
+    logFrameComplete(frameCounter);
+
     emit frameProcessed();
 }
 

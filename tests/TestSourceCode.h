@@ -17,8 +17,7 @@
 #pragma once
 #include <QObject>
 
-class TestSourceCode : public QObject
-{
+class TestSourceCode : public QObject {
     Q_OBJECT
 private slots:
     void source_code_must_contain_license_header();

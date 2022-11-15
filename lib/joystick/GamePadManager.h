@@ -35,6 +35,8 @@ public:
     int count() const;
     QList<QObject*> gamePadQObjects() const;
 
+    GamePad* gamepadForRobot(QByteArray id) const;
+
 signals:
     void gamePadAdded(GamePad* g);
     void gamePadRemoved(GamePad* g);

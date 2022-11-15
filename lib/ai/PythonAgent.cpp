@@ -18,16 +18,20 @@
 #include "aruco/MarkerList.h"
 #include "game/WorldEdge.h"
 #include "robot/Robot.h"
+#include <QRegularExpression>
 
-PythonAgent::PythonAgent(Robot& robot, WorldEdge& worldEdge)
-    : IAgent(robot)
+PythonAgent::PythonAgent(Robot& robot, WorldEdge& worldEdge, QObject* parent)
+    : IAgent(robot, parent)
     , _worldEdge(worldEdge)
     , _insideWorld(false)
+    , _thread()
 {
+    _thread.start();
 }
 
 PythonAgent::~PythonAgent()
 {
+    _thread.wait();
 }
 
 void PythonAgent::processMarkers(const MarkerList& markers)
@@ -47,10 +51,18 @@ void PythonAgent::processMarkers(const MarkerList& markers)
     }
 }
 
-void PythonAgent::processUserCommand(QByteArray command)
+void PythonAgent::processUserCommand(QByteArray commandLine)
 {
+    qDebug() << commandLine;
     if (_insideWorld) {
-        _robot.sendCommand(command);
+        // _robot.sendCommand(command);
+
+        //        auto words = commandLine.simplified().toLower().split(' ');
+        //        if (words.size() >= 1) {
+        //            QByteArray cmd = words.at(0);
+        //            if (cmd == "driveTime") {
+        //            }
+        //        }
     }
 }
 

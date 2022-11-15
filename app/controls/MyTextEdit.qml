@@ -18,7 +18,9 @@ import QtQuick 2.0
 import RobotControlCenter 1.0
 
 Rectangle {
+    id: main
     property alias text: textEdit.text
+    signal accepted
 
     color: Style.lightGray
     border.color: textEdit.activeFocus ? Style.white : Style.lightGray
@@ -26,12 +28,14 @@ Rectangle {
     radius: Style.smallRadius
     height: textEdit.contentHeight + 20
 
-    TextEdit {
+    TextInput {
         id: textEdit
         anchors.fill: parent
         anchors.margins: 10
         font.pixelSize: Style.fontSize
         color: enabled ? Style.black : Style.mediumGray
         selectByMouse: true
+
+        onAccepted: main.accepted()
     }
 }

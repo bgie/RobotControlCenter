@@ -18,21 +18,29 @@
 #include <QObject>
 
 class IRobotManager;
-class PipeController;
+class RobotSocketManager;
 class CameraController;
 class SceneTracker;
+class GamePadManager;
 class GameScene;
-class Robot;
+class RobotSocket;
 
 class PythonGameMode : public QObject
 {
      Q_OBJECT
 public:
-    PythonGameMode(IRobotManager& robots, PipeController& pipes, CameraController& camera, SceneTracker& tracker, GameScene& gameScene, QObject* parent = nullptr);
+    PythonGameMode(
+        RobotSocketManager& sockets,
+        CameraController& camera,
+        SceneTracker& tracker,
+        GamePadManager& gamePadManger,
+        GameScene& gameScene,
+        QObject* parent = nullptr);
     virtual ~PythonGameMode() override;
 
 private:
-    void onRobotAdded(Robot* r);
+    void onRobotSocketAdded(RobotSocket* socket);
+    void onRobotSocketRemoved(RobotSocket* socket);
     void onTrackerCameraFrameProcessed();
 
 private:

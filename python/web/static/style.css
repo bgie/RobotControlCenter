@@ -144,3 +144,16 @@ div h2:not(:first-child) {
     border: 0px;
     padding: 20px;
 }
+
+code {
+    font-family: monospace;
+    display: block;
+    background-color: #000;
+    color: #4f4;
+    font-weight: 700;
+    padding: 1em 2em;
+}
+
+.right {
+    text-align: right;
+}

@@ -15,6 +15,7 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 #include "CameraReader.h"
+#include "performance/LogPerformance.h"
 #include <QDebug>
 #include <errno.h>
 #include <fcntl.h>
@@ -128,6 +129,8 @@ void CameraReader::init(void)
 
 bool CameraReader::readFrame()
 {
+    static int frameCounter = 0;
+
     struct v4l2_buffer buffer;
     memset(&buffer, 0, sizeof(buffer));
     buffer.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
@@ -147,8 +150,13 @@ bool CameraReader::readFrame()
         }
     }
 
-    auto jpgBuffera = reinterpret_cast<const uchar*>(_buffers.at(buffer.index).start);
-    QImage img = QImage::fromData(jpgBuffera, _buffers.at(buffer.index).length, "JPG");
+    logRelativeTime(frameCounter, QStringLiteral("Read frame from USB"));
+
+    auto jpgBuffer = reinterpret_cast<const uchar*>(_buffers.at(buffer.index).start);
+    QImage img = QImage::fromData(jpgBuffer, _buffers.at(buffer.index).length, "JPG");
+
+    logRelativeTime(frameCounter, QStringLiteral("Converted JPG to bitmap"));
+
     img = img.convertToFormat(QImage::Format_RGB888);
 
     // Enqueue the buffer again
@@ -156,7 +164,9 @@ bool CameraReader::readFrame()
         qCritical() << "VIDIOC_QBUF error, errno: " << errno;
     }
 
+    img.setText(QStringLiteral("index"), QString::number(frameCounter));
     emit frameRead(img);
+    frameCounter++;
     return true;
 }
 

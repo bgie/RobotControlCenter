@@ -39,6 +39,7 @@ public:
     bool isInside(QPointF pos) const;
     QRectF bounds() const;
     QRectF boundsWithMargin(float ratio = 0.125) const;
+    bool isDirectionInwards(QPointF pos, float angleRadians);
 
     float z() const;
     void setZ(float newValue);

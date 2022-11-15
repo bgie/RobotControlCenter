@@ -50,6 +50,12 @@ QList<QObject*> GamePadManager::gamePadQObjects() const
     return result;
 }
 
+GamePad* GamePadManager::gamepadForRobot(QByteArray id) const
+{
+    int i = id.toInt() - 1;
+    return _gamepads.value(i, nullptr);
+}
+
 void GamePadManager::onJoystickAdded(IJoystick* j)
 {
     auto gamepad = new GamePad(j);

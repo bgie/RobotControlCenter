@@ -25,8 +25,6 @@ const QString EXPOSURE_KEY(QStringLiteral("Exposure"));
 const QString GAIN_KEY(QStringLiteral("Gain"));
 const QString VIDEOFORMATINDEX_KEY(QStringLiteral("VideoFormatIndex"));
 const QString CALIBRATIONFILE_KEY(QStringLiteral("CalibrationFile"));
-const QString CAMERA_PIPE_PATH_KEY(QStringLiteral("CameraPipePath"));
-const QString ROBOT_PIPES_PATH_KEY(QStringLiteral("RobotPipesPath"));
 const QString ROBOT_2_MARKER_KEY(QStringLiteral("Robot2Marker"));
 const QString WORLD_EDGE_KEY(QStringLiteral("WorldEdge"));
 const QString WORLD_Z_KEY(QStringLiteral("WorldZ"));
@@ -47,8 +45,6 @@ AppSettings::AppSettings(QObject *parent) : QObject(parent)
     _gain = settings.value(GAIN_KEY).toMap();
     _videoFormatIndex = settings.value(VIDEOFORMATINDEX_KEY).toMap();
     _calibrationFile = settings.value(CALIBRATIONFILE_KEY, QDir::home().absoluteFilePath(QStringLiteral("CameraCalibration.json"))).toString();
-    _cameraPipePath = settings.value(CAMERA_PIPE_PATH_KEY, QStringLiteral("/robots/camera")).toString();
-    _robotPipesPath = settings.value(ROBOT_PIPES_PATH_KEY, QStringLiteral("/robots")).toString();
     auto r2m = settings.value(ROBOT_2_MARKER_KEY).toMap();
     for (auto it = r2m.cbegin(); it != r2m.cend(); ++it) {
         _robot2Marker.insert(it.key().toLatin1(), it.value().toInt());
@@ -86,16 +82,6 @@ int AppSettings::videoFormatIndex(QString cameraDevice) const
 QString AppSettings::calibrationFile() const
 {
     return _calibrationFile;
-}
-
-QString AppSettings::cameraPipePath() const
-{
-    return _cameraPipePath;
-}
-
-QString AppSettings::robotPipesPath() const
-{
-    return _robotPipesPath;
 }
 
 QMap<QByteArray, int> AppSettings::robot2Marker() const
@@ -181,28 +167,6 @@ void AppSettings::setCalibrationFile(QString calibrationFile)
 
     QSettings settings;
     settings.setValue(CALIBRATIONFILE_KEY, _calibrationFile);
-}
-
-void AppSettings::setCameraPipePath(QString newPath)
-{
-    if (_cameraPipePath == newPath)
-        return;
-
-    _cameraPipePath = newPath;
-
-    QSettings settings;
-    settings.setValue(CAMERA_PIPE_PATH_KEY, newPath);
-}
-
-void AppSettings::setRobotPipesPath(QString newPath)
-{
-    if (_robotPipesPath == newPath)
-        return;
-
-    _robotPipesPath = newPath;
-
-    QSettings settings;
-    settings.setValue(ROBOT_PIPES_PATH_KEY, newPath);
 }
 
 void AppSettings::setRobot2Marker(QMap<QByteArray, int> values)

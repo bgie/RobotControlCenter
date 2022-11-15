@@ -31,9 +31,10 @@
 #include "joystick/GamePadManager.h"
 #include "joystick/JoystickManager.h"
 #include "joystick/SDL2EventLoop.h"
-#include "pipe/PipeController.h"
-#include "pipe/RobotCameraPipe.h"
-#include "pipe/RobotCommandPipe.h"
+#include "performance/LogPerformance.h"
+#include "performance/PerformanceMonitor.h"
+#include "socket/RobotSocketManager.h"
+#include "socket/RobotSocket.h"
 #include "robot/FakeRobotManager.h"
 #include "robot/MultiRobotManager.h"
 #include "robot/Robot.h"
@@ -67,18 +68,20 @@ int main(int argc, char *argv[])
     qmlRegisterUncreatableType<GamePad>("RobotControlCenter", 1, 0, "GamePad", noCreateQml);
     qmlRegisterUncreatableType<RobotNetwork>("RobotControlCenter", 1, 0, "RobotNetwork", noCreateQml);
     qmlRegisterUncreatableType<Robot>("RobotControlCenter", 1, 0, "Robot", noCreateQml);
-    qmlRegisterUncreatableType<PipeController>("RobotControlCenter", 1, 0, "PipeController", noCreateQml);
-    qmlRegisterUncreatableType<RobotCommandPipe>("RobotControlCenter", 1, 0, "RobotCommandPipe", noCreateQml);
-    qmlRegisterUncreatableType<RobotCameraPipe>("RobotControlCenter", 1, 0, "RobotCameraPipe", noCreateQml);
+    qmlRegisterUncreatableType<RobotSocketManager>("RobotControlCenter", 1, 0, "RobotSocketManager", noCreateQml);
+    qmlRegisterUncreatableType<RobotSocket>("RobotControlCenter", 1, 0, "RobotSocket", noCreateQml);
     qmlRegisterUncreatableType<PythonGameMode>("RobotControlCenter", 1, 0, "PythonGameMode", noCreateQml);
     qmlRegisterUncreatableType<WorldEdge>("RobotControlCenter", 1, 0, "WorldEdge", noCreateQml);
+    qmlRegisterUncreatableType<PerformanceMonitor>("RobotControlCenter", 1, 0, "PerformanceMonitor", noCreateQml);
 
     AppSettings settings;
+    PerformanceMonitor monitor;
+    GlobalPerformanceMonitor gmon(&monitor);
 
     SDL2EventLoop loop;
     JoystickManager joystickManager;
     joystickManager.setEventLoop(&loop);
-    GamePadManager gamePadManger(joystickManager);
+    GamePadManager gamePadManager(joystickManager);
 
     QTimer idleTimer;
     QObject::connect(&idleTimer, &QTimer::timeout, &loop, &SDL2EventLoop::processEvents);
@@ -116,21 +119,7 @@ int main(int argc, char *argv[])
     robotSettings.setRobot2Marker(settings.robot2Marker());
     QObject::connect(&robotSettings, &RobotSettings::robot2MarkerChanged, &settings, &AppSettings::setRobot2Marker);
 
-    PipeController pipeController;
-    pipeController.setCameraPipePath(settings.cameraPipePath());
-    pipeController.setRobotPipesPath(settings.robotPipesPath());
-    QObject::connect(&pipeController, &PipeController::cameraPipePathChanged, &settings, &AppSettings::setCameraPipePath);
-    QObject::connect(&pipeController, &PipeController::robotPipesPathChanged, &settings, &AppSettings::setRobotPipesPath);
-    QObject::connect(
-        &tracker, &SceneTracker::frameProcessed, &pipeController, [&]() {
-            pipeController.sendCameraMessage(tracker.markers().serialize());
-        },
-        Qt::QueuedConnection);
-    foreach (Robot* r, multiRobotManager.robots()) {
-        pipeController.addRobot(r);
-    }
-    QObject::connect(&multiRobotManager, &IRobotManager::robotAdded, &pipeController, &PipeController::addRobot);
-    QObject::connect(&multiRobotManager, &IRobotManager::robotRemoved, &pipeController, &PipeController::removeRobot);
+    RobotSocketManager robotSocketManager(multiRobotManager);
 
     GameScene gameScene;
     gameScene.worldEdge().setPoints(settings.worldEdge());
@@ -145,22 +134,23 @@ int main(int argc, char *argv[])
         return result;
     });
     FactoryMethod pythonGameModeFactory([&]() -> QObject* {
-        return new PythonGameMode(multiRobotManager, pipeController, cameraController, tracker, gameScene);
+        return new PythonGameMode(robotSocketManager, cameraController, tracker, gamePadManager, gameScene);
     });
 
     QQmlApplicationEngine engine;
     engine.rootContext()->setContextProperty(QStringLiteral("settingsControllerFactory"), &settingsControllerFactory);
     engine.rootContext()->setContextProperty(QStringLiteral("pythonGameModeFactory"), &pythonGameModeFactory);
-    engine.rootContext()->setContextProperty(QStringLiteral("gamePadManager"), &gamePadManger);
+    engine.rootContext()->setContextProperty(QStringLiteral("gamePadManager"), &gamePadManager);
     engine.rootContext()->setContextProperty(QStringLiteral("cameraManager"), &multiCameraManager);
     engine.rootContext()->setContextProperty(QStringLiteral("cameraController"), &cameraController);
     engine.rootContext()->setContextProperty(QStringLiteral("robotNetwork"), &robotNetwork);
     engine.rootContext()->setContextProperty(QStringLiteral("robotManager"), &multiRobotManager);
     engine.rootContext()->setContextProperty(QStringLiteral("fakeRobotManager"), &fakeRobotManager);
     engine.rootContext()->setContextProperty(QStringLiteral("calibrationController"), &calibrationController);
-    engine.rootContext()->setContextProperty(QStringLiteral("pipeController"), &pipeController);
+    engine.rootContext()->setContextProperty(QStringLiteral("robotSocketManager"), &robotSocketManager);
     engine.rootContext()->setContextProperty(QStringLiteral("gameScene"), &gameScene);
     engine.rootContext()->setContextProperty(QStringLiteral("worldEdge"), &gameScene.worldEdge());
+    engine.rootContext()->setContextProperty(QStringLiteral("performanceMonitor"), &monitor);
     engine.load(QUrl(QStringLiteral("qrc:/main.qml")));
     if (engine.rootObjects().isEmpty()) {
         return -1;

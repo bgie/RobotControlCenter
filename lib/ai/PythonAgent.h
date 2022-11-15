@@ -16,22 +16,24 @@
 */
 #pragma once
 #include "IAgent.h"
+#include <QThread>
 
 class WorldEdge;
 
 class PythonAgent : public IAgent
 {
 public:
-    PythonAgent(Robot& robot, WorldEdge& worldEdge);
+    PythonAgent(Robot& robot, WorldEdge& worldEdge, QObject* parent = nullptr);
     virtual ~PythonAgent() override;
 
     virtual void processMarkers(const MarkerList& markers) override;
-    virtual void processUserCommand(QByteArray command) override;
+    virtual void processUserCommand(QByteArray commandLine) override;
 
     bool insideWorld() const;
 
 private:
     WorldEdge& _worldEdge;
     bool _insideWorld;
+    QThread _thread;
 };
 

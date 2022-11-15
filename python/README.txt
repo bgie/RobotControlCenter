@@ -4,5 +4,3 @@ robots
 web
   Webapp for remote programming of the robots
 
-jupyter
-  Jupyter notebooks - discontinued
